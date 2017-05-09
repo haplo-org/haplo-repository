@@ -1,0 +1,305 @@
+
+label hres:label:output as Output
+    title: Output
+    category: Repository
+
+# ---------------------------------------------------------------------------
+
+schema-template hres:template-type:repository:output
+    annotation hres:annotation:repository:output
+    search-name: output
+
+# ---------------------------------------------------------------------------
+
+type hres:type:artefact as Artefact
+    apply-schema-template hres:template-type:repository-item
+    apply-schema-template hres:template-type:repository:output
+    title: Artefact
+    search-name: artefact
+    attribute dc:attribute:title [sort=10000]
+    render-icon: E224,1,f
+    render-category 0
+    default-subtype hres:type:artefact
+
+type hres:type:audio as Audio
+    apply-schema-template hres:template-type:repository-item
+    apply-schema-template hres:template-type:repository:output
+    title: Audio
+    search-name: audio
+    attribute dc:attribute:title [sort=10000]
+    render-icon: E410,1,f
+    render-category 1
+    default-subtype hres:type:audio
+
+type std:type:book as Book
+    apply-schema-template hres:template-type:repository-item
+    apply-schema-template hres:template-type:repository:output
+    annotation hres:annotation:repository:primary-repository-item
+    title: Book
+    search-name: book
+    behaviour physical
+    attribute dc:attribute:title [sort=10000]
+    attribute hres:attribute:editors-citation [sort=10250]
+    attribute hres:attribute:edition [sort=10870]
+    attribute hres:attribute:series [sort=10890]
+    attribute std:attribute:isbn [sort=11000]
+    render-type book
+    render-icon: E210,1,f
+    render-category 2
+    default-subtype std:type:book
+    # Remove unused attributes from default schema
+    REMOVE attribute dc:attribute:author
+    REMOVE create-position normal
+
+type hres:type:book-chapter as BookChapter
+    apply-schema-template hres:template-type:repository-item
+    apply-schema-template hres:template-type:repository:output
+    annotation hres:annotation:repository:primary-repository-item
+    title: Book chapter
+    search-name: book chapter
+    attribute hres:aliased-attribute:chapter-title [sort=10000]
+    attribute hres:attribute:editors-citation [sort=10250]
+    attribute hres:attribute:page-range [sort=10650]
+    attribute hres:attribute:book-title [sort=10750]
+    attribute hres:attribute:edition [sort=10870]
+    attribute hres:attribute:series [sort=10890]
+    attribute std:attribute:isbn [sort=11000]
+    render-icon: E210,2,f
+    render-category 3
+    default-subtype hres:type:book-chapter
+
+type hres:type:composition as Composition
+    apply-schema-template hres:template-type:repository-item
+    apply-schema-template hres:template-type:repository:output
+    title: Composition
+    search-name: composition
+    attribute dc:attribute:title [sort=10000]
+    render-icon: E234,1,f
+    render-category 4
+    default-subtype hres:type:composition
+
+type hres:type:conference-item as ConferenceItem
+    apply-schema-template hres:template-type:repository-item
+    apply-schema-template hres:template-type:repository:output
+    annotation hres:annotation:repository:primary-repository-item
+    title: Conference item
+    search-name: conference item
+    attribute dc:attribute:title [sort=10000]
+    attribute dc:attribute:type [sort=10300]
+    attribute hres:aliased-attribute:conference-title [sort=10720]
+    attribute hres:aliased-attribute:conference-location [sort=10730]
+    attribute hres:attribute:event-date [sort=10740]
+    attribute hres:attribute:journal [sort=10750]
+    attribute hres:attribute:published-version-of-record [sort=12150]
+    attribute hres:attribute:accepted-author-manuscript [sort=12500]
+    attribute hres:attribute:published-file [sort=12510]
+    attribute hres:attribute:journal-citation [sort=12600]
+    attribute hres:attribute:book-title [sort=12610]
+    attribute hres:attribute:book-editor [sort=12620]
+    attribute std:attribute:isbn [sort=12630]
+    attribute hres:attribute:conference-proceedings-url [sort=12650]
+    render-icon: E20D,1,f E430,1,f
+    render-category 5
+    default-subtype hres:type:conference-item
+type hres:type:conference-item:conference-keynote as ConferenceKeynote
+    title: Conference keynote
+    parent-type hres:type:conference-item
+    search-name: conference keynote
+    render-category 6
+    render-icon: E20D,7,f E430,1,f
+type hres:type:conference-item:conference-paper as ConferencePaper
+    title: Conference paper
+    parent-type hres:type:conference-item
+    search-name: conference paper
+    render-category 7
+    render-icon: E20D,6,f E430,1,f
+type hres:type:conference-item:conference-poster as ConferencePoster
+    title: Conference poster
+    parent-type hres:type:conference-item
+    search-name: conference poster
+    render-category 0
+    render-icon: E20D,4,f E430,1,f
+
+type hres:type:design as Design
+    apply-schema-template hres:template-type:repository-item
+    apply-schema-template hres:template-type:repository:output
+    title: Design
+    search-name: design
+    attribute dc:attribute:title [sort=10000]
+    render-icon: E226,1,f,y E411,2,f
+    render-category 7
+    default-subtype hres:type:design
+
+type hres:type:devices-and-products as DevicesAndProducts
+    apply-schema-template hres:template-type:repository-item
+    apply-schema-template hres:template-type:repository:output
+    title: Devices and products
+    search-name: devices and products
+    attribute dc:attribute:title [sort=10000]
+    render-icon: E204,1,f E506,0,e E515,0,a
+    render-category 0
+    default-subtype hres:type:devices-and-products
+
+type hres:type:digital-or-visual-media as DigitalOrVisualMedia
+    apply-schema-template hres:template-type:repository-item
+    apply-schema-template hres:template-type:repository:output
+    title: Digital or visual media
+    search-name: digital or visual media
+    attribute dc:attribute:title [sort=10000]
+    render-icon: E250,1,f E251,2,c
+    render-category 1
+    default-subtype hres:type:digital-or-visual-media
+
+type hres:type:exhibition as Exhibition
+    apply-schema-template hres:template-type:repository-item
+    apply-schema-template hres:template-type:repository:output
+    title: Exhibition
+    search-name: exhibition
+    attribute dc:attribute:title [sort=10000]
+    attribute hres:attribute:event-title [sort=10900]
+    attribute hres:attribute:event-location [sort=10910]
+    attribute hres:attribute:event-date [sort=10920]
+    render-icon: E504,1,f
+    render-category 2
+    default-subtype hres:type:exhibition
+
+type hres:type:journal-article as JournalArticle
+    apply-schema-template hres:template-type:repository-item
+    apply-schema-template hres:template-type:repository:output
+    annotation hres:annotation:repository:primary-repository-item
+    title: Journal article
+    search-name: journal article
+    attribute dc:attribute:title [sort=10000]
+    attribute hres:attribute:journal [sort=10750]
+    attribute hres:attribute:journal-citation [sort=10760]
+    attribute hres:attribute:accepted-author-manuscript [sort=14100]
+    attribute hres:attribute:published-file [sort=14110]
+    render-icon: E211,1,f
+    render-category 3
+    default-subtype hres:type:journal-article
+
+type hres:type:online-educational-resource as OnlineEducationalResource
+    apply-schema-template hres:template-type:repository-item
+    apply-schema-template hres:template-type:repository:output
+    title: Online educational resource
+    search-name: online educational resource
+    attribute dc:attribute:title [sort=10000]
+    render-icon: E212,1,f E228,0,c
+    render-category 4
+    default-subtype hres:type:online-educational-resource
+
+type hres:type:other as Other
+    apply-schema-template hres:template-type:repository-item
+    apply-schema-template hres:template-type:repository:output
+    title: Other
+    search-name: other
+    attribute dc:attribute:title [sort=10000]
+    attribute hres:attribute:output-media [sort=11250]
+    render-icon: E209,1,f E510,0,c
+    render-category 5
+    default-subtype hres:type:other
+
+type hres:type:patent as Patent
+    apply-schema-template hres:template-type:repository-item
+    apply-schema-template hres:template-type:repository:output
+    title: Patent
+    search-name: patent
+    attribute dc:attribute:title [sort=10000]
+    attribute hres:attribute:patent-applicant [sort=10300]
+    attribute hres:attribute:patent-id [sort=10310]
+    render-icon: E203,1,f E415,0,f
+    render-category 6
+    default-subtype hres:type:patent
+
+type hres:type:performance as Performance
+    apply-schema-template hres:template-type:repository-item
+    apply-schema-template hres:template-type:repository:output
+    title: Performance
+    search-name: performance
+    attribute dc:attribute:title [sort=10000]
+    attribute hres:attribute:event-title [sort=10900]
+    attribute hres:attribute:event-location [sort=10910]
+    attribute hres:attribute:event-date [sort=10920]
+    render-icon: E233,1,f
+    render-category 7
+    default-subtype hres:type:performance
+
+type hres:type:report as Report
+    apply-schema-template hres:template-type:repository-item
+    apply-schema-template hres:template-type:repository:output
+    title: Report
+    search-name: report
+    attribute dc:attribute:title [sort=10000]
+    attribute dc:attribute:type [sort=10300]
+    attribute hres:attribute:page-range [sort=10860]
+    render-icon: E209,1,f E505,0,c
+    render-category 0
+    default-subtype hres:type:report
+type hres:type:report:discussion-paper as DiscussionPaper
+    title: Discussion paper
+    parent-type hres:type:report
+    search-name: discussion paper
+    render-category 1
+    render-icon: E209,2,f E505,0,c
+type hres:type:report:project-report as ProjectReport
+    title: Project report
+    parent-type hres:type:report
+    search-name: project report
+    render-category 2
+    render-icon: E209,7,f E505,0,c
+type hres:type:report:technical-report as TechnicalReport
+    title: Technical report
+    parent-type hres:type:report
+    search-name: technical report
+    render-category 3
+    render-icon: E209,6,f E505,0,c
+type hres:type:report:working-paper as WorkingPaper
+    title: Working paper
+    parent-type hres:type:report
+    search-name: working paper
+    render-category 4
+    render-icon: E209,3,f E505,0,c
+
+type hres:type:software as Software
+    apply-schema-template hres:template-type:repository-item
+    apply-schema-template hres:template-type:repository:output
+    title: Software
+    search-name: software
+    attribute dc:attribute:title [sort=10000]
+    render-icon: E520,1,f
+    render-category 1
+    default-subtype hres:type:software
+
+type hres:type:thesis as Thesis
+    apply-schema-template hres:template-type:repository-item
+    apply-schema-template hres:template-type:repository:output
+    title: Thesis
+    search-name: thesis
+    attribute dc:attribute:title [sort=10000]
+    attribute dc:attribute:type [sort=10300]
+    attribute hres:attribute:institution-name [sort=14050]
+    attribute hres:attribute:department-name [sort=14060]
+    render-icon: E209,1,f E1FF,0,c
+    render-category 2
+    default-subtype hres:type:thesis
+
+type hres:type:video as Video
+    apply-schema-template hres:template-type:repository-item
+    apply-schema-template hres:template-type:repository:output
+    title: Video
+    search-name: video
+    attribute dc:attribute:title [sort=10000]
+    render-icon: E512,1,f
+    render-category 3
+    default-subtype hres:type:video
+
+type hres:type:website as Website
+    apply-schema-template hres:template-type:repository-item
+    apply-schema-template hres:template-type:repository:output
+    title: Website
+    search-name: website
+    attribute dc:attribute:title [sort=10000]
+    render-icon: E232,1,f
+    render-category 4
+    default-subtype hres:type:website
+

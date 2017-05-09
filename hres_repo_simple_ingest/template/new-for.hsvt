@@ -1,0 +1,6 @@
+pageTitle("New output: " researcher.title)
+backLink(std:object:url(researcher))
+
+within(primary)   { template:std:ui:choose() }
+<hr>
+within(secondary) { template:std:ui:choose() }

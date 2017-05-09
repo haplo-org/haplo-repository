@@ -1,0 +1,18 @@
+
+group hres:group:repository-editors as RepositoryEditors
+
+attribute dc:attribute:author as Author
+
+attribute hres:attribute:editors-citation as EditorsCitation
+attribute hres:attribute:editor as Editor
+
+attribute hres:attribute:accepted-author-manuscript as AcceptedAuthorManuscript
+
+# --------- Types -----------------------------------------
+
+OPTIONAL type std:type:book as Book
+
+OPTIONAL type hres:type:book-chapter as BookChapter
+OPTIONAL type hres:type:conference-item as ConferenceItem
+OPTIONAL type hres:type:patent as Patent
+OPTIONAL type hres:type:report as Report

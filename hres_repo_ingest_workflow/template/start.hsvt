@@ -1,0 +1,7 @@
+pageTitle("Deposit item")
+backLink(std:object:url(item))
+
+render(guidanceNote)
+<p> "&nbsp;" </p>
+
+template:std:ui:confirm()

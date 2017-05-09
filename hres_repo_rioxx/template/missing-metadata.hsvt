@@ -1,0 +1,28 @@
+
+std:plugin:resources("rioxx.css")
+
+pageTitle("Failed RIOXX requirements")
+backLink(std:object:url(item))
+
+
+<p> "This output is missing metadata required to comply with RIOXX guidelines. The failing requirements and the missing metadata required for compliance are:" </p>
+
+<br>
+
+<table>
+    <tr>
+        <th> "Requirement" </th>
+        <th> "Add" </th>
+    </tr>
+    each(rows) {    
+        <tr class=if(selected) { "selected" }>
+            <td> title </td>
+            <td>
+                first
+                each(subsequent) {
+                    <br><i> "or " </i> .
+                }
+            </td>
+        </tr>
+    }
+</table>

@@ -1,0 +1,28 @@
+
+group hres:group:repository-editors as RepositoryEditors
+
+# ---------------------------------------------------------------------------
+
+schema-template hres:template-type:repository-item
+    attribute hres:attribute:ref-unit-of-assessment [sort=17000]
+
+# ---------------------------------------------------------------------------
+
+qualifier hres:qualifier:online as Online
+qualifier hres:qualifier:print as Print
+qualifier hres:qualifier:accepted as Accepted
+
+# ---------------------------------------------------------------------------
+
+type hres:type:conference-item as ConferenceItem
+type hres:type:journal-article as JournalArticle
+
+# ---------------------------------------------------------------------------
+
+attribute dc:attribute:author as Author
+attribute hres:attribute:accepted-author-manuscript as AcceptedAuthorManuscript
+attribute hres:attribute:publication-dates as PublicationDates
+attribute hres:attribute:publication-process-dates as PublicationProcessDates
+attribute hres:attribute:published-file as PublishersVersion
+attribute hres:attribute:ref-panel as REFPanel
+attribute hres:attribute:ref-unit-of-assessment as REFUnitOfAssessment

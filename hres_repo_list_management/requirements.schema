@@ -1,0 +1,7 @@
+
+group hres:group:repository-editors as RepositoryEditors
+
+type std:type:journal as Journal
+type std:type:organisation as Organisation
+type hres:type:organisation:publisher as Publisher
+OPTIONAL type hres:type:organisation:funder as Funder

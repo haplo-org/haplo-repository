@@ -1,0 +1,16 @@
+{
+  "pluginName": "hres_repo_navigation",
+  "pluginAuthor": "Haplo Services",
+  "pluginVersion": 1,
+  "displayName": "Haplo RM Repository Navigation",
+  "displayDescription": "Navigation and listing of repository.",
+  "apiVersion": 4,
+  "depend": [
+      "haplo_information_pages",
+      "hres_repository"
+    ],
+  "load": [
+      "js/hres_repo_navigation.js"
+    ],
+  "respond": ["/do/repository"]
+}

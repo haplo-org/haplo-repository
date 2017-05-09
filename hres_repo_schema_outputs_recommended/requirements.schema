@@ -1,0 +1,50 @@
+
+attribute hres:attribute:place-of-publication as PlaceOfPublication
+    title: Place of publication
+    search-name: place-of-publication
+    qualifier std:qualifier:null
+    data-type text
+
+# -----------------------------------------------------------------
+
+type hres:type:artefact as Artefact
+    attribute hres:attribute:place-of-publication [sort=10850]
+
+type hres:type:audio as Audio
+    attribute hres:attribute:place-of-publication [sort=10850]
+
+type std:type:book as Book
+    attribute hres:attribute:place-of-publication [sort=10850]
+    attribute hres:attribute:peer-review [sort=12000]
+
+type hres:type:book-chapter as BookChapter
+    attribute hres:attribute:place-of-publication [sort=10850]
+    attribute hres:attribute:peer-review [sort=12000]
+
+type hres:type:composition as Composition
+    attribute hres:attribute:place-of-publication [sort=10850]
+
+type hres:type:conference-item as ConferenceItem
+    attribute hres:attribute:funder [sort=13050]
+
+type hres:type:design as Design
+    attribute hres:attribute:place-of-publication [sort=10850]
+
+type hres:type:devices-and-products as DevicesAndProducts
+    attribute hres:attribute:place-of-publication [sort=10850]
+
+type hres:type:digital-or-visual-media as DigitalOrVisualMedia
+    attribute hres:attribute:place-of-publication [sort=10850]
+
+type hres:type:journal-article as JournalArticle
+    attribute hres:attribute:peer-review [sort=12000]
+    attribute hres:attribute:funder [sort=13050]
+
+type hres:type:report as Report
+    attribute hres:attribute:place-of-publication [sort=10850]
+
+type hres:type:software as Software
+    attribute hres:attribute:place-of-publication [sort=10850]
+
+type hres:type:video as Video
+    attribute hres:attribute:place-of-publication [sort=10850]

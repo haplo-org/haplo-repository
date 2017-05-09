@@ -1,0 +1,14 @@
+{
+  "pluginName": "hres_repo_schema_research_data",
+  "pluginAuthor": "Haplo Services",
+  "pluginVersion": 1,
+  "displayName": "Haplo RM Repository Research Data",
+  "displayDescription": "Basic schema for repository research data",
+  "apiVersion": 4,
+  "depend": [
+      "hres_repository"
+    ],
+  "load": [
+      "js/hres_repo_schema_research_data.js"
+    ]
+}

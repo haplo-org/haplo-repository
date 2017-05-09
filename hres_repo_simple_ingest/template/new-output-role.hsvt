@@ -1,0 +1,6 @@
+pageTitle("New " typeInfo.name ": " researcher.title)
+backLink("/do/repository-simple-ingest/new-for/" researcher.ref)
+
+<p> "What is your involvement in this output?" </p>
+
+template:std:ui:choose()

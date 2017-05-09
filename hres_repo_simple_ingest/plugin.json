@@ -1,0 +1,20 @@
+{
+  "pluginName": "hres_repo_simple_ingest",
+  "pluginAuthor": "Haplo Services",
+  "pluginVersion": 1,
+  "displayName": "Haplo RM Repository Simple Ingest",
+  "displayDescription": "Simple self-service ingest for researchers",
+  "apiVersion": 4,
+  "depend": [
+      "haplo_activity_guidance_notes",
+      "hres_repository",
+      "hres_repo_navigation"
+    ],
+  "use": [
+      "haplo:activity_guidance_notes"
+    ],
+  "load": [
+      "js/hres_repo_simple_ingest.js"
+    ],
+  "respond": ["/do/repository-simple-ingest"]
+}

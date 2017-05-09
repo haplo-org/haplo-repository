@@ -1,0 +1,29 @@
+{
+  "pluginName": "hres_repo_embargoes",
+  "pluginAuthor": "Haplo Services",
+  "pluginVersion": 1,
+  "displayName": "Haplo RM Embargoes",
+  "displayDescription": "Support for embargoes and associated licensing",
+  "installSecret": "3c3dabcea50a35cfa0d63735717868c1143b8734",
+  "apiVersion": 4,
+  "privilegesRequired": ["pDatabase", "pTempBlockingHttpRequest"],
+  "use": [
+      "std:reporting"
+    ],
+  "depend": [
+      "std_reporting",
+      "std_action_panel",
+      "hres_repository",
+      "hres_thirdparty_libs"
+    ],
+  "load": [
+      "js/hres_repo_embargoes.js",
+      "js/em_forms.js",
+      "js/em_reference_links.js",
+      "js/em_reporting.js"
+    ],
+  "respond": [
+      "/do/hres-repo-embargoes",
+      "/api/hres-repo-embargoes"
+    ]
+}

@@ -1,0 +1,16 @@
+{
+  "pluginName": "hres_repo_schema_recommended",
+  "pluginAuthor": "Haplo Services",
+  "pluginVersion": 1,
+  "displayName": "Haplo RM Recommended Schema",
+  "displayDescription": "Recommended additional schema for Haplo repositories",
+  "installSecret": "66421feb64e8e1de169083981f5a6e5cf85f0a4d",
+  "apiVersion": 4,
+  "depend": [
+      "hres_repository"
+    ],
+  "load": [
+      "js/hres_repo_schema_recommended.js"
+    ],
+  "respond": []
+}

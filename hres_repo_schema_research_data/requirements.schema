@@ -1,0 +1,22 @@
+
+label hres:label:research-data as ResearchData
+    title: Research Data
+    category: Repository
+
+# ---------------------------------------------------------------------------
+
+schema-template hres:template-type:repository:research-data
+    annotation hres:annotation:repository:research-data
+    search-name: research data
+
+# ---------------------------------------------------------------------------
+
+type hres:type:dataset as Dataset
+    apply-schema-template hres:template-type:repository-item
+    apply-schema-template hres:template-type:repository:research-data
+    title: Dataset
+    search-name: dataset
+    attribute dc:attribute:title [sort=10000]
+    render-icon: E226,1,f
+    render-category 6
+    default-subtype hres:type:dataset

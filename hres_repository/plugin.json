@@ -1,0 +1,29 @@
+{
+  "pluginName": "hres_repository",
+  "pluginAuthor": "Haplo Services",
+  "pluginVersion": 1,
+  "displayName": "Haplo RM Repository",
+  "displayDescription": "Repository schema and display for Haplo Research Manager",
+  "apiVersion": 4,
+  "depend": [
+      "std_reporting",
+      "haplo_activity_navigation",
+      "hres_schema",
+      "hres_author_citation_value",
+      "hres_digital_object_identifier"
+    ],
+  "use": [
+      "std:reporting",
+      "hres:author_citation:configuration",
+      "hres:schema:entities"
+    ],
+  "load": [
+      "js/hres_repository.js",
+      "js/repo_test_data.js",
+      "js/repo_permissions.js",
+      "js/repo_reporting.js"
+    ],
+  "respond": [
+      "/do/hres-repository"
+    ]
+}

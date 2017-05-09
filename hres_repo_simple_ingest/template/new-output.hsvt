@@ -1,0 +1,6 @@
+pageTitle("New " typeInfo.name ": " researcher.title)
+backLink("/do/repository-simple-ingest/new-for/" researcher.ref)
+
+<p> "Please complete this form as fully as possible. Fields may be left blank for information that is not applicable to this output. The University repository will be alerted to new or edited outputs." </p>
+
+template:std:new_object_editor()

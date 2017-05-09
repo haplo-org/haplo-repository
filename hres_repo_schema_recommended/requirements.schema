@@ -1,0 +1,119 @@
+
+schema-template hres:template-type:repository-item
+    attribute dc:attribute:subject [sort=11300]
+    attribute hres:attribute:funder [sort=11800]
+    attribute hres:attribute:research-or-scholarly [sort=12100]
+    attribute hres:attribute:research-group [sort=13100]
+    attribute hres:attribute:output-status [sort=15000]
+    attribute hres:attribute:publication-process-dates [sort=15101]
+
+# ---------------------------------------------------------------------------
+
+label std:label:archived as ARCHIVED
+
+# ---------------------------------------------------------------------------
+
+type hres:type:organisation:funder as Funder
+type hres:type:research-institute:research-group as ResearchGroup
+
+# ---------------------------------------------------------------------------
+
+attribute hres:attribute:funder as Funder
+    title: Funder
+    search-name: funder
+    qualifier std:qualifier:null
+    data-type link
+    ui-options lookup
+    linked-type std:type:organisation
+
+attribute hres:attribute:research-or-scholarly as ResearchOrScholarly
+    title: Research or scholarly
+    search-name: research-or-scholarly
+    qualifier std:qualifier:null
+    data-type link
+    ui-options radio
+    linked-type hres:type:research-or-scholarly
+
+attribute hres:attribute:research-group as ResearchGroup
+    title: Research Group
+    search-name: research-group
+    qualifier std:qualifier:null
+    data-type link
+    linked-type hres:type:research-institute:research-group
+
+attribute hres:attribute:output-status as OutputStatus
+    title: Output status
+    search-name: output-status
+    qualifier std:qualifier:null
+    data-type link
+    ui-options dropdown
+    linked-type hres:type:output-status
+
+attribute hres:attribute:peer-review as PeerReview
+    title: Peer-review
+    search-name: peer-review
+    qualifier std:qualifier:null
+    data-type link
+    ui-options radio
+    linked-type hres:type:peer-review
+
+attribute hres:attribute:publication-process-dates as PublicationProcessDates
+    title: Publication process dates
+    search-name: publication-process-dates
+    qualifier hres:qualifier:accepted
+    qualifier hres:qualifier:deposited
+    qualifier hres:qualifier:completed
+    data-type datetime
+    ui-options d,y,n,n,n
+
+# ---------------------------------------------------------------------------
+
+qualifier hres:qualifier:accepted as Accepted
+    title: Accepted
+    search-name: accepted
+
+qualifier hres:qualifier:completed as Completed
+    title: Completed
+    search-name: completed
+
+qualifier hres:qualifier:deposited as Deposited
+    title: Deposited
+    search-name: deposited
+        
+# ---------------------------------------------------------------------------
+
+type hres:type:peer-review as PeerReview
+    title: Peer-review
+    search-name: peer review
+    apply-schema-template hres:template-type:list
+object hres:list:peer-review:not-reviewed
+    type hres:type:peer-review
+    title: Not peer-reviewed
+object hres:list:peer-review:reviewed
+    type hres:type:peer-review
+    title: Peer-reviewed
+
+type hres:type:research-or-scholarly as ResearchOrScholarly
+    title: Research or scholarly
+    search-name: research or scholarly
+    apply-schema-template hres:template-type:list
+object hres:list:research-scholarly:research
+    type hres:type:research-or-scholarly
+    title: Research
+object hres:list:research-scholarly:scholarly
+    type hres:type:research-or-scholarly
+    title: Scholarly
+
+type hres:type:output-status as OutputStatus
+    title: Output status
+    search-name: output status
+    apply-schema-template hres:template-type:list
+object hres:list:output-status:in-press
+    type hres:type:output-status
+    title: In press
+object hres:list:output-status:published
+    type hres:type:output-status
+    title: Published
+object hres:list:output-status:unpublished
+    type hres:type:output-status
+    title: Unpublished

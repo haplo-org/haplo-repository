@@ -1,0 +1,338 @@
+
+# ---------------------------------------------------------------------------
+#   Labels & groups for permissions
+# ---------------------------------------------------------------------------
+
+label hres:label:activity-repository as ActivityRepository
+    title: Repository
+    category: Activity
+
+label hres:label:repository-item as RepositoryItem
+    title: Repository Item
+    category: Repository
+
+# Applied as part of the ingest workflow, or by application-specific rules if the ingest workflow is not used
+label hres:label:accepted-into-repository as AcceptedIntoRepository
+    title: Accepted into Repository
+    category: Repository
+ 
+label hres:label:rejected-from-repository as RejectedFromRepository
+    title: Rejected from Repository
+    category: Repository
+
+group hres:group:repository-editors as RepositoryEditors
+    title: Repository Editors
+
+group std:group:everyone as Everyone
+group hres:group:admin-staff as AdminStaff
+
+# ---------------------------------------------------------------------------
+#   Standard schema
+# ---------------------------------------------------------------------------
+
+attribute dc:attribute:author as Author
+attribute dc:attribute:date as Date
+attribute dc:attribute:publisher as Publisher
+
+attribute std:attribute:configured-behaviour as ConfiguredBehaviour
+
+type std:type:intranet-page as IntranetPage
+type std:type:organisation as Organisation
+type std:type:person as Person
+
+label std:label:archived as ARCHIVED
+
+# ---------------------------------------------------------------------------
+#   Haplo Research Manager schema
+# ---------------------------------------------------------------------------
+
+attribute hres:attribute:editor as Editor
+attribute hres:attribute:researcher as Researcher
+attribute hres:attribute:research-institute as ResearchInstitute
+
+type hres:type:person:external-researcher as ExternalResearcher
+type hres:type:research-institute:faculty as Faculty
+type hres:type:person:researcher as Researcher
+
+# ---------------------------------------------------------------------------
+#   Repository item type schema template
+# ---------------------------------------------------------------------------
+
+# Template defines key repository item metadata, other repository schema
+# plugins define the actual types.
+
+# Other plugins adding attributes to outputs should prefer to add them to the
+# schema template, unless they really are only applicable to particular output
+# types.
+
+schema-template hres:template-type:repository-item
+    annotation hres:annotation:repository-item
+    search-name: repository item
+    attribute hres:attribute:authors-citation [sort=10200]
+    REMOVE attribute dc:attribute:author
+    attribute hres:attribute:abstract [sort=10500]
+    attribute hres:attribute:keywords [sort=10600]
+    attribute std:aliased-attribute:year [sort=10700]
+    attribute dc:attribute:publisher [sort=10800]
+    attribute hres:attribute:issn [sort=11001]
+    attribute hres:attribute:digital-object-identifier-doi [sort=11100]
+    attribute std:attribute:url [sort=11200]
+    attribute std:attribute:project [sort=13000]
+    attribute std:attribute:file [sort=14100]
+    attribute std:attribute:notes [sort=14800]
+    attribute hres:attribute:publication-dates [sort=15100]
+    attribute hres:attribute:license [sort=16000]
+    element: std:group:everyone right std:action_panel {"panel":"repository_item"}
+    create-position never
+
+# ---------------------------------------------------------------------------
+#   Related types for repository
+# ---------------------------------------------------------------------------
+
+type std:type:journal as Journal
+    title: Journal
+    search-name: journal
+    search-name: serial
+    behaviour physical
+    attribute dc:attribute:title
+    attribute dc:attribute:type
+    attribute dc:attribute:author
+    attribute dc:attribute:date
+    attribute dc:attribute:publisher
+    attribute std:attribute:notes
+    attribute std:attribute:url
+    render-type journal
+    render-icon: E211,1,f
+    render-category 5
+    default-subtype std:type:journal
+    create-position never
+
+type hres:type:organisation:publisher as Publisher
+    title: Publisher
+    parent-type std:type:organisation
+    search-name: publisher
+    render-icon: E210,6,a E210,2,c E210,1,e
+    render-category 4
+
+# ---------------------------------------------------------------------------
+#   Qualifiers required for Outputs
+# ---------------------------------------------------------------------------
+
+qualifier hres:qualifier:print as Print
+    title: Print
+    search-name: print
+
+qualifier hres:qualifier:online as Online
+    title: Online
+    search-name: online
+
+qualifier hres:qualifier:published as Published
+    title: Published
+    search-name: published
+
+qualifier hres:qualifier:editor as Editor
+    title: Editor
+    search-name: editor
+
+# ---------------------------------------------------------------------------
+#   Attributes & aliases required for Outputs
+# ---------------------------------------------------------------------------
+
+attribute hres:attribute:accepted-author-manuscript as AcceptedAuthorManuscript
+    title: Accepted author manuscript
+    search-name: aam
+    qualifier std:qualifier:null
+    data-type file
+
+aliased-attribute hres:aliased-attribute:chapter-title as ChapterTitle
+    title: Chapter title
+    search-name: chapter-title
+    alias-of dc:attribute:title
+
+aliased-attribute hres:aliased-attribute:conference-location as ConferenceLocation
+    title: Conference location
+    search-name: conference-location
+    alias-of hres:attribute:event-location
+
+aliased-attribute hres:aliased-attribute:conference-title as ConferenceTitle
+    title: Conference title
+    search-name: conference-title
+    alias-of hres:attribute:event-title
+
+attribute hres:attribute:abstract as Abstract
+    title: Abstract
+    search-name: abstract
+    qualifier std:qualifier:null
+    data-type text-paragraph
+
+attribute hres:attribute:book-editor as BookEditor
+    title: Book editor
+    search-name: book-editor
+    qualifier std:qualifier:null
+    data-type plugin
+    data-type-options hres:author_citation
+
+attribute hres:attribute:book-title as BookTitle
+    title: Book title
+    search-name: book-title
+    qualifier std:qualifier:null
+    data-type text
+
+attribute hres:attribute:conference-proceedings-url as ConferenceProceedingsURL
+    title: Web address (URL) of conference proceedings
+    search-name: conference-proceedings-url
+    qualifier std:qualifier:null
+    data-type url
+
+attribute hres:attribute:department-name as DepartmentName
+    title: Department name
+    search-name: department-name
+    qualifier std:qualifier:null
+    data-type text
+
+attribute hres:attribute:digital-object-identifier-doi as DigitalObjectIdentifierDOI
+    title: Digital Object Identifier (DOI)
+    search-name: doi
+    qualifier std:qualifier:null
+    data-type plugin
+    data-type-options hres:doi
+
+attribute hres:attribute:edition as Edition
+    title: Edition
+    search-name: edition
+    qualifier std:qualifier:null
+    data-type text
+
+attribute hres:attribute:event-date as EventDate
+    title: Event date
+    search-name: event-date
+    qualifier std:qualifier:null
+    data-type datetime
+    ui-options d,y,n,n,n
+
+attribute hres:attribute:event-location as EventLocation
+    title: Event location
+    search-name: event-location
+    qualifier std:qualifier:null
+    data-type text
+
+attribute hres:attribute:event-title as EventTitle
+    title: Event title
+    search-name: event-title
+    qualifier std:qualifier:null
+    data-type text
+    
+attribute hres:attribute:institution-name as InstitutionName
+    title: Institution name
+    search-name: institution-name
+    qualifier std:qualifier:null
+    data-type text
+
+attribute hres:attribute:issn as ISSN
+    title: ISSN
+    search-name: issn
+    qualifier std:qualifier:null
+    data-type idsn
+
+attribute hres:attribute:journal as Journal
+    title: Journal
+    search-name: journal
+    qualifier std:qualifier:null
+    data-type link
+    ui-options lookup
+    linked-type std:type:journal
+
+attribute hres:attribute:journal-citation as JournalCitation
+    title: Journal citation
+    search-name: journal-citation
+    qualifier std:qualifier:null
+    data-type plugin
+    data-type-options hres:journal_citation
+
+attribute hres:attribute:keywords as Keywords
+    title: Keywords
+    search-name: keywords
+    qualifier std:qualifier:null
+    data-type text
+
+attribute hres:attribute:license as License
+    title License
+    search-name license
+    qualifier std:qualifier:null
+    ui-options lookup
+    data-type link
+    linked-type hres:type:license
+
+attribute hres:attribute:output-media as OutputMedia
+    title: Output media
+    search-name: output-media
+    qualifier std:qualifier:null
+    data-type text
+
+attribute hres:attribute:page-range as PageRange
+    title: Page range
+    search-name: page-range
+    qualifier std:qualifier:null
+    data-type text
+
+attribute hres:attribute:patent-applicant as PatentApplicant
+    title: Patent applicant
+    search-name: patent-applicant
+    qualifier std:qualifier:null
+    data-type text
+
+attribute hres:attribute:patent-id as PatentID
+    title: Patent ID
+    search-name: patent-id
+    qualifier std:qualifier:null
+    data-type text
+
+attribute hres:attribute:publication-dates as PublicationDates
+    title: Publication dates
+    search-name: publication-dates
+    qualifier hres:qualifier:print
+    qualifier hres:qualifier:online
+    data-type datetime
+    ui-options d,y,n,n,n
+
+attribute hres:attribute:published-version-of-record as PublishedVersionOfRecord
+    title: Published version of record?
+    search-name: published version of record
+    qualifier std:qualifier:null
+    data-type link
+    ui-options radio
+    linked-type hres:type:published-version-of-record
+
+attribute hres:attribute:published-file as PublishersVersion
+    title: Publisher's version
+    search-name: publisher-version
+    qualifier std:qualifier:null
+    data-type file
+
+attribute hres:attribute:series as Series
+    title: Series
+    search-name: series
+    qualifier std:qualifier:null
+    data-type text
+
+# ---------------------------------------------------------------------------
+#   Lists (types + objects)
+# ---------------------------------------------------------------------------
+
+type hres:type:published-version-of-record as PublishedVersionOfRecord
+    title: Published version of record?
+    search-name: published-version-of-record
+    apply-schema-template hres:template-type:list
+object hres:list:published-version-of-record:true
+    type hres:type:published-version-of-record
+    title: Published version of record
+object hres:list:published-version-of-record:false
+    type hres:type:published-version-of-record
+    title: Alternative version
+
+type hres:type:license
+    title License
+    search-name license
+    apply-schema-template hres:template-type:list
+    attribute std:attribute:url
+# Objects defined elsewhere

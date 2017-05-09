@@ -1,0 +1,27 @@
+{
+  "pluginName": "hres_repo_ingest_workflow",
+  "pluginAuthor": "Haplo Services",
+  "pluginVersion": 1,
+  "displayName": "Haplo RM Repository Ingest Workflow",
+  "displayDescription": "Ingest workflow for Haplo RM Repository applications",
+  "installSecret": "332e3b06cd6a17e8facb8db20dac0ced007e322f",
+  "apiVersion": 4,
+  "privilegesRequired": ["pDatabase"],
+  "use": [
+      "std:workflow",
+      "haplo:activity_guidance_notes"
+    ],
+  "depend": [
+      "std_action_panel",
+      "std_workflow",
+      "haplo_activity_guidance_notes",
+      "hres_repository"
+    ],
+  "load": [
+      "js/hres_repo_ingest_workflow.js",
+      "js/in_workflow.js",
+      "js/in_text.js",
+      "js/in_reporting.js"
+    ],
+  "respond": ["/do/hres-repo-ingest-workflow"]
+}

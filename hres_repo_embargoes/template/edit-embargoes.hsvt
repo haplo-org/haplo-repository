@@ -1,0 +1,14 @@
+
+std:plugin:resources("edit-embargoes.js" "reference-links.js" "reference-links.css")
+
+pageTitle("Embargo: " std:object:title(output))
+backLink(std:object:url(output))
+
+std:object(displayObject)
+
+<form method="POST"> std:form:token()
+    std:form(form)
+    <p><input type="submit" value="Submit"></p>
+</form>
+
+<div class="sherpa-links" data-ref=output></div>

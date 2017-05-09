@@ -1,0 +1,14 @@
+
+pageTitle("Register REF Exception")
+backLink(std:object:url(output))
+
+within(choices) {
+    <h2> "Access" </h2>
+    unsafeHTML(unsafeAccess)
+    <h2> "Deposit" </h2>
+    unsafeHTML(unsafeDeposit)
+    <h2> "Technical" </h2>
+    unsafeHTML(unsafeTechnical)
+    <h2> "Other" </h2>
+    unsafeHTML(unsafeOther)
+}

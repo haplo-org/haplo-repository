@@ -1,0 +1,7 @@
+
+group hres:group:repository-editors as RepositoryEditors
+
+label hres:label:accepted-into-repository as AcceptedIntoRepository
+
+label hres:label:rejected-from-repository as RejectedFromRepository
+

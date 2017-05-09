@@ -1,0 +1,15 @@
+{
+  "pluginName": "hres_repo_list_management",
+  "pluginAuthor": "Haplo Services",
+  "pluginVersion": 1,
+  "displayName": "Haplo RM Repository List Management",
+  "displayDescription": "Enable repository team to manage list of related objects.",
+  "apiVersion": 4,
+  "depend": [
+      "hres_repository"
+    ],
+  "load": [
+      "js/hres_repo_list_management.js"
+    ],
+  "respond": ["/do/repository-list-management"]
+}

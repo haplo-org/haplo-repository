@@ -1,0 +1,17 @@
+{
+  "pluginName": "hres_repo_object_editor",
+  "pluginAuthor": "Haplo Services",
+  "pluginVersion": 1,
+  "displayName": "Haplo RM Object Editor",
+  "displayDescription": "Custom editor page for repository items",
+  "installSecret": "2e2e09b032b84cdc9e803e22aac7f7cbfd6ad1aa",
+  "apiVersion": 4,
+  "depend": [
+      "hres_repository",
+      "hres_author_citation_value"
+    ],
+  "load": [
+      "js/hres_repo_object_editor.js"
+    ],
+  "respond": ["/do/hres-repository-editor"]
+}

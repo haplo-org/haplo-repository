@@ -1,0 +1,17 @@
+{
+  "pluginName": "hres_repo_rioxx",
+  "pluginAuthor": "Haplo Services",
+  "pluginVersion": 1,
+  "displayName": "Haplo RM Rioxx",
+  "displayDescription": "Support for Rioxx metadata guidelines in Haplo repositories",
+  "installSecret": "86b322dbc7a7b79c3396ba4f7b905f7e7c907ec2",
+  "apiVersion": 4,
+  "depend": [
+      "hres_repository",
+      "hres_repo_schema_outputs_recommended"
+    ],
+  "load": [
+      "js/hres_repo_rioxx.js"
+    ],
+  "respond": ["/do/hres-repo-rioxx"]
+}

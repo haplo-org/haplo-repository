@@ -1,0 +1,18 @@
+
+feature std:configuration-data
+    property: {"applicationRootPlugin":"hresrepodemo_application"}
+    property: {"haplo_activity_navigation:disable_built_in_guides":true}
+    property: {"hres:schema:workflow:required_entities:enable":true}
+
+feature std:page:home
+    REMOVE element std:group:everyone right std:recent
+    REMOVE element std:group:everyone left std:noticeboard
+    element std:group:everyone left hresrepodemo_application:home
+
+# --------- Attributes --------------------------
+
+attribute dc:attribute:author as Author
+
+# ---------- Groups ------------------------------------
+
+group hres:group:repository-editors as RepositoryEditors

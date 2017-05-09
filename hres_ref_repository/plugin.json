@@ -1,0 +1,35 @@
+{
+  "pluginName": "hres_ref_repository",
+  "pluginAuthor": "Haplo Services",
+  "pluginVersion": 1,
+  "displayName": "Haplo RM REF Repository",
+  "displayDescription": "Research Excellence Framework support for repository applications",
+  "installSecret": "428fc63085c54d5a7fadd7af90bde82d8eb6099e",
+  "apiVersion": 4,
+  "loadPriority": 10000,
+  "privilegesRequired": [
+      "pDatabase"
+    ],
+  "use": [
+      "std:workflow",
+      "std:reporting",
+      "std:document_store"
+    ],
+  "depend": [
+      "std_workflow",
+      "std_reporting",
+      "std_document_store",
+      "hres_ref_schema",
+      "hres_repository"
+    ],
+  "load": [
+      "js/hres_ref_repository.js",
+      "js/ref_workflow.js",
+      "js/ref_exceptions.js",
+      "js/ref_requirements.js",
+      "js/ref_reporting.js"
+    ],
+  "respond": [
+      "/do/hres-ref-repo"
+    ]
+}

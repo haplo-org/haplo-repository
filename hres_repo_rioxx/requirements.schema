@@ -1,0 +1,33 @@
+
+group hres:group:repository-editors as RepositoryEditors
+
+# ---------------------------------------------------------------------------
+
+schema-template hres:template-type:repository-item
+
+# ---------------------------------------------------------------------------
+
+qualifier hres:qualifier:accepted as Accepted
+
+# ---------------------------------------------------------------------------
+
+attribute dc:attribute:author as Author
+
+attribute std:attribute:file as File
+attribute std:attribute:isbn as ISBN
+attribute std:attribute:url as WebAddressUrl
+
+attribute hres:attribute:accepted-author-manuscript as AcceptedAuthorManuscript
+attribute hres:attribute:funder as Funder
+attribute hres:attribute:issn as ISSN
+attribute hres:attribute:license as License
+attribute hres:attribute:publication-dates as PublicationDates
+attribute hres:attribute:publication-process-dates as PublicationProcessDates
+attribute hres:attribute:published-file as PublishersVersion
+
+# ---------------------------------------------------------------------------
+
+type hres:type:book-chapter as BookChapter
+type hres:type:conference-item:conference-paper as ConferencePaper
+type hres:type:license as License
+type hres:type:journal-article as JournalArticle

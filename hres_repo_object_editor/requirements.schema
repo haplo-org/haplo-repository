@@ -1,0 +1,19 @@
+
+attribute dc:attribute:author as Author
+attribute dc:attribute:publisher as Publisher
+
+attribute std:attribute:file as File
+attribute std:attribute:isbn as Isbn
+attribute std:attribute:url as WebAddressUrl
+
+attribute hres:attribute:accepted-author-manuscript as AcceptedAuthorManuscript
+attribute hres:attribute:authors-citation as AuthorsCitation
+attribute hres:attribute:book-editor as BookEditor
+attribute hres:attribute:editors-citation as EditorsCitation
+attribute hres:attribute:issn as Issn
+attribute hres:attribute:publication-dates as PublicationDates
+attribute hres:attribute:ref-unit-of-assessment as RefUnitOfAssessment
+
+# ------------------------------------------------------------------
+
+type hres:type:person:external-researcher as ExternalResearcher

@@ -1,0 +1,16 @@
+{
+  "pluginName": "hres_repo_schema_outputs_recommended",
+  "pluginAuthor": "Haplo Services",
+  "pluginVersion": 1,
+  "displayName": "Haplo RM Recommended Schema - Research Outputs",
+  "displayDescription": "Recommended additional schema for Haplo Research Output repositories",
+  "installSecret": "154afb128f21f4eeb2ec37d171536fe73e5b9300",
+  "apiVersion": 4,
+  "depend": [
+      "hres_repo_schema_recommended",
+      "hres_repo_schema_outputs"
+    ],
+  "load": [
+    ],
+  "respond": []
+}

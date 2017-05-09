@@ -1,0 +1,28 @@
+<doc>
+  <p>This demonstration system contains:</p>
+  <li>Randomly generated data about people and repository items.</li>
+  <li>The recommended Haplo RM Repository schema, based on Datacite and Dublin Core metadata standards.</li>
+  <li>Standard features for item upload, deposit review workflow, embargoes, REF and RIOXX monitoring, OAI-PMH integration.</li>
+  <li>Dashboards for overview of repository items and processes.</li>
+    
+  <h1>Instructions</h1>
+  <li>Click the <i>"Repository"</i> button on the right to see the menus.</li>
+  <li>Use the <i>"Repository overview"</i> directory to find a research output.</li>
+  <li>Follow the instructions below to impersonate other users.</li>
+  <li>As an academic the <i>"My record"</i> button second on the home pages links directly to pages about your use of the system.</li>
+  <li>From your profile you can add research outputs to the system. They will only be visible to authors and repository editors until they have gone through the deposit review workflow.</li>
+  <li>This process can be started from the output record.</li>
+  <li>When a workflow is in progress, it'll show who it's currently with on the right hand side. Impersonate the user to try the next step in the workflow.</li>
+  <li>To see the notification emails the system would send, click the user name in the top right, then <i>"Test email viewer"</i>. (only available for repository administrator users)</li>
+
+  <h1>Impersonation</h1>
+  <p>To see the system from the perspective of different roles, and to try out each step of a workflow, you can impersonate other users.</p>
+
+  <p>To try out the system as another user:</p>
+  <li>Click the name of the current user in the top right of the screen</li>
+  <li>In the menu which appears, click <i>"Impersonate user"</i></li>
+  <li>Choose a user from the list, or type to search.</li>
+  <li>Click the <i>"Finish impersonation"</i> button at the top of the screen to return to the original user, or choose a icon in the top left to quickly switch between users you've previously impersonated.</li>
+
+  <p>Impersonation is only available to IT Support users in a live Haplo RM Repository system.</p>
+</doc>
