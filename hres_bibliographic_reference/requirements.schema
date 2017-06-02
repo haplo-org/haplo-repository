@@ -1,0 +1,35 @@
+
+# ------ Attributes -------------------------
+
+attribute hres:attribute:authors-citation as AuthorsCitation
+attribute hres:attribute:book-title as BookTitle
+attribute dc:attribute:date as Date
+attribute hres:attribute:department-name as DepartmentName
+attribute hres:attribute:editors-citation as EditorsCitation
+attribute hres:attribute:event-date as EventDate
+attribute hres:attribute:event-location as EventLocation
+attribute hres:attribute:event-title as EventTitle
+attribute hres:attribute:institution-name as InstitutionName
+attribute hres:attribute:issn as Issn
+attribute hres:attribute:journal as Journal
+attribute hres:attribute:journal-citation as JournalCitation
+attribute hres:attribute:page-range as PageRange
+attribute hres:attribute:place-of-publication as PlaceOfPublication
+attribute dc:attribute:publisher as Publisher
+
+
+# ------ Types -----------------------------
+
+type hres:type:artefact as Artefact
+type hres:type:audio as Audio
+type std:type:book as Book
+type hres:type:book-chapter as BookChapter
+type hres:type:conference-item as ConferenceItem
+type hres:type:exhibition as Exhibition
+type hres:type:journal-article as JournalArticle
+type hres:type:patent as Patent
+type hres:type:performance as Performance
+type hres:type:report as Report
+type hres:type:thesis as Thesis
+type hres:type:video as Video
+

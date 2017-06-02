@@ -1,0 +1,17 @@
+{
+  "pluginName": "hres_bibliographic_reference",
+  "pluginAuthor": "Haplo Services",
+  "pluginVersion": 1,
+  "displayName": "Bibliographic Reference",
+  "displayDescription": "Bibliographic reference generation for Haplo RM",
+  "installSecret": "1e9f14264f30e7b555b475d2024b7c660bbc6133",
+  "apiVersion": 4,
+  "depend": [
+      "hres_schema",
+      "hres_repo_schema_recommended"
+    ],
+  "load": [
+      "js/hres_bibliographic_reference.js"
+    ],
+  "respond": ["/do/hres-bibliographic-reference"]
+}
