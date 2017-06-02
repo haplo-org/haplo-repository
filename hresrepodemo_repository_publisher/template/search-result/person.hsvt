@@ -1,0 +1,8 @@
+<div class="media">
+    <div class="media-body">
+        std:web-publisher:object:link(object.object) {
+            <h4 class="media-heading"> object.title </h4>
+        }
+        <p> render(object.first.ResearchInstitute) </p>
+    </div>
+</div>

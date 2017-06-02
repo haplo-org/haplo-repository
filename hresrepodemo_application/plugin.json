@@ -17,7 +17,13 @@
       "hres_repo_navigation",
       "hres_repo_list_management",
       "hres_repo_schema_data_recommended",
-      "hres_repo_schema_outputs_recommended"
+      "hres_repo_schema_outputs_recommended",
+      "hres_researcher_profile",
+      "hres_researcher_profile_biography",
+      "hres_researcher_profile_photo",
+      "hres_researcher_profile_extended",
+      "hres_bibliographic_reference",
+      "hresrepodemo_repository_publisher"
     ],
   "load": [
       "js/hresrepodemo_application.js"

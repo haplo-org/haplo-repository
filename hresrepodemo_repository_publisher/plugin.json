@@ -1,0 +1,16 @@
+{
+  "pluginName": "hresrepodemo_repository_publisher",
+  "pluginAuthor": "Haplo Services",
+  "pluginVersion": 1,
+  "displayName": "Demo Repository Publisher",
+  "displayDescription": "Demonstration public interface to academic repository.",
+  "apiVersion": 4,
+  "depend": [
+      "std_web_publisher",
+      "hres_researcher_profile_biography"
+    ],
+  "use": ["std:web-publisher"],
+  "load": [
+      "js/hresrepodemo_repository_publisher.js"
+    ]
+}

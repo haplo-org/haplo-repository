@@ -3,3 +3,22 @@ Haplo Research Manager is copyright Haplo Services Ltd. The Haplo Research Manag
 licensed to you under the terms of the Mozilla Public License Version 2.0, a copy of
 which is provided in the LICENSE file.
 
+------------------------------------------------------------------------------------
+
+This repository contains software by other authors, licensed to you as follows:
+
+jQuery
+hresrepodemo_repository_publisher/static/jquery.js
+  http://jquery.com/
+  MIT License
+
+Bootstrap
+hresrepodemo_repository_publisher/static/bootstrap.css
+hresrepodemo_repository_publisher/static/bootstrap.js
+  http://getbootstrap.com/
+  MIT License
+
+Bootstrap Lumen theme
+hresrepodemo_repository_publisher/static/bootstrap-lumen.css
+  https://github.com/thomaspark/bootswatch
+  MIT License

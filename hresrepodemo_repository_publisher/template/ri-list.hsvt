@@ -1,0 +1,25 @@
+
+template:layout()
+    {
+        <h2> "Outputs" </h2>
+        <div class="row">
+          <div class="col-md-12">
+            <ul class="list-group col-md-6">
+            each(faculties) {
+              <a href=["/outputs/" ref]>
+                <li class=["list-group-item" if(active) { "active" }]>title</li>
+              </a>
+            }
+            </ul>
+            if(depts) {
+              <ul class="list-group col-md-6">
+              each(depts) {
+                <a href=["/outputs/" fac "/" ref]>
+                  <li class="list-group-item">title</li>
+                </a>
+              }
+              </ul>
+            }
+          </div>
+        </div>
+    }

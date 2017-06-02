@@ -1,0 +1,38 @@
+/* Haplo Research Manager                            https://haplo.org
+ * (c) Haplo Services Ltd 2006 - 2017   https://www.haplo-services.com
+ * This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.         */
+
+/* Sticky footer styles
+ * -------------------------------------------------- */
+html {
+    position: relative;
+    min-height: 100%;
+}
+body {
+    /* Margin bottom by footer height */
+    margin-bottom: 60px;
+}
+.footer {
+    border-top: 3px solid #e7e7e7;
+    padding-top: 20px;
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    /* Set the fixed height of the footer here */
+    height: 60px;
+    background-color: #f5f5f5;
+}
+th.haplo-attribute {
+    width: 25%;
+}
+.haplo-profile-photo {
+    margin-top: -50px; /* TODO: Set this properly */
+}
+.oforms-display-row.control-group {
+    margin-top: 8px;
+}
+.control-label {
+    font-weight: bold;
+}
