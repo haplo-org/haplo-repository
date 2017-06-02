@@ -19,6 +19,7 @@ P.implementService("std:action_panel:activity:menu:repository", function(display
 
 // Sentinel object for reporting on uncontrolled publisher entries
 P.onInstall = function() {
+    if(O.behaviourRefMaybe("hres:object:publisher-reporting-sentinel")) { return; }
     var sentinel = O.object([Label.ARCHIVED]);
     sentinel.appendType(T.IntranetPage);
     sentinel.appendTitle("Unregistered publisher entered");

@@ -13,7 +13,7 @@ P.implementService("std:action_panel:category:hres:person", function(display, bu
 P.implementService("std:action_panel:home_page_my_links", function(display, builder) {
     var ref = O.currentUser.ref;
     if(ref) {
-        builder.link("default", "/do/repository/outputs/"+ref, "My research outputs");
+        builder.link("default", "/do/repository/outputs/"+ref, "My Research Outputs");
     }
 });
 

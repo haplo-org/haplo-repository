@@ -50,7 +50,7 @@ P.implementService("hres:development:generate-test-data-end", function(action) {
                 last: name[2]
             });
                        
-            repositoryItem.append(generator.randomParagraphText(), A.Abstract);
+            repositoryItem.append(O.text(O.T_TEXT_PARAGRAPH, generator.randomParagraphText()), A.Abstract);
             repositoryItem.append(O.datetime(generator.randomDateInPeriod(-54,6,"year"),null,O.PRECISION_YEAR), A.Date);
             
             // Defined here so a new randomListMember and randomProjectName is drawn each time
