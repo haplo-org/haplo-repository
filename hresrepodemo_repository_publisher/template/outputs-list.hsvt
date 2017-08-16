@@ -1,6 +1,6 @@
 
-template:layout()
-    {
+pageTitle("Browse")
+
         <h2> "Outputs" </h2>
         <ol class="breadcrumb">
           <li><a href=["/outputs/" faculty.ref]>faculty.title</a></li>
@@ -14,12 +14,11 @@ template:layout()
             }
             if(citation) { render(citation) }
           </div>
-          if(unsafeThumbnail) {
+          if(file) {
             <div class="media-right">
-              unsafeHTML(unsafeThumbnail)
+              std:web-publisher:file:thumbnail(file)
             </div>
           }
         </div>
         }
-    }
 

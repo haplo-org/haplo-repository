@@ -13,3 +13,15 @@ attribute hres:attribute:accepted-author-manuscript as AcceptedAuthorManuscript
 attribute hres:attribute:published-file as PublishedFile
 attribute dc:attribute:author as Author
 attribute hres:attribute:research-institute as ResearchInstitute
+
+# ---------------------------------------------------------------------------
+
+group hres:group:repository-publisher-service
+    title: Repository Publisher Service
+
+group hres:group:public-repository-access
+    member hres:group:repository-publisher-service
+
+service-user hres:service-user:repository-publisher
+    title: Repository Publisher
+    group hres:group:repository-publisher-service

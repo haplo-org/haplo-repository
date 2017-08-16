@@ -7,10 +7,15 @@
   "apiVersion": 4,
   "depend": [
       "std_web_publisher",
-      "hres_researcher_profile_biography"
+      "hres_repo_publication_common",
+      "hres_repo_publication_page_parts",
+      "hres_researcher_profile_biography",
+      "hres_repo_access_request",
+      "hres_repo_file_restriction"
     ],
   "use": ["std:web-publisher"],
   "load": [
       "js/hresrepodemo_repository_publisher.js"
-    ]
+    ],
+  "allowAnonymousRequests": true
 }

@@ -1,6 +1,6 @@
 
-template:layout()
-    {
+pageTitle("Browse")
+
         <h2> "Outputs" </h2>
         <div class="row">
           <div class="col-md-12">
@@ -22,4 +22,3 @@ template:layout()
             }
           </div>
         </div>
-    }

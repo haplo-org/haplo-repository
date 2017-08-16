@@ -1,75 +1,8 @@
 
-template:layout() 
-    {
+      <h2> object.title </h2>
 
-    <h2> object.title </h2>
+      <p>"&nbsp;"</p>
 
-    <p>"&nbsp;"</p>
+      if(citation) { <div class="well"> render(citation) </div> }
 
-    if(citation) { <div class="well"> render(citation) </div> }
-
-    render(object.asTable)
-
-    } right {
-
-      // TODO: make a widget
-      unless(noFiles) {
-      <div class=["panel" if(underEmbargo) { "panel-warning" } else { "panel-primary"}]>
-        <div class="panel-heading">
-          <h3 class="panel-title">if(underEmbargo) { "Under embargo" } else { "Download" }</h3>
-        </div>
-        <div class="panel-body">
-          if(underEmbargo) {
-            "The output is currently unavailable for download due to an embargo."
-          } else {
-            if(hasFile) {
-              <h5>"File(s)"</h5>
-              each(object.every.File) { render(.) }
-            }
-            if(hasPublishedFile) {
-              <h5>"Published version"</h5>
-              each(object.every.PublishedFile) { render(.) }
-            }
-            if(hasAAM) {
-              <h5>"Accepted author manuscript"</h5>
-              each(object.every.AcceptedAuthorManuscript) { render(.) }
-            }
-          }
-        </div>
-      </div>
-      }
-
-      <div class="panel panel-default">
-        <div class="panel-heading">
-          <h3 class="panel-title">"Related outputs"</h3>
-        </div>
-        <div class="panel-body">
-          <p>"The authors of this output also contributed to:"</p>
-          each(related) {
-              <p>
-                  <a href=href> output.title </a>
-                  if(citation) { <br> <small> render(citation) </small> }
-              </p>
-          }
-        </div>
-      </div>
-
-      } below {
-
-      // TODO: make a widget
-      <div class="panel panel-default">
-        <div class="panel-heading">
-          <h3 class="panel-title">"Permalink"</h3>
-        </div>
-        <div class="panel-body">
-          <p>"Use this permanent URL when citing or linking to this resource:"</p>
-          <p style="overflow: hidden;">
-              // TODO: hardcoded
-              <span style="white-space: nowrap;">
-                <a href=permalink>applicationUrl permalink</a>
-              </span>
-          </p>
-        </div>
-      </div>
-
-    }
+      render(object.asTable)

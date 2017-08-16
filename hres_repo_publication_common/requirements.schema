@@ -1,0 +1,6 @@
+
+label hres:label:accepted-into-repository as AcceptedIntoRepository
+
+type std:type:person as Person
+
+attribute hres:attribute:research-institute as ResearchInstitute

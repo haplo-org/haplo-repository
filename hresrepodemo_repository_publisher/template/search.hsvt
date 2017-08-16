@@ -1,8 +1,7 @@
 
-template:layout()
-    {
+pageTitle("Search")
+
         <h2> "Search" </h2>
 
         // NOTE: Can be broken down into render(search.form) and render(search.results) if it needs to go into different places.
         render(search.ui)
-    }

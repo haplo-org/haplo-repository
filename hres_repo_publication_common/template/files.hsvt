@@ -1,0 +1,9 @@
+
+<div class="panel panel-primary">
+  <div class="panel-heading">
+    "File(s)"
+  </div>
+  <div class="panel-body">
+    render(object.asTable)
+  </div>
+</div>

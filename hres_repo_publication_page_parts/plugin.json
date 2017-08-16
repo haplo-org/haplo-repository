@@ -1,0 +1,18 @@
+{
+  "pluginName": "hres_repo_publication_page_parts",
+  "pluginAuthor": "Haplo Services",
+  "pluginVersion": 1,
+  "displayName": "Repository Publication Page Parts",
+  "displayDescription": "Provision of web publisher page parts to build repository publications",
+  "apiVersion": 4,
+  "depend": [
+      "std_web_publisher",
+      "hres_bibliographic_reference"
+    ],
+  "use": ["std:web-publisher"],
+  "load": [
+      "js/repo_publication_parts_misc.js",
+      "js/repo_publication_parts_output.js",
+      "js/repo_publication_parts_person.js"
+    ]
+}

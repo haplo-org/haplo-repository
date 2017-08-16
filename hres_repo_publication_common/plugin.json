@@ -1,0 +1,16 @@
+{
+  "pluginName": "hres_repo_publication_common",
+  "pluginAuthor": "Haplo Services",
+  "pluginVersion": 1,
+  "displayName": "Repository Publication Common",
+  "displayDescription": "Common implementations of repository publication.",
+  "apiVersion": 4,
+  "depend": [
+      "std_web_publisher",
+      "hres_bibliographic_reference"
+    ],
+  "use": ["std:web-publisher"],
+  "load": [
+      "js/repo_publication_common.js"
+    ]
+}

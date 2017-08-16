@@ -1,0 +1,13 @@
+<div class="panel panel-default">
+  <div class="panel-heading">
+    <h3 class="panel-title">"Research outputs"</h3>
+  </div>
+  <div class="panel-body">
+  each(outputs) {
+    <p>
+        <a href=href> output.title </a>
+        if(citation) { <br> <small> render(citation) </small> }
+    </p>
+  }
+  </div>
+</div>

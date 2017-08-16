@@ -5,7 +5,16 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
-    <title> if(title) { title } else { "Example Repository" } </title>
+    <title>
+        if(context.pageTitle) {
+            context.pageTitle " : "
+        } else {
+          if(context.object) {
+              context.object.title " : "
+          }
+        }
+        "Example Repository"
+    </title>
 
     <meta name="description" content="Example Repository Publisher">
 
@@ -51,12 +60,17 @@
                 <div class="row">
                     <div class="col-md-8">
                         <div class="well">
-                            yield()
+                            render(blocks.body)
                         </div>
-                        yield:below()
+                        if(context.hint.objectKind) {
+                            std:web-publisher:page-part:render-category(concat("hres:repository:" context.hint.objectKind ":below"))
+                        }
                     </div>
                     <div class="col-md-4">
-                        yield:right()
+                        if(blocks.sidebar) { render(blocks.sidebar) }
+                        if(context.hint.objectKind) {
+                            std:web-publisher:page-part:render-category(concat("hres:repository:" context.hint.objectKind ":sidebar"))
+                        }
                     </div>
                 </div>
             </div>

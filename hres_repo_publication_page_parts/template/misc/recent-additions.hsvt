@@ -1,0 +1,7 @@
+        <h2>"Latest additions"</h2>
+        each(outputs) {
+            <p>
+                <a href=href> output.title </a>
+                if(citation) { <br> <small> render(citation) </small> }
+            </p>
+        }

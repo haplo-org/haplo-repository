@@ -36,3 +36,8 @@ th.haplo-attribute {
 .control-label {
     font-weight: bold;
 }
+.checkbox input[type="checkbox"] {
+    margin-left: 0px;
+    margin-right: 20px;
+    position: relative;
+}

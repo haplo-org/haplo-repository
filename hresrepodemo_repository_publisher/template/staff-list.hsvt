@@ -1,6 +1,6 @@
 
-template:layout()
-    {
+pageTitle("People")
+
         <h2> "People" </h2>
         <ul class="row" style="column-width: 15em; list-style-position: inside;">
         each(staff.results) {
@@ -9,4 +9,3 @@ template:layout()
           }
         }
         </ul>
-    }
