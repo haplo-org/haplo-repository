@@ -53,36 +53,58 @@ var QUERY_STRING_TO_ATTRIBUTE = {
     "pub": A.Publisher
 };
 
-P.respond("GET", "/api/hres-repo-embargoes/sherpa-romeo", [
-    {pathElement:0, as:"object"}
-], function(E, output) {
-    P.CanEditEmbargoes.enforce();
+P.respondAfterHTTPRequest("GET", "/api/hres-repo-embargoes/sherpa-romeo", [
+    {pathElement:0, as:"object"},
+    {parameter:"done", as:"string", optional:true}
+], {
+    setup: function(data, E, output, keysDoneStr) {
+        P.CanEditEmbargoes.enforce();
 
-    var results = [];
-    
-    _.each(QUERY_STRING_TO_ATTRIBUTE, function(desc, key) {
-        var v = output.first(desc);
-        if(!v) { return; }
-        
-        var search;
-        var params = {};
-        if(key === "issn") {
-            search = v.toString();
-        } else {
-            search = O.isRef(v) ? v.load().title : v.toString();
+        var keysDoneIn = (keysDoneStr||'').split(',');
+        var keysDoneOut = [];   // rebuild to avoid trusting input
+
+        var queries = [];
+        _.each(QUERY_STRING_TO_ATTRIBUTE, function(desc, key) {
+            var v = output.first(desc);
+            if(v && (-1 === keysDoneIn.indexOf(key))) {
+                var search;
+                var params = {};
+                if(key === "issn") {
+                    search = v.toString();
+                } else {
+                    search = O.isRef(v) ? v.load().title : v.toString();
+                }
+                params[key] = search;
+                queries.push({key:key, params:params});
+            } else {
+                keysDoneOut.push(key);
+            }
+        });
+
+        if(queries.length > 0) {
+            data.more = (queries.length > 1);
+            var q = queries[0];
+            data.done = keysDoneOut.concat(q.key);
+            data.key = q.key;
+            var http = O.httpClient("http://www.sherpa.ac.uk/romeo/api29.php");
+            _.each(q.params, function(v,k) { http.queryParameter(k,v); });
+            return http;
         }
-        params[key] = search;
-        
-        var response = O._TEMP_API.blockingHttpRequest(
-            "http://www.sherpa.ac.uk/romeo/api29.php",
-            "GET",
-            params,
-            {},
-            undefined
-        );
-        
-        parseResponse(response.body, results);
-    });
-
-    E.response.body = JSON.stringify(results);
+    },
+    process: function(data, client, result) {
+        var results = [];
+        if(result.successful) {
+            parseResponse(result.body.readAsString("UTF-8"), results);
+        }
+        return {
+            more: data.more,
+            key: data.key,
+            done: data.done,
+            publishers: results
+        };
+    },
+    handle: function(data, result, E, output) {
+        E.response.body = JSON.stringify(data);
+        E.response.kind = 'json';
+    }
 });

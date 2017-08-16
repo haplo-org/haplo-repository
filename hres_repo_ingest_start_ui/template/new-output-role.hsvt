@@ -1,5 +1,5 @@
 pageTitle("New " typeInfo.name ": " researcher.title)
-backLink("/do/repository-simple-ingest/new-for/" researcher.ref)
+backLink("/do/repository-ingest-start-ui/new-for/" researcher.ref)
 
 <p> "What is your involvement in this output?" </p>
 

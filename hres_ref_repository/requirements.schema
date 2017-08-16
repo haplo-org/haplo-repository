@@ -1,6 +1,8 @@
 
 group hres:group:repository-editors as RepositoryEditors
 
+label hres:label:accepted-into-repository as AcceptedIntoRepository
+
 # ---------------------------------------------------------------------------
 
 schema-template hres:template-type:repository-item
@@ -16,6 +18,8 @@ qualifier hres:qualifier:accepted as Accepted
 
 type hres:type:conference-item as ConferenceItem
 type hres:type:journal-article as JournalArticle
+
+type hres:type:ref-unit-of-assessment as REFUnitOfAssessment
 
 # ---------------------------------------------------------------------------
 

@@ -7,26 +7,47 @@
 
 (function($) {
 
-    $(document).ready(function() {
+    var safety = 5;
+    var doneHeading = false;
+    var haveResults = false;
+    var getLinks = function(doneStr) {
+        if(--safety < 0) { return; }
+
         var output = $('.sherpa-links').data('ref');
 
-        $.get("/api/hres-repo-embargoes/sherpa-romeo/"+output)
+        var url = "/api/hres-repo-embargoes/sherpa-romeo/"+output;
+        if(doneStr) { url += "?done="+doneStr; }
+        $.get(url)
             .done(function(response) {
-                var publishers = JSON.parse(response);
+                var publishers = response.publishers;
                 var html = [];
-                html.push('<h2>SHERPA/RoMEO reference links</h2>');
-                if(publishers.length === 0) {
-                    html.push('<p>No links available. <a target="_blank" href="http://www.sherpa.ac.uk/romeo/">RoMEO home page</a><p>');
+                if(!doneHeading) {
+                    html.push('<h2>SHERPA/RoMEO reference links</h2>');
+                    doneHeading = true;
+                }
+                if(publishers.length > 0) {
+                    haveResults = true;
                 }
                 _.each(publishers, function(p) {
                     html.push('<h3>', _.escape(p.name), '</h3>');
                     _.each(p.links, function(l) {
-                        html.push("<li><a target='_blank' href='", _.escape(l.url), "'>", _.escape(l.text), "</a></li>");
+                        // rel=noopener for security
+                        html.push("<li><a target='_blank' rel='noopener' href='", _.escape(l.url), "'>", _.escape(l.text), "</a></li>");
                     });
                 });
+                if(!response.more && !haveResults) {
+                    html.push('<p>No links available. <a target="_blank" href="http://www.sherpa.ac.uk/romeo/">RoMEO home page</a><p>');
+                }
                 var htmlString = html.join('');
                 $('.sherpa-links').append(htmlString);
+                if(response.more) {
+                    getLinks((response.done||[]).join(','));
+                }
             });
+    };
+
+    $(document).ready(function() {
+        getLinks(null);
     });
     
 })(jQuery);

@@ -60,6 +60,7 @@ P.implementService("std:reporting:collection:repository_items:setup", function(c
         fact("author",      "ref",      "Primary author").
         fact("type",        "ref",      "Output type").
         fact("faculty",     "ref",      "Faculty").
+        fact("department",  "ref",      "Department").
         fact("year",        "date",     "Year").
         fact("publisher",   "ref",      "Publisher");
 });
@@ -75,6 +76,7 @@ P.implementService("std:reporting:collection:repository_items:get_facts_for_obje
             "researcher": function(context) { return (context === "list") ? [author] : author; }
         }).constructEntitiesObject(author.load());
         row.faculty = entities.faculty_refMaybe || null;
+        row.department = entities.department_refMaybe || null;
     }
     if(object.first(A.Date)) {
         row.year = object.first(A.Date).start;

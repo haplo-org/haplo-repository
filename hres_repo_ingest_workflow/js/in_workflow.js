@@ -27,7 +27,7 @@ Ingest.observeFinish({}, function(M) {
     var mItem = M.workUnit.ref.load().mutableCopy();
     var addLabel = (M.state === "published") ? Label.AcceptedIntoRepository : Label.RejectedFromRepository;
     var removeLabel = (M.state === "published") ? Label.RejectedFromRepository : Label.AcceptedIntoRepository;
-    mItem.save(O.labelChanges().add(addLabel).remove(removeLabel    ));
+    mItem.save(O.labelChanges().add(addLabel).remove(removeLabel));
 });
 
 Ingest.start(function(M, initial, properties) {

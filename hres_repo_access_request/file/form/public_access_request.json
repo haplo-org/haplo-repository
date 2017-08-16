@@ -1,0 +1,53 @@
+{
+    "specificationVersion": 0,
+    "formId": "requestAccess",
+    "formTitle": "Access Request",
+    "elements": [
+        {
+            "type":"section",
+            "style":"oforms:row",
+            "elements":[
+                {
+                    "type": "text",
+                    "label": "Title",
+                    "path": "title"
+                },
+                {
+                    "type": "text",
+                    "label": "First name",
+                    "path": "nameFirst",
+                    "required": true
+                },
+                {
+                    "type": "text",
+                    "label": "Last name",
+                    "path": "nameLast",
+                    "required": true
+                }
+            ]
+        },
+        {
+            "type": "text",
+            "label": "Email",
+            "path": "email",
+            "required": true
+        },
+        {
+            "type": "text",
+            "label": "Institution",
+            "path": "institution"
+        },
+        {
+            "type": "paragraph",
+            "label": "Notes",
+            "path": "notes"
+        },
+        {
+            "type": "boolean",
+            "style": "confirm",
+            "path": "agreement",
+            "label": "I accept the institutional End User License.",
+            "trueLabel": "The user has agreed to abide by the institutional End User License"
+        }
+    ]
+}

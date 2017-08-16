@@ -5,3 +5,6 @@ label hres:label:accepted-into-repository as AcceptedIntoRepository
 
 label hres:label:rejected-from-repository as RejectedFromRepository
 
+label hres:label:repository-item as RepositoryItem
+
+attribute hres:attribute:editor as Editor

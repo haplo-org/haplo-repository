@@ -1,0 +1,10 @@
+
+feature std:configuration-data
+    property: {"hres:doi:minting:safety-application-hostname":"(SET TO HOSTNAME OF LIVE APPLICATION)"}
+    property: {"hres:doi:minting:doi-prefix":""}
+    property: {"hres:doi:minting:doi-prefix-for-update":[]}
+    property: {"hres:doi:minting:service-url":"https://mds.test.datacite.org"}
+
+label hres:label:repository-item as RepositoryItem
+
+attribute hres:attribute:digital-object-identifier-doi as DOI

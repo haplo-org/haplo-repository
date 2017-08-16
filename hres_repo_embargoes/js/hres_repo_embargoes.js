@@ -44,9 +44,6 @@ var removeEmbargoedFiles = function(response, object, forDisplay) {
     }
 };
 
-P.hook('hPreIndexObject', function(response, object) {
-    removeEmbargoedFiles(response, object, false);
-});
 P.hook('hPreObjectDisplay', function(response, object) {
     removeEmbargoedFiles(response, object, true);
 });
@@ -54,11 +51,11 @@ P.hook('hPreObjectDisplay', function(response, object) {
 P.implementService("std:action_panel:repository_item", function(display, builder) {
     var embargo = getEmbargoData(display.object);
     if(embargo) {
-        builder.panel(1).element(0, {title:"Embargo"});
-        builder.panel(1).link("default", embargo.licenseURL, embargo.getDatesForDisplay());
+        builder.panel(101).element(0, {title:"Embargo"});
+        builder.panel(101).link("default", embargo.licenseURL, embargo.getDatesForDisplay());
     }
     if(O.currentUser.allowed(CanEditEmbargoes)) {
-        builder.panel(1).link("default", "/do/hres-repo-embargoes/edit/"+display.object.ref,
+        builder.panel(101).link("default", "/do/hres-repo-embargoes/edit/"+display.object.ref,
             (!!embargo ? "Edit" : "Set")+" embargo");
     }
 });

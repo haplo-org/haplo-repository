@@ -18,12 +18,19 @@
       "hres_repo_list_management",
       "hres_repo_schema_data_recommended",
       "hres_repo_schema_outputs_recommended",
+      "hres_repo_access_request",
+      "hres_repo_doi_minting",
       "hres_researcher_profile",
       "hres_researcher_profile_biography",
       "hres_researcher_profile_photo",
       "hres_researcher_profile_extended",
+      "hres_oai_pmh",
       "hres_bibliographic_reference",
-      "hresrepodemo_repository_publisher"
+      "hres_repo_ingest_start_ui",
+      "hres_ref_repository",
+      "hresrepodemo_repository_publisher",
+      "hres_file_mediated_access",
+      "hres_repo_access_level_policy"
     ],
   "load": [
       "js/hresrepodemo_application.js"

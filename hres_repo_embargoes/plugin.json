@@ -6,13 +6,15 @@
   "displayDescription": "Support for embargoes and associated licensing",
   "installSecret": "3c3dabcea50a35cfa0d63735717868c1143b8734",
   "apiVersion": 4,
-  "privilegesRequired": ["pDatabase", "pTempBlockingHttpRequest"],
+  "privilegesRequired": ["pDatabase", "pHTTPClient"],
   "use": [
+      "haplo:respond-after-http-request",
       "std:reporting"
     ],
   "depend": [
       "std_reporting",
       "std_action_panel",
+      "haplo_respond_after_http_request",
       "hres_repository",
       "hres_thirdparty_libs"
     ],
@@ -20,7 +22,8 @@
       "js/hres_repo_embargoes.js",
       "js/em_forms.js",
       "js/em_reference_links.js",
-      "js/em_reporting.js"
+      "js/em_reporting.js",
+      "js/em_web_publisher.js"
     ],
   "respond": [
       "/do/hres-repo-embargoes",

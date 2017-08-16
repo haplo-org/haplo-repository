@@ -21,6 +21,7 @@
       "js/hres_repository.js",
       "js/repo_test_data.js",
       "js/repo_permissions.js",
+      "js/repo_permissions_public.js",
       "js/repo_reporting.js"
     ],
   "respond": [

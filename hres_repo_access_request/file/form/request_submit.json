@@ -1,0 +1,14 @@
+{
+    "specificationVersion": 0,
+    "formId": "requestSubmit",
+    "formTitle": "Request access to restricted file",
+    "elements": [
+        {
+            "type": "boolean",
+            "style": "confirm",
+            "path": "agreement",
+            "label": "I accept the institutional End User License.",
+            "trueLabel": "The user has agreed to abide by the institutional End User License"
+        }
+    ]
+}

@@ -1,0 +1,22 @@
+
+attribute dc:attribute:date as Date
+attribute dc:attribute:publisher as Publisher
+
+attribute hres:attribute:abstract as Abstract
+attribute hres:attribute:authors-citation as AuthorsCitation
+attribute hres:attribute:digital-object-identifier-doi as DOI
+attribute hres:attribute:editor as Editor
+attribute hres:attribute:keywords as Keywords
+attribute hres:attribute:license as License
+
+# ---------------------------------------------------------------------------
+
+group hres:group:oai-pmh-service
+    title: OAI-PMH Service
+
+group hres:group:public-repository-access
+    member hres:group:oai-pmh-service
+
+service-user hres:service-user:oai-pmh
+    title: OAI-PMH Access
+    group hres:group:oai-pmh-service

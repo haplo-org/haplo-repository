@@ -20,10 +20,12 @@
       "std_reporting",
       "std_document_store",
       "hres_ref_schema",
-      "hres_repository"
+      "hres_repository",
+      "hres_repo_open_access"
     ],
   "load": [
       "js/hres_ref_repository.js",
+      "js/ref_test_data.js",
       "js/ref_workflow.js",
       "js/ref_exceptions.js",
       "js/ref_requirements.js",

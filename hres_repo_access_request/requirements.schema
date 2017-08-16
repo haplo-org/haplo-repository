@@ -1,0 +1,13 @@
+
+group std:group:administrators as Administrators
+group hres:group:repository-editors as RepositoryEditors
+
+group hres:group:data-preparers as DataPreparers
+    
+
+attribute dc:attribute:author as Author
+attribute hres:attribute:accepted-author-manuscript as AcceptedAuthorManuscript
+attribute hres:attribute:editor as Editor
+attribute std:attribute:file as File
+attribute hres:attribute:prepared-file as PreparedFile
+attribute hres:attribute:published-file as PublishersVersion

@@ -1,9 +1,9 @@
 {
-  "pluginName": "hres_repo_simple_ingest",
+  "pluginName": "hres_repo_ingest_start_ui",
   "pluginAuthor": "Haplo Services",
   "pluginVersion": 1,
-  "displayName": "Haplo RM Repository Simple Ingest",
-  "displayDescription": "Simple self-service ingest for researchers",
+  "displayName": "Haplo RM Repository Ingest Start UI",
+  "displayDescription": "Basic ingest start UI for researchers",
   "apiVersion": 4,
   "depend": [
       "haplo_activity_guidance_notes",
@@ -14,7 +14,7 @@
       "haplo:activity_guidance_notes"
     ],
   "load": [
-      "js/hres_repo_simple_ingest.js"
+      "js/hres_repo_ingest_start_ui.js"
     ],
-  "respond": ["/do/repository-simple-ingest"]
+  "respond": ["/do/repository-ingest-start-ui"]
 }

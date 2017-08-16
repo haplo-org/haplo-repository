@@ -5,6 +5,7 @@ schema-template hres:template-type:repository-item
     attribute hres:attribute:research-or-scholarly [sort=12100]
     attribute hres:attribute:research-group [sort=13100]
     attribute hres:attribute:output-status [sort=15000]
+    attribute hres:attribute:file-access-level [sort=15500]
     attribute hres:attribute:publication-process-dates [sort=15101]
 
 # ---------------------------------------------------------------------------
@@ -17,6 +18,14 @@ type hres:type:organisation:funder as Funder
 type hres:type:research-institute:research-group as ResearchGroup
 
 # ---------------------------------------------------------------------------
+
+attribute hres:attribute:file-access-level as AccessLevel
+    title: File Access Level
+    search-name: access-level
+    qualifier: std:qualifier:null
+    data-type link
+    ui-options radio
+    linked-type hres:type:file-access-level
 
 attribute hres:attribute:funder as Funder
     title: Funder
@@ -56,6 +65,13 @@ attribute hres:attribute:peer-review as PeerReview
     data-type link
     ui-options radio
     linked-type hres:type:peer-review
+        
+# For files suitable for release through access requests. This plugin is agnostic about how it is used.
+attribute hres:attribute:prepared-file as PreparedFile
+    title: Prepared file
+    search-name prepared-file
+    qualifier std:qualifier:null
+    data-type file
 
 attribute hres:attribute:publication-process-dates as PublicationProcessDates
     title: Publication process dates
@@ -81,6 +97,24 @@ qualifier hres:qualifier:deposited as Deposited
     search-name: deposited
         
 # ---------------------------------------------------------------------------
+
+    
+type hres:type:file-access-level as AccessLevel
+    title: File Access Level
+    search-name: access-level
+    apply-schema-template hres:template-type:list
+object hres:list:file-access-level:safeguarded
+    type hres:type:file-access-level
+    title: Safeguarded
+object hres:list:file-access-level:open
+    type hres:type:file-access-level
+    title: Open
+object hres:list:file-access-level:controlled
+    type hres:type:file-access-level
+    title: Controlled
+object hres:list:file-access-level:restricted
+    type hres:type:file-access-level
+    title: Restricted
 
 type hres:type:peer-review as PeerReview
     title: Peer-review

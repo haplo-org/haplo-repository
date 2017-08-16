@@ -114,10 +114,11 @@ P.respond("GET", "/do/hres-ref-repo/choose-exception", [
             label: "Delete registered exception"
         });
     }
-    var M = O.service("std:workflow:for_ref", "hres_repo_ingest_workflow:in", output.ref);
-    if(M && (M.state === "wait_editor")) {
+
+    var publishTransitionUrl = O.serviceMaybe("hres_ref_repository:get_publish_url", output);
+    if(publishTransitionUrl) {
         sidebarElements.push({
-            href:M.transitionUrl("publish"),
+            href:publishTransitionUrl,
             label:"Bypass REF exception registration",
             indicator:"terminal"
         });
@@ -147,7 +148,7 @@ P.respond("GET,POST", "/do/hres-ref-repo/exception-evidence", [
     
     var row = P.getREFException(output);
     var document = {};
-    if(row) {
+    if(row && row.evidence) {
         document.evidence = row.evidence;
     }
     var form = evidenceForm.handle(document, E.request);
@@ -166,16 +167,14 @@ P.respond("GET,POST", "/do/hres-ref-repo/exception-evidence", [
                 evidence: evidence
             }).save();
         }
-        
-        var rdr;
-        var M = O.service("std:workflow:for_ref", "hres_repo_ingest_workflow:in", output.ref);
-        if(M && (M.state === "wait_editor")) {
-            rdr = M.transitionUrl("publish");
-        } else {
+
+        var rdr = O.serviceMaybe("hres_ref_repository:get_publish_url", output);
+        if(!rdr) {
             rdr = output.url();
         }
         E.response.redirect(rdr);
     }
+
     E.render({
         backLink: "/do/hres-ref-repo/choose-exception/"+output.ref,
         form: form,

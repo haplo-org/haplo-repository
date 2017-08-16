@@ -7,7 +7,7 @@
 
 P.workflow.registerWorkflowFeature("hres:ref_compliance", function(workflow, spec) {
     
-    workflow.actionPanelTransitionUI({statue:["wait_editor"]}, function(M, builder) {
+    workflow.actionPanelTransitionUI({state:"wait_editor"}, function(M, builder) {
         if(M.workUnit.isActionableBy(O.currentUser)) {
             var output = M.workUnit.ref.load();
             _.each(M.transitions.list, function(t) {

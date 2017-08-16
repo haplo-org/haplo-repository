@@ -9,14 +9,14 @@ var AAMGuidanceNote = P.guidanceNote("repository", "ingest-aam",
 
 // --------------------------------------------------------------------------
 
-var CanAddOutput = O.action("hres:repository:simple_ingest:add_respository_item").
+var CanAddOutput = O.action("hres:repository:ingest_start_ui:add_respository_item").
     title("Add repository item through simple ingest process").
     allow("group", Group.RepositoryEditors);
 
 P.implementService("hres_repo_navigation:repository_item_page", function(object, builder) {
     // TODO: Better permissions for adding repository items via the UI
     if((O.currentUser.ref == object.ref) || O.currentUser.allowed(CanAddOutput)) {
-        builder.sidebar.link("default", "/do/repository-simple-ingest/new-for/"+object.ref, "Add output", "primary");
+        builder.sidebar.link("default", "/do/repository-ingest-start-ui/new-for/"+object.ref, "Add output", "primary");
     }
 });
 
@@ -53,22 +53,22 @@ var ensureTypes = function() {
 
 // --------------------------------------------------------------------------
 
-P.respond("GET", "/do/repository-simple-ingest/new-for", [
+P.respond("GET", "/do/repository-ingest-start-ui/new-for", [
     {pathElement:0, as:"object"}
 ], function(E, researcher) {
     ensureTypes();
     var options = function(list) {
         return {options:_.map(list, function(i) {
             var guidanceRequired;
-            if(O.serviceImplemented("hres_repo_simple_ingest:custom_guidance_for_output")) {
-                guidanceRequired = !!O.service("hres_repo_simple_ingest:custom_guidance_for_output", i.ref);
+            if(O.serviceImplemented("hres_repo_ingest_start_ui:custom_guidance_for_output")) {
+                guidanceRequired = !!O.service("hres_repo_ingest_start_ui:custom_guidance_for_output", i.ref);
             } else {
                 guidanceRequired = (-1 !== SCHEMA.getTypeInfo(i.ref).attributes.indexOf(A.AcceptedAuthorManuscript));
             }
             return {
                 action: (guidanceRequired ? 
-                    "/do/repository-simple-ingest/guidance-for/" :
-                    "/do/repository-simple-ingest/new-for-edit/")+researcher.ref+'/'+ i.ref,
+                    "/do/repository-ingest-start-ui/guidance-for/" :
+                    "/do/repository-ingest-start-ui/new-for-edit/")+researcher.ref+'/'+ i.ref,
                 label: i.name,
                 indicator: "standard",
                 notes: notes.get(i.ref)
@@ -84,13 +84,13 @@ P.respond("GET", "/do/repository-simple-ingest/new-for", [
 
 // --------------------------------------------------------------------------
 
-P.respond("GET", "/do/repository-simple-ingest/guidance-for", [
+P.respond("GET", "/do/repository-ingest-start-ui/guidance-for", [
     {pathElement:0, as:"object"},
     {pathElement:1, as:"ref"}
 ], function(E, researcher, type) {
     E.renderIntoSidebar({
         elements: [{
-            href: '/do/repository-simple-ingest/new-for-edit/'+researcher.ref+'/'+type,
+            href: '/do/repository-ingest-start-ui/new-for-edit/'+researcher.ref+'/'+type,
             label: "Continue",
             indicator: "primary"
         }]
@@ -98,15 +98,15 @@ P.respond("GET", "/do/repository-simple-ingest/guidance-for", [
     E.render({
         researcher: researcher,
         typeInfo: SCHEMA.getTypeInfo(type),
-        guidance: (O.serviceImplemented("hres_repo_simple_ingest:custom_guidance_for_output") ?
-            O.service("hres_repo_simple_ingest:custom_guidance_for_output", type) :
+        guidance: (O.serviceImplemented("hres_repo_ingest_start_ui:custom_guidance_for_output") ?
+            O.service("hres_repo_ingest_start_ui:custom_guidance_for_output", type) :
             AAMGuidanceNote).deferredRender()
     });
 });
 
 // --------------------------------------------------------------------------
 
-P.respond("GET,POST", "/do/repository-simple-ingest/new-for-edit", [
+P.respond("GET,POST", "/do/repository-ingest-start-ui/new-for-edit", [
     {pathElement:0, as:"object"},
     {pathElement:1, as:"ref"}
 ], function(E, researcher, type) {

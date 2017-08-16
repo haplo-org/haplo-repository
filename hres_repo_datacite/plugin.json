@@ -1,0 +1,19 @@
+{
+  "pluginName": "hres_repo_datacite",
+  "pluginAuthor": "Haplo Services",
+  "pluginVersion": 1,
+  "displayName": "Repository DataCite",
+  "displayDescription": "Support for DataCite",
+  "apiVersion": 4,
+  "depend": [
+      "hres_repository",
+      "hres_orcid_researcher_profile",
+      "hres_digital_object_identifier"
+    ],
+  "use": [
+      "hres:doi"
+    ],
+  "load": [
+      "js/hres_repo_datacite.js"
+    ]
+}

@@ -49,6 +49,9 @@ P.Ingest.text({
     "timeline-entry:return": "returned the item to the submitter",
     "timeline-entry:place_on_hold": "placed the deposit process on hold",
     "timeline-entry:submit": "resubmitted the item for review",
-    "timeline-entry:reject": "rejected the item as unsuitable for deposit"
+    "timeline-entry:reject": "rejected the item as unsuitable for deposit",
+
+    "notes-explanation-everyone": "Notes can be seen by the submitter and all staff reviewing this request",
+    "notes-explanation-private": "Seen only by staff reviewing this request, not seen by the submitter"
 
 });

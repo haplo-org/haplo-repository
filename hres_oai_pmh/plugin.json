@@ -1,0 +1,22 @@
+{
+  "pluginName": "hres_oai_pmh",
+  "pluginAuthor": "Haplo Services",
+  "pluginVersion": 1,
+  "displayName": "OAI-PMH",
+  "displayDescription": "Support for the Open Archives Initiative formats and protocols, including OAI-PMH at /api/oai2",
+  "apiVersion": 4,
+  "depend": [
+      "hres_thirdparty_libs",
+      "hres_repository",
+      "hres_repo_datacite"
+    ],
+  "load": [
+      "js/hres_oai_pmh.js",
+      "js/oai_dc.js"
+    ],
+  "respond": [
+      "/do/open-archives-initiative",
+      "/api/oai2"
+    ],
+  "allowAnonymousRequests": true
+}

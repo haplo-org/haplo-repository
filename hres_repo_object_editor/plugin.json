@@ -11,7 +11,8 @@
       "hres_author_citation_value"
     ],
   "load": [
-      "js/hres_repo_object_editor.js"
+      "js/hres_repo_object_editor.js",
+      "js/hres_journal_citation_value.js"
     ],
   "respond": ["/do/hres-repository-editor"]
 }

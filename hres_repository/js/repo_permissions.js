@@ -48,3 +48,12 @@ P.hook("hUserLabelStatements", function(response, user) {
         response.statements = statements.or(repositoryStatements);
     }
 });
+
+// This rule can't currently be expressed with restrictions
+P.hook('hPreObjectEdit', function(response, object, isTemplate) {
+    if(O.service("hres:repository:is_repository_item", object) &&
+        object.labels.includes(Label.AcceptedIntoRepository) &&
+        !O.currentUser.isMemberOf(Group.RepositoryEditors)) {
+        response.readOnlyAttributes = (response.readOnlyAttributes || []).concat(A.DigitalObjectIdentifierDOI);
+    }
+});

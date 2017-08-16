@@ -82,7 +82,7 @@ P.hook('hPostObjectEdit', function(response, object, previous) {
         _.each(shadowedAttributes, function(shadowed, author) {
             author = 1*author;  // JS keys are always strings
             r.remove(shadowed);
-            object.every(author, function(v,d,q) {
+            r.every(author, function(v,d,q) {
                 var person = v.load();
                 if(person.isKindOf(T.Person) && !person.isKindOf(T.ExternalResearcher)) {
                     r.append(v, shadowed);
@@ -93,7 +93,7 @@ P.hook('hPostObjectEdit', function(response, object, previous) {
 });
 
 // Don't display the shadowed fields
-P.hook('hPreObjectDisplay', function(response, object) {
+var preObjectDisplay = function(response, object) {
     var type = object.firstType();
     if(type && shadowInTypes.get(type)) {
         var r = response.replacementObject || object.mutableCopy();
@@ -102,4 +102,6 @@ P.hook('hPreObjectDisplay', function(response, object) {
         });
         response.replacementObject = r;
     }
-});
+};
+P.hook('hPreObjectDisplay', preObjectDisplay);
+P.hook('hPreObjectDisplayPublisher', preObjectDisplay);

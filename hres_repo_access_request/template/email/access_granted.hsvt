@@ -1,0 +1,11 @@
+#option:no-tag-attribute-quote-minimisation
+emailSubject("Access request granted - " std:object:title(item))
+
+<p> "Dear " toUser.nameFirst </p>
+<p> "Your request for access to the files of this record has been granted."</p>
+<p> "Please use the links below to download the files requested." </p>
+<p> "Note that the download links below are valid only for 24 hours, for security purposes." </p>
+
+each(downloads) {
+    <p class="button"> <a href=url> "Download " name </a> </p>
+}

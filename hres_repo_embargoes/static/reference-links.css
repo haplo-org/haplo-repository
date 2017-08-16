@@ -7,5 +7,10 @@
 
 .sherpa-links {
     background: #eee;
-    padding-left: 5px;
+    padding: 8px 13px;
+    border-radius: 3px;
+}
+
+.sherpa-links h2 {
+    margin-top: 0;
 }

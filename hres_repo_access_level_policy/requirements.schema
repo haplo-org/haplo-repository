@@ -1,0 +1,12 @@
+
+group hres:group:repository-editors as RepositoryEditors
+group hres:group:admin-staff as AdminStaff
+
+group hres:group:data-preparers as DataPreparers
+    title: Data Preparers
+
+attribute hres:attribute:file-access-level as AccessLevel
+
+type hres:type:file-access-level as AccessLevel
+
+

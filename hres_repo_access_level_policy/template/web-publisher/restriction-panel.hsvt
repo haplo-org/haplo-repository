@@ -1,0 +1,15 @@
+
+<div class=["panel" "panel-warning"]>
+  <div class="panel-heading">
+    <h3 class="panel-title"> 
+      "Request access"
+    </h3>
+  </div>
+  <div class="panel-body">
+    if(requestUrl) {
+      <a href=requestUrl> "Request file download" </a>
+    } else {
+      <p> "The files for this output are not available for public download." </p>
+    }
+  </div>
+</div>

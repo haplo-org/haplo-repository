@@ -19,7 +19,7 @@ var getEmbargoDocument = function(object) {
     var row = P.getEmbargoData(object);
     if(row) {
         document = {
-            start: "<p class='default-start'>"+new XDate(row.start).toString('dd MMM yyyy')+"</p>",
+            start: "<p>"+new XDate(row.start).toString('dd MMM yyyy')+"</p>",
             customStart: row.startIsEdited ? new XDate(row.start).toString('yyyy-MM-dd') : null,
             embargoLength: row.embargoLength ? row.embargoLength.toString() : "Indefinite",
             licenseURL: row.licenseURL
@@ -27,7 +27,9 @@ var getEmbargoDocument = function(object) {
     } else {
         if(object.first(A.PublicationDate)) {
             var published = getEarliestPublicationDate(object);
-            document.start = "<p class='default-start'>"+published.toString("dd MMM yyyy")+"</p>";
+            document.start = "<p>"+published.toString("dd MMM yyyy")+"</p>";
+        } else {
+            document.start = "<p><i>No start date set. Embargo will be set to start today unless a custom start date is chosen.</i></p>";
         }
     }
     return document;

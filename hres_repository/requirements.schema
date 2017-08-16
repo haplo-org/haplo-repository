@@ -3,6 +3,9 @@
 #   Labels & groups for permissions
 # ---------------------------------------------------------------------------
 
+label std:label:structure as STRUCTURE
+label std:label:concept as CONCEPT
+
 label hres:label:activity-repository as ActivityRepository
     title: Repository
     category: Activity
@@ -22,6 +25,9 @@ label hres:label:rejected-from-repository as RejectedFromRepository
 
 group hres:group:repository-editors as RepositoryEditors
     title: Repository Editors
+
+group hres:group:public-repository-access as PublicRepositoryAccess
+    title: Public Repository Access
 
 group std:group:everyone as Everyone
 group hres:group:admin-staff as AdminStaff
@@ -53,6 +59,7 @@ attribute hres:attribute:research-institute as ResearchInstitute
 type hres:type:person:external-researcher as ExternalResearcher
 type hres:type:research-institute:faculty as Faculty
 type hres:type:person:researcher as Researcher
+type hres:type:research-institute as ResearchInstitute
 
 # ---------------------------------------------------------------------------
 #   Repository item type schema template
@@ -330,7 +337,7 @@ object hres:list:published-version-of-record:false
     type hres:type:published-version-of-record
     title: Alternative version
 
-type hres:type:license
+type hres:type:license as License
     title License
     search-name license
     apply-schema-template hres:template-type:list

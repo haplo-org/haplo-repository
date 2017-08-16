@@ -1,0 +1,21 @@
+{
+  "pluginName": "hres_repo_open_access",
+  "pluginAuthor": "Haplo Services",
+  "pluginVersion": 1,
+  "displayName": "Haplo RM Open Access",
+  "displayDescription": "Open Access compliance reporting for Haplo Research Manager repositories",
+  "installSecret": "6770507cc376f93b64e1335638d06766c3eecda1",
+  "apiVersion": 4,
+  "use": [
+      "std:reporting"
+    ],
+  "depend": [
+      "std_reporting",
+      "hres_repo_schema_outputs"
+    ],
+  "load": [
+      "js/hres_repo_open_access_test_data.js",
+      "js/hres_repo_open_access.js"
+    ],
+  "respond": ["/do/hres-repo-open-access"]
+}

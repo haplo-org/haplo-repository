@@ -6,7 +6,7 @@
         {
             "type":"display-value",
             "path":"start",
-            "label":"Start date",
+            "label":"Embargo start date",
             "as":"html"
         },
         {
@@ -24,7 +24,7 @@
             "type":"choice",
             "class":"embargo-length",
             "path":"embargoLength",
-            "label":"Length (in months)",
+            "label":"Embargo length (in months)",
             "choices": "embargoLengths",
             "required": true
         },

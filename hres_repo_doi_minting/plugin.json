@@ -1,0 +1,25 @@
+{
+  "pluginName": "hres_repo_doi_minting",
+  "pluginAuthor": "Haplo Services",
+  "pluginVersion": 1,
+  "displayName": "Repository DOI Minting",
+  "displayDescription": "Minding of DOIs",
+  "apiVersion": 4,
+  "privilegesRequired": [
+      "pBackgroundProcessing",
+      "pHTTPClient"
+    ],
+  "depend": [
+      "hres_thirdparty_libs",
+      "hres_repository",
+      "hres_digital_object_identifier",
+      "hres_author_citation_value",
+      "hres_repo_datacite"
+    ],
+  "use": [
+      "hres:doi"
+    ],
+  "load": [
+      "js/hres_repo_doi_minting.js"
+    ]
+}

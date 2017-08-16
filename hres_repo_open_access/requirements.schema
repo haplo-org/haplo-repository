@@ -1,0 +1,47 @@
+
+label hres:label:accepted-into-repository as AcceptedIntoRepository
+
+group hres:group:repository-editors as RepositoryEditors
+
+type std:type:person as Person
+type hres:type:research-institute:department as Department
+type hres:type:research-institute:faculty as Faculty
+
+attribute dc:attribute:author as Author
+attribute dc:attribute:date as Date
+attribute hres:attribute:editor as Editor
+attribute hres:attribute:research-institute as ResearchInstitute
+
+
+
+type hres:type:journal-article as JournalArticle
+    attribute hres:attribute:open-access [sort=12100]
+
+type hres:type:conference-item as ConferenceItem
+    attribute hres:attribute:open-access [sort=12100]
+
+
+
+attribute hres:attribute:open-access as OpenAccess
+    title: Open access
+    search-name: open-access
+    qualifier std:qualifier:null
+    data-type link
+    ui-options radio
+    linked-type hres:type:open-access
+
+type hres:type:open-access as OpenAccess
+    title: Open access
+    search-name: open access
+    apply-schema-template hres:template-type:list
+
+object hres:list:open-access:not-open-access
+    type hres:type:open-access
+    title: Published as non-open access 
+object hres:list:open-access:green
+    type hres:type:open-access
+    title: Published as green open access
+object hres:list:open-access:gold
+    type hres:type:open-access
+    title: Published as ‘gold’ (paid) open access
+
