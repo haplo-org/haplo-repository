@@ -7,7 +7,10 @@
 
 var Ingest = P.Ingest = P.workflow.
     implement("in", "Ingest").
-    objectElementActionPanelName("repository_item");
+    // On individual panels as these are above the repository_item panel
+    objectElementActionPanelName("output").
+    objectElementActionPanelName("collection").
+    objectElementActionPanelName("research_data");
 
 if(P.workflow.workflowFeatureImplemented("hres:ref_compliance")) {
     Ingest.use("hres:ref_compliance");
@@ -24,10 +27,17 @@ Ingest.actionPanelTransitionUI({state:"on_hold"}, function(M, builder) {
 });
 
 Ingest.observeFinish({}, function(M) {
-    var mItem = M.workUnit.ref.load().mutableCopy();
+    var mItem = M.workUnit.ref.load();
     var addLabel = (M.state === "published") ? Label.AcceptedIntoRepository : Label.RejectedFromRepository;
     var removeLabel = (M.state === "published") ? Label.RejectedFromRepository : Label.AcceptedIntoRepository;
-    mItem.save(O.labelChanges().add(addLabel).remove(removeLabel));
+    var changes = O.labelChanges().add(addLabel).remove(removeLabel);
+    if(mItem.first(A.PublicationProcessDates, Q.Deposited)) {
+        mItem.relabel(changes);
+    } else {
+        mItem = mItem.mutableCopy();
+        mItem.append(O.datetime(new Date(), undefined, O.PRECISION_DAY), A.PublicationProcessDates, Q.Deposited);
+        mItem.save(O.labelChanges().add(addLabel).remove(removeLabel));
+    }
 });
 
 Ingest.start(function(M, initial, properties) {

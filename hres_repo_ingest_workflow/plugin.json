@@ -8,11 +8,13 @@
   "apiVersion": 4,
   "privilegesRequired": ["pDatabase"],
   "use": [
+      "std:reporting",
       "std:workflow",
       "haplo:activity_guidance_notes"
     ],
   "depend": [
       "std_action_panel",
+      "std_reporting",
       "std_workflow",
       "haplo_activity_guidance_notes",
       "hres_repository"

@@ -1,0 +1,26 @@
+
+
+type hres:type:thesis as Thesis
+
+
+attribute dc:attribute:date as Date
+attribute dc:attribute:publisher as Publisher
+attribute dc:attribute:subject as Subject
+attribute dc:attribute:author as Author
+
+attribute std:attribute:project as Project
+
+attribute hres:attribute:abstract as Abstract
+attribute hres:attribute:authors-citation as AuthorsCitation
+attribute hres:attribute:department-name as DepartmentName
+attribute hres:attribute:editor as Editor
+attribute hres:attribute:funder as Funder
+attribute hres:attribute:institution-name as InstitutionName
+attribute hres:attribute:keywords as Keywords
+attribute hres:attribute:license as License
+attribute hres:attribute:supervisor as Supervisor
+
+OPTIONAL attribute hres:attribute:digital-object-identifier-doi as DOI
+OPTIONAL attribute hres:attribute:language as Language
+OPTIONAL attribute hres:attribute:orcid as ORCID
+OPTIONAL attribute hres:attribute:qualification-name as QualificationName

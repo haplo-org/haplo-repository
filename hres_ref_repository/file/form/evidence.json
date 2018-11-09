@@ -6,7 +6,7 @@
     "elements": [
         {
             "type": "paragraph",
-            "label": "Notes",
+            "label": "Evidence",
             "path": "evidence"
         }
     ]

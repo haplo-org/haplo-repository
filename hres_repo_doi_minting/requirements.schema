@@ -5,6 +5,9 @@ feature std:configuration-data
     property: {"hres:doi:minting:doi-prefix-for-update":[]}
     property: {"hres:doi:minting:service-url":"https://mds.test.datacite.org"}
 
+group hres:group:repository-editors as RepositoryEditors
+
 label hres:label:repository-item as RepositoryItem
+label hres:label:accepted-into-repository as AcceptedIntoRepository
 
 attribute hres:attribute:digital-object-identifier-doi as DOI

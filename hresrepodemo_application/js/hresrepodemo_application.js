@@ -34,8 +34,15 @@ P.element("home", "Home page introduction",
                 authors: _.map(authors, function(a) { return O.ref(a); }),
                 repositoryEditors: _.compact(_.map(O.group(Group.RepositoryEditors).loadAllMembers(), function(user) {
                     return user.ref;
+                })),
+                dataPreparers: _.compact(_.map(O.group(Group.DataPreparers).loadAllMembers(), function(user) {
+                    return user.ref;
                 }))
             }
         });
     }
 );
+
+P.implementService("haplo_activity_navigation:overview:repository", function(activity, add) {
+    add(100, P.template("repository_activity_guidance").deferredRender());
+});

@@ -1,0 +1,140 @@
+{
+    "specificationVersion": 0,
+    "formId": "search_by_fields",
+    "formTitle": "Search by fields",
+    "elements": [
+        {
+            "type": "text",
+            "path": "title",
+            "class": "haplo-repository-search-by-fields-long",
+            "label": "Title"
+        },
+        {
+            "type": "text",
+            "path": "author",
+            "class": "haplo-repository-search-by-fields-long",
+            "label": "Author"
+        },
+        {
+            "type": "choice",
+            "path": "type",
+            "choices": "types",
+            "label": "Type of repository item",
+            "prompt": "(everything in the repository)"
+        },
+        {
+            "type": "section",
+            "template": "oforms:join",
+            "label": "Year",
+            "elements": [
+                {
+                    "type": "number",
+                    "class": "haplo-repository-search-by-fields-year",
+                    "path": "yearFrom"
+                },
+                {
+                    "type": "static",
+                    "html": "<span class='haplo-repo-search-by-fields-year-row-text'> to </span>"
+                },
+                {
+                    "type": "number",
+                    "class": "haplo-repository-search-by-fields-year",
+                    "path": "yearTo"
+                }
+            ]
+        },
+        {
+            "type": "section",
+            "class": "haplo-repository-search-by-fields-other",
+            "label": "Other fields",
+            "elements": [
+
+                {
+                    "type": "section",
+                    "template": "oforms:join",
+                    "elements": [
+                        {
+                            "type": "choice",
+                            "path": "f0.field",
+                            "choices": "fields",
+                            "prompt": "Any field"
+                        },
+                        {
+                            "type": "text",
+                            "path": "f0.value"
+                        }
+                    ]
+                },
+
+                {
+                    "type": "section",
+                    "template": "oforms:join",
+                    "elements": [
+                        {
+                            "type": "choice",
+                            "path": "f1.field",
+                            "choices": "fields",
+                            "prompt": "Any field"
+                        },
+                        {
+                            "type": "text",
+                            "path": "f1.value"
+                        }
+                    ]
+                },
+
+                {
+                    "type": "section",
+                    "template": "oforms:join",
+                    "elements": [
+                        {
+                            "type": "choice",
+                            "path": "f2.field",
+                            "choices": "fields",
+                            "prompt": "Any field"
+                        },
+                        {
+                            "type": "text",
+                            "path": "f2.value"
+                        }
+                    ]
+                },
+
+                {
+                    "type": "section",
+                    "template": "oforms:join",
+                    "elements": [
+                        {
+                            "type": "choice",
+                            "path": "f3.field",
+                            "choices": "fields",
+                            "prompt": "Any field"
+                        },
+                        {
+                            "type": "text",
+                            "path": "f3.value"
+                        }
+                    ]
+                },
+
+                {
+                    "type": "section",
+                    "template": "oforms:join",
+                    "elements": [
+                        {
+                            "type": "choice",
+                            "path": "f4.field",
+                            "choices": "fields",
+                            "prompt": "Any field"
+                        },
+                        {
+                            "type": "text",
+                            "path": "f4.value"
+                        }
+                    ]
+                }
+
+            ]
+        }
+    ]
+}

@@ -5,19 +5,34 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.         */
 
 
-var CanDownloadAllRepositoryFiles = O.action("hres_repo_access_level_policy:bypass_restrictions").
-    title("Download All Repository Files").
-    allow("group", Group.RepositoryEditors).
-    allow("group", Group.DataPreparers);
+P.implementService("haplo:user_roles_permissions:setup", function(setup) {
+    setup.groupRestrictionLabel(Group.RepositoryEditors, Label.LiftAllFileControls);
+    
+    setup.groupRestrictionLabel(Group.DataPreparers, Label.LiftAllFileControls);
+    setup.groupRestrictionLabel(Group.DataPreparers, Label.ViewPreparedFiles);
+});
 
-var filesAreRestrictedFor = 
-    P.filesAreRestrictedFor = function(user, object) {
-    if(O.serviceMaybe("hres:repository:is_repository_item", object) &&
-        !(user.allowed(CanDownloadAllRepositoryFiles) ||
-          O.serviceMaybe("hres:repository:is_author", user, object))) {
-        return filesAreRestricted(object);
+P.hook("hObjectAttributeRestrictionLabelsForUser", function(response, user, object) {
+    if(O.serviceMaybe("hres:repository:is_author", user, object)) {
+        response.userLabelsForObject.add(Label.LiftAllFileControls);
     }
-};
+});
+
+P.implementService("hres:repository:access_requests:has_restricted_files_for_user", function(user, object) {
+    if(object.labels.includes(Label.ControlAllFiles)) {
+        var hasControlledFiles = false;
+        object.every(function(v,d,q) {
+            if(O.typecode(v) === O.T_IDENTIFIER_FILE) {
+                if(!object.canReadAttribute(d, user)) { 
+                    hasControlledFiles = true;
+                }
+            }
+        });
+        return hasControlledFiles;
+    }
+});
+
+// -------------------------------------------------------------------
 
 var filesAreRestricted = function(object) {
     var access = object.first(A.AccessLevel);
@@ -30,30 +45,37 @@ var filesAreRestricted = function(object) {
     }
 };
 
-P.hook('hPreFileDownload', function(response, file, transform) {
-    var allow = false;
-    var objects = O.query().identifier(file.identifier()).execute();
-    if(objects.length) {
-        _.each(objects, function(object) {
-            if(allow) { return; }
-            if(!filesAreRestrictedFor(O.currentUser, object)) {
-                allow = true;
-            }
-        });
-    } else {
-        allow = true; // not attached to any object?
+var modifyLabelChangesForRepoObject = function(object, changes) {
+    // These are removed from the 'remove' list when they are later 'added'
+    changes.remove([
+        Label.ControlAllFiles
+    ]);
+    // TODO: Currently is only a "whole object" access level - this should be extended to 
+    // apply a restriction per attribute when the schema is extended
+    if(filesAreRestricted(object)) {
+        changes.add(Label.ControlAllFiles);
     }
-    if(!allow) {
-        response.redirectPath = O.serviceMaybe("hres_repo_access_level_policy:access_redirect_path", file) ||
-            "/do/hres-repo-acess-level-policy/denied";
+};
+
+// TODO: Remove this workaround as soon as possible.
+// Authors shouldn't have general relabel permissions, but *can* change the access level of files
+P.hook("hPostObjectChange", function(response, object, operation, previous) {
+    if(operation === "create" || operation === "update") {
+        if(O.service("hres:repository:is_repository_item", object)) {
+            var shouldBeRestricted = filesAreRestricted(object);
+            var isRestricted = object.labels.includes(Label.ControlAllFiles);
+            if(shouldBeRestricted !== isRestricted) {
+                O.background.run("hres_repo_access_level_policy:TEMP_relabel_on_change", {ref: object.ref.toString()});
+            }
+        }
     }
 });
 
-P.respond("GET", "/do/hres-repo-acess-level-policy/denied", [
-], function(E) {
-    E.render({
-        pageTitle: "File access restricted",
-        message: "Access to this file is restricted. Please contact the repository administrators to request "+
-            "a copy of the file"
-    }, "std:ui:notice");
+P.backgroundCallback("TEMP_relabel_on_change", function(data) {
+    O.withoutPermissionEnforcement(function() {
+        var object = O.ref(data.ref).load();
+        var changes = O.labelChanges();
+        modifyLabelChangesForRepoObject(object, changes);
+        object.relabel(changes);
+    });
 });

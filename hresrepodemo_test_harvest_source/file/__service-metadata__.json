@@ -1,0 +1,7 @@
+{
+    "hres:repository:harvest-source:test-example": {
+        "statements": [
+            "hres:repository:harvest-source"
+        ]
+    }
+}

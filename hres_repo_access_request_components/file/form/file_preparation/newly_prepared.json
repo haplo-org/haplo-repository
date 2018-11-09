@@ -1,0 +1,34 @@
+{
+    "specificationVersion": 0,
+    "formId": "newlyPrepared",
+    "formTitle": "Newly prepared files",
+    "elements": [
+        {
+            "type": "file-repeating-section",
+            "path": "files",
+            "heading": "Newly prepared files",
+            "allowAdd": false,
+            "allowDelete": false,
+            "elements": [{"type": "file" , "path":"."}]
+        },
+        {
+            "type": "choice",
+            "path": "audience",
+            "label": "Suitable for",
+            "choices": "audiences",
+            "required": true
+        },
+        {
+            "type": "choice",
+            "path": "action",
+            "label": "Preparation action taken",
+            "choices": "actions",
+            "required": true
+        },
+        {
+            "type": "text",
+            "path": "comments",
+            "label": "Comment"
+        }
+    ]
+}

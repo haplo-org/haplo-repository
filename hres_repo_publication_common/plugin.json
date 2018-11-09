@@ -7,10 +7,16 @@
   "apiVersion": 4,
   "depend": [
       "std_web_publisher",
-      "hres_bibliographic_reference"
+      "hres_author_citation_value",
+      "hres_bibliographic_reference",
+      "hres_repository",
+      "hres_schema"
     ],
   "use": ["std:web-publisher"],
   "load": [
-      "js/repo_publication_common.js"
+      "js/repo_publication_common.js",
+      "js/repo_publication_templates.js",
+      "js/repo_publication_search_by_fields.js",
+      "js/repo_publication_meta_tags.js"
     ]
 }

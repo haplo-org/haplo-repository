@@ -1,14 +1,22 @@
 
-std:plugin:resources("edit-embargoes.js" "reference-links.js" "reference-links.css")
+std:plugin:resources("edit-embargoes.js" "reference-links.js" "embargoes.css")
 
 pageTitle("Embargo: " std:object:title(output))
 backLink(std:object:url(output))
 
 std:object(displayObject)
 
-<form method="POST"> std:form:token()
+<br>
+
+if(publicationDate) {
+    <p><b> "Default embargo start date: " </b> std:date(publicationDate) </p>
+} else {
+    <p><i> "No publication date entered. Embargoes will be set to start today unless a custom start date is chosen." </i></p>
+}
+
+<form method="POST" data-used-attributes=usedAttributes class="edit-embargoes-form"> std:form:token()
     std:form(form)
-    <p><input type="submit" value="Submit"></p>
+    <p><input type="submit" value="Apply embargoes"></p>
 </form>
 
 <div class="sherpa-links" data-ref=output></div>

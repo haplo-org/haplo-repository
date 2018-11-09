@@ -5,57 +5,52 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.         */
 
 
-var embargoForm = P.form('embargo', 'form/embargo.json');
+P.db.table('embargoDocuments', {
+    object: { type: 'ref' },
+    document: { type: 'text' }
+});
 
-var getEarliestPublicationDate = function(object) {
-    var publicationDates = _.map(object.every(A.PublicationDate), function(d) { return d.start; });
-    return new XDate(_.reduce(publicationDates, function(memo, d) {
-        return (memo < d) ? memo : d;
-    }));
-};
-
-var getEmbargoDocument = function(object) {
-    var document = {};
-    var row = P.getEmbargoData(object);
-    if(row) {
-        document = {
-            start: "<p>"+new XDate(row.start).toString('dd MMM yyyy')+"</p>",
-            customStart: row.startIsEdited ? new XDate(row.start).toString('yyyy-MM-dd') : null,
-            embargoLength: row.embargoLength ? row.embargoLength.toString() : "Indefinite",
-            licenseURL: row.licenseURL
-        };
-    } else {
-        if(object.first(A.PublicationDate)) {
-            var published = getEarliestPublicationDate(object);
-            document.start = "<p>"+published.toString("dd MMM yyyy")+"</p>";
-        } else {
-            document.start = "<p><i>No start date set. Embargo will be set to start today unless a custom start date is chosen.</i></p>";
-        }
-    }
-    return document;
-};
-
-var setEmbargo = function(object, document) {
+var saveEmbargoToDb = function(object, desc, data) {
     var start;
-    if(!!document.customStart) {
-        start = new Date(document.customStart || document.start);
+    if(!!data.customStart) {
+        start = new Date(data.customStart);
     } else if(object.first(A.PublicationDate)) {
-        start = getEarliestPublicationDate(object).toDate();
+        start = O.service("hres:repository:earliest_publication_date", object);
     } else {
         // Fallback to today
         start = new Date();
     }
+    var end;
+    if(data.embargoLength !== "Indefinite") {
+        var length = parseInt(data.embargoLength, 10);
+        end = new XDate(start).addMonths(length);
+    }
     P.db.embargoes.create({
         object: object.ref,
-        // TODO: Actual default
-        licenseURL: document.licenseURL || "DEFAULT",
+        desc: (desc === "all") ? null : parseInt(desc, 10),
+        licenseURL: data.licenseURL || null,
         start: start,
-        embargoLength: (document.embargoLength === "Indefinite") ? null : parseInt(document.embargoLength, 10),
-        startIsEdited: !!document.customStart
+        end: end || null
     }).save();
 };
 
-// TODO: Extend with service when REF is implemented.
+var saveEmbargoData = function(object, document) {
+    var oldData = P.getEmbargoData(object);
+    if(oldData) {
+        oldData.deleteAll();
+    }
+    _.each(document.embargoes, function(data) {
+        // Save blanket embargoes as a single entry, as this makes all UI easier
+        if(data.appliesTo && data.appliesTo.indexOf("all") !== -1) {
+            saveEmbargoToDb(object, "all", data);
+        } else {
+            _.each(data.appliesTo, function(desc) {
+                saveEmbargoToDb(object, desc, data);
+            });
+        }
+    });
+};
+
 var DISPLAY_ATTRIBUTES = [
     A.Type,
     A.Title,
@@ -65,6 +60,24 @@ var DISPLAY_ATTRIBUTES = [
     A.Publisher,
     A.Journal
 ];
+
+var RESTRICTED_ATTRIBUTES = [
+    A.AcceptedAuthorManuscript, A.PublishersVersion, A.File
+];
+
+var getFileChoices = function() {
+    var choices = [["all", "All"]];
+    _.each(RESTRICTED_ATTRIBUTES, function(desc) {
+        choices.push([desc.toString(), SCHEMA.getAttributeInfo(desc).name]);
+    });
+    return choices;
+};
+
+// Load and modify embargo form; can't use instance choices for multiple files
+var embargoFormJSON = JSON.parse(P.loadFile('form/embargo.json').readAsString());
+var attributesChoiceElement = _.find(embargoFormJSON.elements[0].elements, function(f) { return f.choices === "attributes"; });
+attributesChoiceElement.choices = getFileChoices();
+var embargoForm = P.form(embargoFormJSON);
 
 P.respond("GET,POST", "/do/hres-repo-embargoes/edit", [
     {pathElement:0, as:"object"}
@@ -77,8 +90,13 @@ P.respond("GET,POST", "/do/hres-repo-embargoes/edit", [
             displayObject.append(v,d,q);
         });
     });
+    var publicationDate = O.service("hres:repository:earliest_publication_date", output);
 
-    var document = getEmbargoDocument(output);
+    var document = {};
+    var existingDocumentQuery = P.db.embargoDocuments.select().where("object", "=", output.ref);
+    if(existingDocumentQuery.length) {
+        document = JSON.parse(existingDocumentQuery[0].document);
+    }
     var form = embargoForm.instance(document);
     form.choices("embargoLengths",
         ["Indefinite"].concat(_.map(_.range(1,49), function(i) { return i.toString(); }))
@@ -86,24 +104,34 @@ P.respond("GET,POST", "/do/hres-repo-embargoes/edit", [
     form.update(E.request);
 
     if(E.request.method === "POST") {
-        setEmbargo(output, document);
-        // Embargoed files should not be searchable
-        output.reindexText();
-        // TODO: Update collections
-        // TODO: Notify pattern to re-publish output if workflow has completed
+        if(existingDocumentQuery.length) {
+            existingDocumentQuery.deleteAll();
+        }
+        P.db.embargoDocuments.create({
+            object: output.ref,
+            document: JSON.stringify(document)
+        }).save();
+        saveEmbargoData(output, document);
+        P.relabelForEmbargoes(output);
         E.response.redirect(output.url());
+        return;
     }
+
+    // Get choices for display
+    var usedAttributes = _.select(RESTRICTED_ATTRIBUTES, function(d) { return !!output.first(d); });
+
     E.renderIntoSidebar({
         elements: [{
-            label: "Delete embargo",
+            label: "Delete all embargoes",
             href: "/do/hres-repo-embargoes/delete/"+output.ref,
             indicator: "standard"
         }]
     }, "std:ui:panel");
-    // TODO: Extend display via service call when REF is implemented.
     E.render({
         output: output.ref,
+        usedAttributes: usedAttributes.join(','),
         displayObject: displayObject,
+        publicationDate: publicationDate,
         form: form
     }, "edit-embargoes");
 });
@@ -115,19 +143,45 @@ P.respond("GET,POST", "/do/hres-repo-embargoes/delete", [
     
     if(E.request.method === "POST") {
         P.db.embargoes.select().where("object", "=", output.ref).deleteAll();
-        // Files show up in searches again
-        output.reindexText();
-        // TODO: Update collections
-        // TODO: Notify pattern to re-publish output if workflow has completed
+        P.db.embargoDocuments.select().where("object", "=", output.ref).deleteAll();
+        P.relabelForEmbargoes(output);
         E.response.redirect(output.url());
     }
     E.render({
-        pageTitle: "Delete embargo: "+output.title,
+        pageTitle: "Delete all embargoes: "+output.title,
         backLink: "/do/hres-repo-embargoes/edit/"+output.ref,
         backLinkText: "Cancel",
-        text: "Warning: This will unlock the files for all users.",
+        text: "Warning: This will unlock all files for all users.",
         options: [
             { label: "Delete" }
         ]
     }, "std:ui:confirm");
+});
+
+P.respond("GET,POST", "/do/hres-repo-embargoes/sherpa-information", [
+    {pathElement:0, as:"object"}
+], function(E, output) {
+    var document = {};
+    var existingDocumentQuery = P.db.embargoDocuments.select().where("object", "=", output.ref);
+    if(existingDocumentQuery.length) {
+        document = JSON.parse(existingDocumentQuery[0].document);
+    }
+
+    if(E.request.method === "POST") {
+        if(existingDocumentQuery.length) {
+            existingDocumentQuery.deleteAll();
+        }
+        P.db.embargoDocuments.create({
+            object: output.ref,
+            document: JSON.stringify(document)
+        }).save();
+        saveEmbargoData(output, document);
+        P.relabelForEmbargoes(output);
+        E.response.redirect(output.url());
+        return;
+    }
+
+    E.render({
+        output: output.ref
+    }, "sherpa-information");
 });

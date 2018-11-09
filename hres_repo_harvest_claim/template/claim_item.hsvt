@@ -1,0 +1,8 @@
+<p> 
+    if(list) {
+        "The item \"" std:object:title(object) "\" "
+    } else {
+        "This item "
+    }
+    "has been harvested from " source " for you to review"
+</p>

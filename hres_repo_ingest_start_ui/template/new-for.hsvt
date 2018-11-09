@@ -1,6 +1,10 @@
-pageTitle("New output: " researcher.title)
-backLink(std:object:url(researcher))
+pageTitle("New output" if(researcher) { ": " researcher.title })
+if(researcher){
+    backLink(std:object:url(researcher)) { "Researcher profile" }
+}
 
 within(primary)   { template:std:ui:choose() }
-<hr>
+
+unless(shouldHidePrimaryDivider) { <hr> }
+
 within(secondary) { template:std:ui:choose() }

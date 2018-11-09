@@ -5,33 +5,42 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.         */
 
 
-// Provides an OAI-PMH endpoint at /api/oai2
-
 // --------------------------------------------------------------------------
 // Default configuration, overridden in application configuration data
 // (System Management -> Configuration -> Configuration data)
 
-var SERVICE_USER_CODE = "hres:service-user:oai-pmh";
-
 // oai:results_per_page -- page size for resuilts
 var RESULT_PAGE_SIZE = O.application.config["oai:results_per_page"] || 20;
 
-// oai:identifier_base -- prefix for identifiers, ref appended. Must end with ':'
-var IDENTIFIER_BASE = O.application.config["oai:identifier_base"] || "oai:"+O.application.hostname+":";
-
-// oai:repository_attributes -- dictionary, overrides the defaults here
-var REPO_ATTRS = _.extend({
-    repositoryName: "Haplo Research Manager: Repository",
-    baseURL: O.application.url+"/api/oai2",
+var REQUIRED_REPO_ATTRIBUTES = {
     protocolVersion: "2.0",
-    adminEmail: "repository@"+O.application.hostname,
-    earliestDatestamp: "1900-01-01T00:00:00Z",
     deletedRecord: "transient",
     granularity: "YYYY-MM-DDThh:mm:ssZ"
-}, O.application.config["oai:repository_attributes"] || {});
+};
 
-// oai:debug - true to enable debug mode
-var DEBUG_MODE = !!(O.application.config["oai:debug"]);
+// --------------------------------------------------------------------------
+
+var _metadataServices;
+var metadataServices = function() {
+    if(!_metadataServices) {
+        _metadataServices = O.service("haplo:service-registry:query", [
+            "conforms-to hres:write-store-object-below-xml-cursor",
+            "hres:oai-pmh:exposed-metadata-format"
+        ]);
+    }
+    return _metadataServices;
+};
+
+var _metadataServiceForScheme;
+var metadataServiceForScheme = function(scheme) {
+    if(!_metadataServiceForScheme) {
+        _metadataServiceForScheme = {};
+        metadataServices().eachService((metadataService) => {
+            _metadataServiceForScheme[metadataService.metadata["hres:oai-pmh:metadata-prefix"]] = metadataService;
+        });
+    }
+    return _metadataServiceForScheme[scheme];
+};
 
 // --------------------------------------------------------------------------
 
@@ -44,52 +53,51 @@ var codeToSetName = function(code) {
 
 // --------------------------------------------------------------------------
 
-if(DEBUG_MODE) {
-    P.hook("hObjectDisplay", function(response, object) {
-        ensureTypeInfoGathered();
-        if(P.typeToSet.get(object.firstType())) {
-            response.buttons["*EXPORT"] = [["/do/open-archives-initiative/export/"+object.ref, "OAI Export"]];
-        }
-    });
-    P.respond("GET", "/do/open-archives-initiative/export", [
-        {pathElement:0, as:"object"},
-        {parameter:"metadataPrefix", as:"string", optional:true}
-    ], function(E, output, metadataPrefix) {
-        ensureTypeInfoGathered();
-        if(!metadataPrefix) { metadataPrefix = "oai_dc"; }
-        E.render({
-            pageTitle: "OAI2: "+output.title,
-            backLink: output.url(),
-            viewingDC: (metadataPrefix === "oai_dc"),
-            xml: O.service("hres_thirdparty_libs:generate_xml", {record:itemToXML(output,true,metadataPrefix)}, {indent:true}),
-            applicationName: O.application.name,
-            baseURL: REPO_ATTRS.baseURL
-        });
-    });
-}
+// Spec has properties:
+//   refToOAIIdentifier: function(item) { return "oai:"+hostname+":"+ref; }
+//   attributes: { ... }
+// Returns an object with a respond(E) method, which should be called in the security context
+// of a user with the required permissions.
+
+P.implementService("hres:oai-pmh:create-responder", function(spec) {
+    return new OAIPMHResponder(spec);
+});
 
 // --------------------------------------------------------------------------
 
-P.respond("GET,POST", "/api/oai2", [
-    {parameter:"verb", as:"string", optional:true}
-], function(E, verb) {
+var OAIPMHResponder = function(spec) {
+    this._refToOAIIdentifier = spec.refToOAIIdentifier;
+    this._objectToURL = spec.objectToURL || function(){};
+    this._fileToURL = spec.fileToURL || function(){};
+    this._attributes = _.extend({}, spec.attributes, REQUIRED_REPO_ATTRIBUTES);
+    this.writeXMLOptions = {
+        objectToURL: this._objectToURL,
+        fileToURL: this._fileToURL,
+        refToOAIIdentifier: this._refToOAIIdentifier
+    };
+};
+
+OAIPMHResponder.prototype.respond = function(E) {
+    var verb = E.request.parameters.verb;
     if(!verb) { verb = 'Identify'; }
 
-    var command = COMMANDS[verb];
-    var response = command ? command(E) : [];
+    ensureTypeInfoGathered();
 
-    var xmlObject = {"OAI-PMH": [
-        {_attr: {
-            "xmlns": "http://www.openarchives.org/OAI/2.0/",
-            "xmlns:xsi": "http://www.w3.org/2001/XMLSchema-instance",
-            "xsi:schemaLocation": "http://www.openarchives.org/OAI/2.0/ http://www.openarchives.org/OAI/2.0/OAI-PMH.xsd"
-        }},
-        {responseDate: (new XDate()).toString('i')},
-        {request: [{_attr:{verb:verb}}, REPO_ATTRS.baseURL]}
-    ].concat(response)};
-    E.response.body = '<?xml version="1.0" encoding="UTF-8" ?>'+O.service("hres_thirdparty_libs:generate_xml", xmlObject, {indent:true});
-    E.response.kind = 'xml';
-});
+    var xmlDocument = O.xml.document();
+    var cursor = xmlDocument.cursor().cursorWithControlCharacterPolicy("remove").
+        cursorSettingDefaultNamespace("http://www.openarchives.org/OAI/2.0/").
+        element("OAI-PMH").
+            addSchemaLocation("http://www.openarchives.org/OAI/2.0/", "http://www.openarchives.org/OAI/2.0/OAI-PMH.xsd").
+            element("responseDate").text((new XDate()).toString('i')).up().
+            element("request").attribute("verb", verb).text(this._attributes.baseURL).up();
+
+    var command = COMMANDS[verb];
+    if(command) {
+        command(this, E, cursor.cursor().element(verb));
+    }
+    if(E.response.body) { return; } // Error condition - command has set body with appropriate error message
+    E.response.body = xmlDocument;
+};
 
 // --------------------------------------------------------------------------
 
@@ -97,115 +105,95 @@ var COMMANDS = {};
 
 // --------------------------------------------------------------------------
 
-COMMANDS.Identify = function(E) {
-    var items = [];
-    _.each(REPO_ATTRS, function(value, key) {
-        var i = {};
-        i[key] = value;
-        items.push(i);
-    });
-    // Get sample identifier which works
+const IDENTIFY_ATTRIBUTE_ORDER = [
+    'repositoryName', 'baseURL', 'protocolVersion', 'adminEmail', 'earliestDatestamp', 'deletedRecord', 'granularity'
+];
+
+COMMANDS.Identify = function(responder, E, cursor) {
+    // Get object to find a sample identifier which works
     var q = O.service("hres:repository:store_query").limit(1).sortByDateAscending().execute();
 
-    items.push({
-        description: [
-            {"oai-identifier": [
-                {_attr: {
-                    "xmlns": "http://www.openarchives.org/OAI/2.0/oai-identifier",
-                    "xmlns:xsi": "http://www.w3.org/2001/XMLSchema-instance",
-                    "xsi:schemaLocation": "http://www.openarchives.org/OAI/2.0/oai-identifier http://www.openarchives.org/OAI/2.0/oai-identifier.xsd"
-                }},
-                {scheme: "oai"},
-                {repositoryIdentifier: O.application.hostname},
-                {delimiter: ":"},
-                {sampleIdentifier: IDENTIFIER_BASE+(q.length ? q[0].ref : '80000')}
-            ]}
-        ]
-    });
-    return [{Identify:items}];
-};
-
-// --------------------------------------------------------------------------
-
-COMMANDS.ListMetadataFormats = function(E) {
-    return [{
-        ListMetadataFormats: [
-            {
-                metadataFormat: [
-                    {metadataPrefix: "oai_dc"},
-                    {schema: "http://www.openarchives.org/OAI/2.0/oai_dc.xsd"},
-                    {metadataNamespace: "http://www.openarchives.org/OAI/2.0/oai_dc/"}
-                ]
-            },
-            {
-                metadataFormat: [
-                    {metadataPrefix: "oai_datacite"},
-                    {schema: "http://schema.datacite.org/oai/oai-1.0/oai.xsd"},
-                    {metadataNamespace: "http://schema.datacite.org/oai/oai-1.0/"}
-                ]
-            }
-        ]
-    }];
-};
-
-// --------------------------------------------------------------------------
-
-COMMANDS.ListSets = function(E) {
-    var sets = [];
-    O.service("hres:repository:each_repository_item_type", function(type) {
-        var info = SCHEMA.getTypeInfo(type);
-        if(info) {
-            sets.push({
-                set: [
-                    {setSpec: codeToSetName(info.code)},
-                    {setName: info.name}
-                ]
-            });
+    _.each(IDENTIFY_ATTRIBUTE_ORDER, function(key) {
+        var value = responder._attributes[key];
+        if(value) {
+            cursor.element(key).text(value).up();
         }
     });
-    return [{ListSets:sets}];
+
+    var identifier = cursor.
+        element("description").
+            cursorSettingDefaultNamespace("http://www.openarchives.org/OAI/2.0/oai-identifier").
+            element("oai-identifier").
+                addSchemaLocation("http://www.openarchives.org/OAI/2.0/oai-identifier", "http://www.openarchives.org/OAI/2.0/oai-identifier.xsd").
+                element("scheme").text("oai").up().
+                element("repositoryIdentifier").text(O.application.hostname).up().
+                element("delimiter").text(":").up().
+                element("sampleIdentifier").text(responder._refToOAIIdentifier(q.length ? q[0].ref : O.ref('80000'))).up();
 };
 
 // --------------------------------------------------------------------------
 
-COMMANDS.ListIdentifiers = function(E) {
-    var items = [];
-    var resume = queryForCommand(E, false, function(info) {
-        items.push(info[0]);
+COMMANDS.ListMetadataFormats = function(responder, E, cursor) {
+    metadataServices().eachService((metadataService) => {
+        var m = metadataService.metadata;
+        cursor.
+            element("metadataFormat").
+                element("metadataPrefix").text(m["hres:oai-pmh:metadata-prefix"]).up().
+                element("schema").text(m["hres:oai-pmh:schema"]).up().
+                element("metadataNamespace").text(m["hres:oai-pmh:metadata-namespace"]).up().
+            up();
     });
-    if(resume) { items.push(resume); }
-    return [{ListIdentifiers:items}];
 };
 
 // --------------------------------------------------------------------------
 
-COMMANDS.ListRecords = function(E) {
-    var items = [];
-    var resume = queryForCommand(E, true, function(info) {
-        items.push({record: info});
+COMMANDS.ListSets = function(responder, E, cursor) {
+    O.service("hres:repository:each_repository_item_type", function(type) {
+        var info = SCHEMA.getTypeInfo(type);
+        cursor.
+            element("set").
+                element("setSpec").text(codeToSetName(info.code)).up().
+                element("setName").text(info.name).up().
+            up();
     });
-    if(resume) { items.push(resume); }
-    return [{ListRecords:items}];
 };
 
 // --------------------------------------------------------------------------
 
-COMMANDS.GetRecord = function(E) {
-    ensureTypeInfoGathered();
+COMMANDS.ListIdentifiers = function(responder, E, cursor) {
+    var resume = queryForCommand(E, function(item, metadataPrefix) {
+        writeItemHeader(responder, cursor, item);
+    });
+    if(resume) { resume(cursor); }
+};
+
+// --------------------------------------------------------------------------
+
+COMMANDS.ListRecords = function(responder, E, cursor) {
+    var resume = queryForCommand(E, function(item, metadataPrefix) {
+        cursor.element("record");
+        writeItemHeader(responder, cursor, item);
+        writeItemRecord(responder, cursor, item, metadataPrefix);
+        cursor.up();
+    });
+    if(resume) { resume(cursor); }
+};
+
+// --------------------------------------------------------------------------
+
+COMMANDS.GetRecord = function(responder, E, cursor) {
+    var metadataPrefix = E.request.parameters.metadataPrefix || 'oai_dc';
     var e = (E.request.parameters.identifier || '').split(':');
     var refStr = e[e.length-1];
     var ref = O.ref(refStr);
     if(!ref) { O.stop("Bad ref"); }
     // Load object, doing our own security on top of the service user's permissions
-    return O.impersonating(O.serviceUser(SERVICE_USER_CODE), function() {
-        var object = ref.load();
-        if(!(O.service("hres:repository:is_repository_item", object))) { O.stop("Not permitted"); }
-        return [
-            {GetRecord: [
-                {record: itemToXML(ref.load(), true, E.request.parameters.metadataPrefix)}
-            ]}
-        ];
-    });
+    var object = ref.load();
+    if(!(O.service("hres:repository:is_repository_item", object))) { O.stop("Not permitted"); }
+    cursor.element("record");
+    writeItemHeader(responder, cursor, object);
+    writeItemRecord(responder, cursor, object, metadataPrefix);
+    cursor.up();
 };
 
 // --------------------------------------------------------------------------
@@ -224,10 +212,43 @@ var ensureTypeInfoGathered = function() {
     });
 };
 
-var queryForCommand = function(E, fullRecord, consume) {
-    ensureTypeInfoGathered();
+var datesFromParams = function(params) {
+    var dates = {};
+    ["from", "until"].forEach((d) => {
+        if(!(d in params)) { return; }
+        var xd = new XDate(params[d]);
+        if(!xd.valid()) {
+            dates.error = true;
+            return;
+        }
+        dates[d] = xd.toDate();
+    });
+    return dates;
+};
 
+var RESUMPTION_COMPONENTS = ['__offset','metadataPrefix','from','until','set'];
+
+var queryForCommand = function(E, consume) {
+    // Resumption token may contain parameters, as they don't have to be passed in for further requests
     var params = E.request.parameters;
+    var startIndex = 0;
+    if(params.resumptionToken) {
+        var parts = params.resumptionToken.split(',');
+        params = {};        // ignore params from the URL, as resumptionToken is an 'exclusive' parameter
+        for(var l = 0; l < RESUMPTION_COMPONENTS.length; ++l) {
+            if(parts[l]) {
+                params[RESUMPTION_COMPONENTS[l]] = decodeURIComponent(parts[l]);
+            }
+        }
+        if(params.__offset) {
+            var o = parseInt(params.__offset,10);
+            if(!isNaN(o)) { startIndex = o; }
+        }
+    }
+
+    // Metadata prefix already obtained from resumption token, URL params. But default to DC otherwise.
+    params.metadataPrefix = params.metadataPrefix || 'oai_dc';
+
     var query = O.query();
 
     // Relevant types
@@ -240,64 +261,76 @@ var queryForCommand = function(E, fullRecord, consume) {
     }
     // Date range?
     if("from" in params || "until" in params) {
-        var from  = ("from" in params)  ? new XDate(params.from)  : undefined;
-        var until = ("until" in params) ? new XDate(params.until) : undefined;
-        query.dateRange(from, until, A.Date);
+        var dates = datesFromParams(params);
+        if(dates.error) {
+            E.response.body = 'A date in the request was badly formed.';
+            E.response.kind = 'text';
+            E.response.statusCode = HTTP.BAD_REQUEST;
+            return;
+        }
+        query.dateRange(dates.from, dates.until, A.Date);
     }
     // Requested as ANONYMOUS, so need to (carefully) query with the service user
     // Include the itemToXML() in this block as it will need to read items
-    O.impersonating(O.serviceUser(SERVICE_USER_CODE), function() {
-        var items = query.setSparseResults(true).execute();
-        // Result range
-        var startIndex = ("resumptionToken" in params) ? parseInt(params.resumptionToken,10) : 0;
-        var endIndex = startIndex + RESULT_PAGE_SIZE;
-        for(var i = startIndex; i < endIndex; ++i) {
-            if(i >= items.length) { break; }
-            var item = items[i];
-            consume(itemToXML(item, fullRecord, params.metadataPrefix));
+    var resume;
+    var items = query.setSparseResults(true).execute();
+    // Result range
+    var endIndex = startIndex + RESULT_PAGE_SIZE;
+    for(var i = startIndex; i < endIndex; ++i) {
+        if(i >= items.length) { break; }
+        consume(items[i], params.metadataPrefix);
+    }
+    // Resumption token needed?
+    if(i < items.length) {
+        var tokenParts = [''+endIndex],
+            newParams = Object.create(params);
+        newParams.__offset = ''+endIndex;
+        for(var p = 1 /* not offset */; p < RESUMPTION_COMPONENTS.length; ++p) {
+            var v = newParams[RESUMPTION_COMPONENTS[p]];
+            tokenParts[p] = v ? encodeURIComponent(v) : '';
         }
-        // Resumption token needed?
-        if(i < items.length) {
-            return {resumptionToken:[
-                {_attr: {
-                    expirationDate: (new XDate()).addHours(2).toString("i"),
-                    completeListSize: items.length,
-                    cursor: startIndex
-                }},
-                ""+endIndex
-            ]};
-        }
-    });
+        var resumptionToken = tokenParts.join(','); // , is encoded by encodeURIComponent(), so safe to use as separator
+        resume = function(cursor) {
+            cursor.element("resumptionToken").
+                attribute("expirationDate", (new XDate()).addHours(2).toString("i")).
+                attribute("completeListSize", items.length).
+                attribute("cursor", startIndex).
+                text(resumptionToken).
+            up();
+        };
+    }
+    return resume;
 };
 
-var itemToXML = function(item, fullRecord, metadataPrefix) {
-    // Header
-    var headerItems = [
-        {identifier: IDENTIFIER_BASE+item.ref},
-        {datestamp: (new XDate(item.lastModificationDate)).toString('yyyy-MM-dd')}
-    ];
+var writeItemHeader = function(responder, cursor, item) {
+    cursor.
+        element("header").
+            element("identifier").text(responder._refToOAIIdentifier(item.ref)).up().
+            element("datestamp").text((new XDate(item.lastModificationDate)).toString('yyyy-MM-dd')).up();
     item.everyType(function(v,d,q) {
         var name = P.typeToSet.get(v);
-        if(name) { headerItems.push({setSpec:name}); }
+        if(name) { cursor.element("setSpec").text(name).up(); }
     });
-    var header = {header:headerItems};
+    cursor.up();
+};
 
-    // Get rest of the info, if required
-    var info = [header];
-    if(fullRecord) {
-        // Metadata
-        var metadata;
-        if(metadataPrefix === "oai_dc") {
-            metadata = P.getDublinCoreMetadata(item);
-        } else if(metadataPrefix === "oai_datacite") {
-            metadata = {
-                metadata: [O.service("hres:repository:datacite:to-xml-metadata", item)]
-            };
-        } else {
-            throw new Error("Bad metadataPrefix requested.");
-        }
-        info.push(metadata);
+var writeItemRecord = function(responder, cursor, item, metadataPrefix) {
+    var metadataService = metadataServiceForScheme(metadataPrefix);
+    if(!metadataService) {
+        throw new Error("Bad metadataPrefix requested.");
     }
-
-    return info;
+    var m = metadataService.metadata;
+    cursor.
+        element("metadata").
+        addNamespace(
+            m["hres:oai-pmh:metadata-namespace"],
+            m["hres:oai-pmh:metadata-prefix"],
+            m["hres:oai-pmh:schema"]
+        );
+    var c = cursor.
+        cursorWithNamespace(m["hres:oai-pmh:metadata-namespace"]).
+        element(m["hres:oai-pmh:root-element"]);
+    var restrictedItem = item.restrictedCopy(O.currentUser);
+    O.service(metadataService.name, restrictedItem, c, responder.writeXMLOptions);
+    cursor.up();
 };

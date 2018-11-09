@@ -1,0 +1,6 @@
+pageTitle("Article processing charge (APC): " output.title)
+backLink(outputUrl)
+
+<form method="POST"> std:form:token()
+  render(deferredForm)
+</form>

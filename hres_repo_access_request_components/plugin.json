@@ -1,0 +1,25 @@
+{
+  "pluginName": "hres_repo_access_request_components",
+  "pluginAuthor": "Haplo Services",
+  "pluginVersion": 1,
+  "displayName": "Haplo RM Repository Access Request Components",
+  "displayDescription": "Reusable components for client implementations of access requests",
+  "installSecret": "c1a92490b98d131a375f866a03501722a2e28e71",
+  "apiVersion": 4,
+  "loadPriority": 5000,
+  "privilegesRequired": ["pDatabase"],
+  "depend": [
+      "std_workflow",
+      "hres_file_mediated_access"
+    ],
+  "use": [
+      "std:workflow"
+    ],
+  "load": [
+      "js/hres_repo_access_request_components.js",
+      "js/arc_start.js",
+      "js/arc_web_publisher.js",
+      "js/arc_file_management.js"
+    ],
+  "respond": ["/do/hres-repo-access-request"]
+}

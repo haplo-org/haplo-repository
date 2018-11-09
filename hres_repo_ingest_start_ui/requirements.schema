@@ -1,6 +1,8 @@
 
 group hres:group:repository-editors as RepositoryEditors
 
+label hres:label:repository-item as RepositoryItem
+
 attribute dc:attribute:author as Author
 
 attribute hres:attribute:editors-citation as EditorsCitation

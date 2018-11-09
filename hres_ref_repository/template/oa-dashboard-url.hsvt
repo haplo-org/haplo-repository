@@ -1,0 +1,8 @@
+url(
+    "/do/hres-repo-open-access/repository-items/"
+    oaType
+    "/ref-unit/"
+    ref
+    ?
+    year=year
+)

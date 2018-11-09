@@ -1,7 +1,19 @@
 <div class="media">
     <div class="media-body">
+        if(file) {
+            <div class="haplo-search-thumbnail">
+                std:web-publisher:object:link(object) {
+                    std:web-publisher:file:thumbnail(file)
+                }
+            </div>
+        }
         std:web-publisher:object:link(object) {
             <h4 class="media-heading"> object.title </h4>
+        }
+        if(typeInfo.name) {
+            <div class="haplo-search-type">
+                <span> typeInfo.name </span>
+            </div>
         }
         if(citation) { <p> render(citation) </p> }
     </div>

@@ -1,0 +1,5 @@
+pageTitle(year)
+
+each(items) {
+  <p> std:web-publisher:object:link(.) </p>
+}

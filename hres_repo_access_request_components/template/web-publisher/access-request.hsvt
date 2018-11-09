@@ -1,0 +1,9 @@
+
+<h2> title ": " std:object:title(ref) </h2>
+    
+<div class="panel well">
+    <form method="POST" class="haplo-plugin-form">
+        std:form(form)
+        <p><input type="submit" value="Send request"></p>
+    </form>
+</div>

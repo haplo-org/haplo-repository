@@ -1,0 +1,14 @@
+
+pageTitle("Add as Portfolio")
+backLink("/do/tray")
+
+<p> "Create a portfolio record containing the following research items:" </p>
+<hr>
+
+each(contents) {
+    std:object(. "linkedheading")
+}
+
+<form method="POST"> std:form:token()
+    <input type="submit" value="Confirm">
+</form>

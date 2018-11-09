@@ -10,16 +10,27 @@ var canSubmitForIngest = function(user, item) {
         !P.Ingest.instanceForRef(item.ref));
 };
 
-P.implementService("std:action_panel:repository_item", function(display, builder) {
-    if(canSubmitForIngest(O.currentUser, display.object)) {
-        builder.panel(100).link("default", "/do/hres-repo-ingest-workflow/start/"+display.object.ref.toString(), "Deposit item");
+var fillPanel = function(display, builder) {
+    let object = display.object;
+    let depositPanel = builder.panel(100);
+    if(!P.Ingest.instanceForRef(object.ref) && !object.labels.includes(Label.AcceptedIntoRepository)) {
+        depositPanel.status(1, "Draft record - not yet available in public repository");
     }
+    if(canSubmitForIngest(O.currentUser, object)) {
+            depositPanel.link("default", "/do/hres-repo-ingest-workflow/start/"+object.ref.toString(), "Deposit item");
+    }
+};
+P.implementService("std:action_panel:output", function(display, builder) {
+    fillPanel(display, builder);
+});
+P.implementService("std:action_panel:research_data", function(display, builder) {
+    fillPanel(display, builder);
 });
 
 P.implementService("hres_ref_repository:get_publish_url", function(output) {
     var M = O.service("std:workflow:for_ref", "hres_repo_ingest_workflow:in", output.ref);
     var outputUrl;
-    if(M.state === "wait_editor") {
+    if(M && M.state === "wait_editor") {
         outputUrl = M.transitionUrl("publish");
     }
     return outputUrl;
@@ -37,11 +48,13 @@ P.respond("GET,POST", "/do/hres-repo-ingest-workflow/start", [
         E.response.redirect(item.url());
     }
     E.render({
-        item: item,
         guidanceNote: guidanceNote.deferredRender(),
-        text: "Would you like to submit this item for acceptance into the repository?",
-        backLinkText: "Save for later",
-        options: [{label:"Submit"}]
+        confirmPanel: {
+            text: "Would you like to submit this item for acceptance into the repository?",
+            backLinkText: "Return to item",
+            backLink: item.url(),
+            options: [{label:"Submit"}]
+        }
     });
 });
 
@@ -49,7 +62,9 @@ P.respond("GET,POST", "/do/hres-repo-ingest-workflow/start", [
 
 P.hook('hPostObjectEdit', function(response, object, previous) {
     // Create operation
-    if(!previous) {
+    if(!previous &&
+        O.serviceMaybe("hres:repository:is_repository_item", object) &&
+        canSubmitForIngest(O.currentUser, object)) {
         response.redirectPath = "/do/hres-repo-ingest-workflow/start/"+object.ref;
     }
 });

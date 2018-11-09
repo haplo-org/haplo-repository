@@ -8,3 +8,7 @@ label hres:label:rejected-from-repository as RejectedFromRepository
 label hres:label:repository-item as RepositoryItem
 
 attribute hres:attribute:editor as Editor
+
+attribute hres:attribute:publication-process-dates as PublicationProcessDates
+
+qualifier hres:qualifier:deposited as Deposited

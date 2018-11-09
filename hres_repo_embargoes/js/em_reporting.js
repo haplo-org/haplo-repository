@@ -7,6 +7,7 @@
 
 P.implementService("std:reporting:collection:repository_items:setup", function(collection) {
     collection.
+        fact("emStart",         "date",         "Start").
         fact("emEnd",           "date",         "End").
         fact("emLength",        "text",         "Length").
         fact("emUnderEmbargo",  "boolean",      "Under embargo").
@@ -15,53 +16,52 @@ P.implementService("std:reporting:collection:repository_items:setup", function(c
         statistic({
             name:"emHasEmbargoCount",
             description:"Items with embargos",
-            filter: function(select) {
+            filter(select) {
                 select.where("emHasEmbargo", "=", true);
             },
             aggregate:"COUNT"
         }).
         
-        filter("emHasEmbargo", function(select) {
+        filter("emHasEmbargo", (select) => {
             select.where("emHasEmbargo", "=", true);
         });
 });
 
 P.implementService("std:reporting:collection:repository_items:get_facts_for_object", function(object, row) {
-    var data = P.getEmbargoData(object);
-    row.emHasEmbargo = !!data;
-    if(data) {
-        row.emEnd = data.getEndDate() || null;
-        row.emLength = data.embargoLength ? data.embargoLength+" months" : "Indefinite";
-        row.emUnderEmbargo = data.isUnderEmbargo();
+    let embargoes = P.getEmbargoData(object);
+    row.emHasEmbargo = !!embargoes;
+    if(embargoes) {
+        row.emStart = _.chain(embargoes).
+            map((embargo) => embargo.start).
+            min().
+            value();
+        if(_.every(embargoes, (e) => !!e.end)) {
+            row.emEnd = _.chain(embargoes).
+                map((embargo) => embargo.end).
+                max().
+                value();
+        }
+        if(_.every(embargoes, (e) => !!e.getLengthInMonths())) {
+            let l = _.chain(embargoes).
+                map(embargo => embargo.getLengthInMonths()).
+                max().
+                value();
+            row.emLength = l+" months";
+        } else {
+            row.emLength = "Indefinite";
+        }
+        row.emUnderEmbargo = _.chain(embargoes).
+            map((embargo) => embargo.isActive()).
+            any().
+            value();
     }
 });
 
-P.implementService("std:action_panel:activity:menu:repository", function(display, builder) {
-    if(O.currentUser.allowed(P.CanEditEmbargoes)) {
-        var panel = builder.panel(500).
-            link(600, "/do/hres-repo-embargoes/embargo-overview", "Embargo overview");
-    }
-});
-
-P.respond("GET,POST", "/do/hres-repo-embargoes/embargo-overview", [
-], function(E) {
-    P.CanEditEmbargoes.enforce();
-    P.reporting.dashboard(E, {
-        kind:"list",
-        collection:"repository_items",
-        name:"embargo_overview",
-        title:"Embargo overview",
-        filter:"emHasEmbargo"
-    }).
-        summaryStatistic(0, "emHasEmbargoCount").
+P.implementService("std:reporting:dashboard:ref_embargoes:setup", function(dashboard) {
+    dashboard.
+        filter((select) => select.where("emHasEmbargo", "=", true)).
         order(["emEnd", "descending"]).
-        columns(1, [
-            {fact:"ref", heading:"Item", link:true}
-        ]).
-        columns(200, [
-            "emLength",
-            "emEnd",
-            "emUnderEmbargo"
-        ]).
-        respond();
+        columns(250, [
+            "emLength"
+        ]);
 });

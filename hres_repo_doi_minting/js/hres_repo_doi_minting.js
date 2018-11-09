@@ -4,19 +4,6 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.         */
 
-/*
-    To set up:
-
-        * Set "hres:doi:minting:safety-application-hostname" in config data to the app's hostname.
-        * Set "hres:doi:minting:doi-prefix" in config data to the DOI prefix used for this app. End with a / or .
-              DataCite's test prefix is 10.5072, append /hostname/ or something when testing.
-        * Set "hres:doi:minting:doi-prefix-for-update" to an array of DOI prefixes which should be updated when
-              the object changes. (It's not just the copy of the prefix for new DOIs, as we want to be able
-              to update DOIs imported from other repositories.)
-        * Check "hres:doi:minting:service-url" is set to the URL of the metadata store you want to mint DOIs.
-        * Create an "HTTP / Basic" keychain credential named "DOI Minting" containing the DataCite username and password.
-*/
-
 var CREDENTIAL_NAME = 'DOI Minting';
 
 // --------------------------------------------------------------------------
@@ -44,6 +31,15 @@ P.hook('hPostObjectChange', function(response, object, operation, previous) {
             console.log("Running background job to mint or update DOI for", object);
             O.background.run("hres_repo_doi_minting:mint", {ref:object.ref.toString()});
         }
+    }
+});
+
+// This rule can't currently be expressed with restrictions
+P.hook('hPreObjectEdit', function(response, object, isTemplate) {
+    if(O.service("hres:repository:is_repository_item", object) &&
+        object.labels.includes(Label.AcceptedIntoRepository) &&
+        !O.currentUser.isMemberOf(Group.RepositoryEditors)) {
+        response.readOnlyAttributes = (response.readOnlyAttributes || []).concat(A.DOI);
     }
 });
 
@@ -84,15 +80,13 @@ var mintDOIForObject = function(object) {
     }
 
     // Step 1: Send metadata to Metadata Store.
-    var metadata = O.service("hres:repository:datacite:to-xml-metadata", objectWithDOI);
-
-    var metadataBody = '<?xml version="1.0" encoding="UTF-8" ?>'+
-        O.service("hres_thirdparty_libs:generate_xml", metadata, {indent:true});
-    if(O.PLUGIN_DEBUGGING_ENABLED) { console.log(metadataBody); }
+    var xml = O.xml.document();
+    O.service("hres:repository:datacite:write-store-object-below-xml-cursor", objectWithDOI, xml.cursor());
+    if(O.PLUGIN_DEBUGGING_ENABLED) { console.log(xml.toString()); }
 
     O.httpClient(O.application.config["hres:doi:minting:service-url"]+"/metadata").
         method("POST").
-        body("application/xml;charset=UTF-8", metadataBody).
+        body("application/xml;charset=UTF-8", xml.toString()).
         useCredentialsFromKeychain(CREDENTIAL_NAME).
         request(HaveSetMetadata, {
             doi: doi,
@@ -116,7 +110,7 @@ var HaveSetMetadata = P.callback("have-set-metadata", function(data, client, res
             });
     } else {
         console.log("Failed to set DOI metadata: ", response.errorMessage);
-        console.log("Response body", response.body.readAsString("UTF-8"));
+        console.log("Response body:", response.body ? response.body.readAsString("UTF-8") : "No body returned");
     }
 
 });
@@ -133,6 +127,6 @@ var Minted = P.callback("minted", function(data, client, response) {
         }
     } else {
         console.log("Failed to mint DOI: ", response.errorMessage);
-        console.log("Response body", response.body.readAsString("UTF-8"));
+        console.log("Response body:", response.body ? response.body.readAsString("UTF-8") : "No body returned");
     }
 });

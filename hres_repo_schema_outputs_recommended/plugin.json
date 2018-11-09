@@ -8,9 +8,12 @@
   "apiVersion": 4,
   "depend": [
       "hres_repo_schema_recommended",
-      "hres_repo_schema_outputs"
+      "hres_repo_schema_outputs",
+      "hres_author_citation_value"
     ],
   "load": [
+      "js/hres_repo_schema_outputs_recommended.js",
+      "js/outputs_recommended_test_data.js"
     ],
   "respond": []
 }

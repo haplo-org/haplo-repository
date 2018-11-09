@@ -1,0 +1,4 @@
+pageTitle("Article processing charge (APC): " output.title)
+backLink(outputUrl)
+
+render(ui.deferredDocument)

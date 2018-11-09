@@ -1,0 +1,9 @@
+
+pageTitle("New from " data.doi)
+
+<div style="background:#eee;padding:6px 12px;border-radius:3px;margin-bottom:16px">
+  <div> "Where authors are researchers at this institution, use the lookup fields to link to their records." </div>
+  <div style="text-align:right"> <a href=doiUrl target="_blank" rel="noopener"> data.doi </a> <span style="color:#888"> " (opens in new window)" </span> </div>
+</div>
+
+template:std:new_object_editor()

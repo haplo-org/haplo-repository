@@ -1,0 +1,17 @@
+{
+  "pluginName": "hres_repo_ethos",
+  "pluginAuthor": "Haplo Repository",
+  "pluginVersion": 1,
+  "displayName": "Repository EThOS metadata format",
+  "displayDescription": "Exposes repository Thesis data in the EThOS uketd_dc format",
+  "apiVersion": 4,
+  "depend": [
+      "hres_repository",
+      "hres_author_citation_value",
+      "hres_schema"
+    ],
+  "load": [
+      "js/hres_repo_ethos.js"
+    ],
+  "respond": ["/do/hres-repo-ethos"]
+}

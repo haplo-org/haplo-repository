@@ -1,0 +1,11 @@
+
+attribute dc:attribute:date as Date
+attribute dc:attribute:publisher as Publisher
+
+attribute hres:attribute:abstract as Abstract
+attribute hres:attribute:authors-citation as AuthorsCitation
+attribute hres:attribute:editor as Editor
+attribute hres:attribute:keywords as Keywords
+attribute hres:attribute:license as License
+
+OPTIONAL attribute hres:attribute:digital-object-identifier-doi as DOI

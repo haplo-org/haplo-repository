@@ -4,7 +4,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.         */
 
-P.implementService("hres_repository:test_data:pre_project_save", function(generator, repositoryItem) {
+P.implementService("hres_repository:test_data:pre_item_save", function(generator, repositoryItem) {
     var funderDistribution = [
         0.8, generator.randomListMember(generator.funders),
         0.9, generator.randomProjectName(),
@@ -24,13 +24,38 @@ P.implementService("hres_repository:test_data:pre_project_save", function(genera
     appendDateWithProbablility(0.2, repositoryItem, A.PublicationProcessDates, Q.Deposited);
 });
 
+// -------- Reporting ---------------------------------
+
 P.implementService("std:reporting:collection:repository_items:setup", function(collection) {
-    collection.fact("publicationAcceptanceDate", "date", "Publication accepted");
+    collection.fact("publicationAcceptanceDate", "date", "Accepted");
 });
 
 P.implementService("std:reporting:collection:repository_items:get_facts_for_object", function(object, row) {
     var publicationAcceptance = object.first(A.PublicationProcessDates, Q.Accepted);
     if(publicationAcceptance) {
         row.publicationAcceptanceDate = publicationAcceptance.start;
+    }
+});
+
+P.implementService("std:reporting:dashboard:ref_non_compliance:setup", function(dashboard) {
+    dashboard.columns(15, ["publicationAcceptanceDate"]);
+});
+
+P.implementService("std:reporting:dashboard:repository_overview:setup_export", function(dashboard) {
+    dashboard.columns(95, ["publicationAcceptanceDate"]);
+});
+P.implementService("std:reporting:dashboard:outputs_in_progress:setup_export", function(dashboard) {
+    dashboard.columns(160, ["publicationAcceptanceDate"]);
+});
+
+// ---------- Permissions ------------------------------
+
+P.implementService("haplo:user_roles_permissions:setup", function(setup) {
+    setup.groupRestrictionLabel(Group.RepositoryEditors, Label.ViewPreparedFiles);
+});
+
+P.hook('hObjectAttributeRestrictionLabelsForUser', function(response, user, object) {
+    if(O.serviceMaybe("hres:repository:is_author", user, object)) {
+        response.userLabelsForObject.add(Label.ViewPreparedFiles);
     }
 });

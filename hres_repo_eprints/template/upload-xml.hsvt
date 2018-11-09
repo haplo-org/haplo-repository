@@ -1,0 +1,16 @@
+<form method="POST"> std:form:token()
+    std:form(form)
+    <input type="submit" value="Upload and begin import">
+</form>
+
+<br>
+
+if(status) { <p><b>"Import status: " status</b></p> }
+
+if(logUrl) { <p><a href=logUrl>"Last log of activity"</a></p> }
+if(recentLogs) {
+    <h2>"Recent logs"</h2>
+    each(recentLogs) {
+        <p><a href=["/do/hres-repo-eprints/log/" id]>"Log " id</a> if(filename) { " ("filename")" } </p>
+    }
+}

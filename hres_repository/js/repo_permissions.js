@@ -19,11 +19,32 @@ P.implementService("haplo:descriptive_object_labelling:setup", function(type) {
             labelWith: [A.Author, A.Editor]
         });
     });
+    
+    type(T.Project, {
+        labels: [Label.ActivityRepository]
+    });
+    
+    type(T.Journal, {
+        labels: [Label.ActivityRepository]
+    });
+    
+    type(T.Publisher, {
+        labels: [Label.ActivityRepository]
+    });
+
+    type(T.ExternalEvent, {
+        labels: [Label.ActivityRepository],
+        labelWithCreator: true
+    });
 });
 
 P.implementService("haplo:user_roles_permissions:setup", function(setup) {
     // Accepted outputs can be read by everyone
     setup.groupPermission(Group.Everyone, "read", Label.AcceptedIntoRepository);
+    setup.groupPermission(Group.Everyone, "read", T.Journal);
+    setup.groupPermission(Group.Everyone, "create", T.ExternalEvent);
+    setup.groupPermission(Group.Everyone, "read", T.ExternalEvent);
+    setup.groupPermission(Group.RepositoryEditors, "read-write", T.ExternalEvent);
     // Outputs editors can read and write at all times
     setup.groupPermission(Group.RepositoryEditors, "read-write", Label.RepositoryItem);
     // Setup role & permission which allows users to add outputs and then edit
@@ -32,7 +53,8 @@ P.implementService("haplo:user_roles_permissions:setup", function(setup) {
     // will only ever be one label for this permission.
     setup.groupPermission(Group.Everyone, "create", Label.RepositoryItem);
     setup.groupPersonalRole(Group.Everyone, "Is: Repository Item Author");
-    setup.roleOversightPermission("Is: Repository Item Author", "read-write", [Label.RepositoryItem]);
+    setup.roleOversightPermission("Is: Repository Item Author", "read-edit", [Label.RepositoryItem]);
+    setup.roleOversightPermission("Is: Repository Item Author", "read-edit", [T.ExternalEvent]);
 });
 
 P.hook("hUserLabelStatements", function(response, user) {
@@ -49,11 +71,12 @@ P.hook("hUserLabelStatements", function(response, user) {
     }
 });
 
-// This rule can't currently be expressed with restrictions
-P.hook('hPreObjectEdit', function(response, object, isTemplate) {
-    if(O.service("hres:repository:is_repository_item", object) &&
-        object.labels.includes(Label.AcceptedIntoRepository) &&
-        !O.currentUser.isMemberOf(Group.RepositoryEditors)) {
-        response.readOnlyAttributes = (response.readOnlyAttributes || []).concat(A.DigitalObjectIdentifierDOI);
+// TODO: Remove this when haplo_user_roles_permissions has been extended to check changes to object labels
+// Implemented to allow people with edit permissions to edit authors and other label-controlling attributes.
+P.hook("hOperationAllowOnObject", function(response, user, object, operation) {
+    if((operation === "relabel") &&
+        O.serviceMaybe("hres:repository:is_repository_item", object) &&
+        object.labels.includes(user.ref)) {
+        response.allow = true;
     }
 });

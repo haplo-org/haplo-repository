@@ -1,0 +1,22 @@
+
+pageTitle("Eprints import/export mapping")
+backLink("/")
+
+std:ui:notice("Where more complex logic is required, a different tag and/or attribute may be used, and the below mapping does not reflect these exceptions.")
+
+<table>
+    <tr>
+        <th>"Tag"</th>
+        <th>"Attribute"</th>
+        <th>"Import"</th>
+        <th>"Export"</th>
+    </tr>
+    each(mappings) {
+        <tr>
+            <td>tag</td>
+            <td>if(database) { "Database" } else { attributeTitle }</td>
+            <td>if(import) { "&#x2713;" }</td>
+            <td>if(export) { "&#x2713;" }</td>
+        </tr>
+    }
+</table>

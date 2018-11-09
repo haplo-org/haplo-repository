@@ -1,7 +1,8 @@
 pageTitle("Deposit item")
-backLink(std:object:url(item))
 
 render(guidanceNote)
 <p> "&nbsp;" </p>
 
-template:std:ui:confirm()
+within(confirmPanel) {
+    template:std:ui:confirm()
+}

@@ -1,0 +1,16 @@
+{
+  "pluginName": "hres_oai_pmh_standalone",
+  "pluginAuthor": "Haplo Services",
+  "pluginVersion": 1,
+  "displayName": "OAI-PMH (Standalone)",
+  "displayDescription": "Implement an OAI-PMH server for the entire repository at /api/oai2",
+  "apiVersion": 4,
+  "depend": [
+      "hres_oai_pmh"
+    ],
+  "load": [
+      "js/hres_oai_pmh_standalone.js"
+    ],
+  "respond": ["/api/oai2"],
+  "allowAnonymousRequests": true
+}

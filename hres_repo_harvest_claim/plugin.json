@@ -1,0 +1,21 @@
+{
+  "pluginName": "hres_repo_harvest_claim",
+  "pluginAuthor": "Haplo Services",
+  "pluginVersion": 1,
+  "displayName": "Haplo Repository Harvest Claim",
+  "displayDescription": "Policy and task management for claiming harvested items",
+  "installSecret": "fb6582dbb44c1b381eb0a3590404b4e7bcc96648",
+  "apiVersion": 4,
+  "loadPriority": 5000,
+  "depend": [
+      "hres_repo_harvest_sources",
+      "hres_repository",
+      "hres_author_citation_value",
+      "hres_schema"
+    ],
+  "load": [
+      "js/hres_repo_harvest_claim.js",
+      "js/hc_handlers.js"
+    ],
+  "respond": ["/do/hres-repo-harvest-claim"]
+}

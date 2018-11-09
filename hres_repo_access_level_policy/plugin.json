@@ -6,13 +6,13 @@
   "displayDescription": "Access level policy supoort for Haplo RM Repository applications",
   "installSecret": "d288f49502ffb557a39018f9c99d79176214bf97",
   "apiVersion": 4,
+  "privilegesRequired": ["pBackgroundProcessing"],
   "depend": [
       "hres_repo_schema_recommended"
     ],
   "load": [
       "js/hres_repo_access_level_policy.js",
-      "js/alp_test_data.js",
-      "js/alp_web_publisher.js"
+      "js/alp_test_data.js"
     ],
   "respond": ["/do/hres-repo-acess-level-policy"]
 }

@@ -1,0 +1,24 @@
+
+std:web-publisher:template("hres:repository:common:ui:panel") {
+  each(files) {
+    <div class="haplo-repository-file-attribute">
+      unless(first) { <hr> }
+      if(info.printableName) {
+        <p class="haplo-repository-file-attribute-name">
+          <i class="icon-lock"></i>
+            if(only) {
+              if(info.printableNameOnlyFileAttribute) {
+                info.printableNameOnlyFileAttribute
+              } else {
+                info.printableName
+              }
+            } else {
+              info.printableName
+            }
+          <br>
+          render(display) 
+        </p>
+      }
+    </div>
+  }
+} heading { "Restricted files" }

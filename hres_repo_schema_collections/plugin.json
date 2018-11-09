@@ -1,0 +1,19 @@
+{
+  "pluginName": "hres_repo_schema_collections",
+  "pluginAuthor": "Haplo Services",
+  "pluginVersion": 1,
+  "displayName": "Haplo RM Repository Collections",
+  "displayDescription": "Schema for repository collections",
+  "installSecret": "ba214a8ee49e2593a808e989f8694997a5f4243c",
+  "apiVersion": 4,
+  "privilegesRequired": ["pBackgroundProcessing"],
+  "loadPriority": 5000,
+  "depend": [
+      "hres_repository",
+      "hres_author_citation_value"
+    ],
+  "load": [
+      "js/hres_repo_schema_collections.js"
+    ],
+  "respond": ["/do/hres-repo-collections"]
+}

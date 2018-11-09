@@ -1,12 +1,47 @@
 
+
 attribute dc:attribute:date as Date
 attribute dc:attribute:publisher as Publisher
+attribute dc:attribute:author as Author
 
 attribute hres:attribute:abstract as Abstract
 attribute hres:attribute:authors-citation as AuthorsCitation
 attribute hres:attribute:digital-object-identifier-doi as DOI
 attribute hres:attribute:editor as Editor
-attribute hres:attribute:keywords as Keywords
-attribute hres:attribute:license as License
-
+attribute hres:attribute:editors-citation as EditorsCitation
 attribute hres:attribute:orcid as ORCID
+attribute hres:attribute:research-institute as ResearchInstitute
+
+type hres:type:person:external-researcher as ExternalResearcher
+
+# ------ Default repository schema ---------------
+# These are OPTIONAL, to allow applications to implement different schemas if required
+
+OPTIONAL qualifier hres:qualifier:accepted as Accepted
+
+OPTIONAL attribute hres:attribute:keywords as Keywords
+OPTIONAL attribute hres:attribute:license as License
+OPTIONAL attribute hres:attribute:publication-process-dates as PublicationProcessDates
+
+OPTIONAL type hres:type:organisation:publisher as Publisher
+OPTIONAL type std:type:book as Book
+OPTIONAL type hres:type:book-chapter as BookChapter
+OPTIONAL type hres:type:conference-item as ConferenceItem
+OPTIONAL type hres:type:journal-article as JournalArticle
+
+OPTIONAL type hres:type:artefact as Artefact
+OPTIONAL type hres:type:audio as Audio
+OPTIONAL type hres:type:composition as Composition
+OPTIONAL type hres:type:dataset as Dataset
+OPTIONAL type hres:type:design as Design
+OPTIONAL type hres:type:devices-and-products as DevicesAndProducts
+OPTIONAL type hres:type:digital-or-visual-media as DigitalOrVisualMedia
+OPTIONAL type hres:type:exhibition as Exhibition
+OPTIONAL type hres:type:online-educational-resource as OnlineEducationalResource
+OPTIONAL type hres:type:patent as Patent
+OPTIONAL type hres:type:performance as Performance
+OPTIONAL type hres:type:report as Report
+OPTIONAL type hres:type:software as Software
+OPTIONAL type hres:type:thesis as Thesis
+OPTIONAL type hres:type:video as Video
+OPTIONAL type hres:type:website as Website

@@ -1,0 +1,22 @@
+{
+    "specificationVersion": 0,
+    "formId": "apc_payment_details_form",
+    "formTitle": "Payment details",
+    "elements": [
+        {
+            "type": "choice",
+            "label": "Fund APC is paid from",
+            "path": "fund",
+            "choices": [
+                "RCUK",
+                "Other/BBSRC",
+                "Institutional" 
+            ]
+        },
+        {
+            "type": "date",
+            "label": "APC payment date",
+            "path": "paymentDate"
+        }
+    ]
+}

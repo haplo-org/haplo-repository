@@ -1,0 +1,24 @@
+{
+  "pluginName": "hres_repo_doi_retrieve_for_new_object",
+  "pluginAuthor": "Haplo Services",
+  "pluginVersion": 1,
+  "displayName": "DOI: Retrieve for New Object",
+  "displayDescription": "Retrieve metadata from DOI and propose for new object",
+  "apiVersion": 4,
+  "privilegesRequired": ["pHTTPClient"],
+  "depend": [
+      "haplo_respond_after_http_request",
+      "hres_thirdparty_libs",
+      "hres_digital_object_identifier",
+      "hres_author_citation_value",
+      "hres_repo_datacite"
+    ],
+  "use": [
+      "haplo:respond-after-http-request",
+      "hres:doi"
+    ],
+  "load": [
+      "js/hres_repo_doi_retrieve_for_new_object.js"
+    ],
+  "respond": ["/do/hres-repo-doi-retrieve-for-new-object"]
+}

@@ -19,14 +19,14 @@
       "hres_thirdparty_libs"
     ],
   "load": [
+    "js/em_reference_links.js",
       "js/hres_repo_embargoes.js",
       "js/em_forms.js",
-      "js/em_reference_links.js",
       "js/em_reporting.js",
       "js/em_web_publisher.js"
     ],
   "respond": [
-      "/do/hres-repo-embargoes",
-      "/api/hres-repo-embargoes"
+      "/api/hres-repo-embargoes",
+      "/do/hres-repo-embargoes"
     ]
 }

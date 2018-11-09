@@ -7,6 +7,7 @@
   "apiVersion": 4,
   "depend": [
       "std_web_publisher",
+      "hres_repo_publication_common",
       "hres_bibliographic_reference"
     ],
   "use": ["std:web-publisher"],

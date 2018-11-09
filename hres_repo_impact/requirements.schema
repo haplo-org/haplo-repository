@@ -1,0 +1,192 @@
+
+# --------- Labels ---------------------------------
+
+label hres:label:activity-repository as ActivityRepository
+
+# --------- Groups ---------------------------------
+
+group std:group:everyone as Everyone
+group hres:group:repository-editors as RepositoryEditors
+group hres:group:public-repository-access as PublicRepositoryAccess
+
+# -------- Types -----------------------------------
+
+type hres:type:impact as Impact
+    title: Impact
+    search-name: impact
+    attribute dc:attribute:title
+    attribute hres:attribute:impact-type
+    attribute hres:attribute:impact-dates
+    attribute hres:attribute:abstract
+    attribute hres:attribute:impact-description
+    REMOVE attribute haplo:attribute:description
+    attribute hres:attribute:impact-stage
+    attribute hres:aliased-attribute:participants
+    attribute hres:attribute:reach
+    attribute hres:attribute:underpinning-research
+    render-icon: E238,2,f
+    render-category 2
+    default-subtype hres:type:impact
+    create-position never
+
+type hres:type:impact-evidence as ImpactEvidence
+    title: Impact evidence
+    search-name: impact-evidence
+    attribute dc:attribute:title
+    attribute dc:attribute:date
+    attribute hres:attribute:abstract
+    attribute std:attribute:url
+    attribute std:attribute:file
+    attribute hres:attribute:impact
+    render-icon: E226,2,f E238,0,d
+    render-category 3
+    default-subtype hres:type:impact-evidence
+    create-position never
+
+# -------- Attributes -------------------------
+
+attribute hres:attribute:impact as Impact
+    title: Impact
+    search-name: impact
+    data-type link
+    linked-type hres:type:impact
+
+attribute hres:attribute:impact-type as ImpactType
+    title: Impact type
+    search-name: impact-type
+    data-type link
+    linked-type hres:type:impact-type
+    ui-options dropdown
+
+attribute hres:attribute:impact-stage as ImpactStage
+    title: Impact stage
+    search-name: impact-stage
+    data-type link
+    linked-type hres:type:impact-stage
+    ui-options dropdown
+
+attribute hres:attribute:impact-dates as ImpactDates
+    title: Dates
+    search-name: dates
+    qualifier std:qualifier:null
+    data-type datetime
+    ui-options M,n,y,n,n
+
+attribute hres:attribute:impact-description as ImpactDescription
+    title: Description
+    search-name: impact-description
+    qualifier std:qualifier:null
+    REMOVE data-type text-document
+    data-type text-paragraph
+
+attribute hres:attribute:reach as Reach
+    title: Reach
+    search-name: reach
+    qualifier std:qualifier:null
+    data-type text-paragraph
+
+attribute dc:attribute:title as Title
+
+attribute hres:attribute:abstract as Abstract
+attribute hres:attribute:researcher as Researcher
+
+attribute hres:attribute:underpinning-research as UnderpinningResearch
+    title: Underpinning research
+    search-name: underpinning-research
+    data-type link
+    linked-type std:type:project
+    linked-type std:type:book
+    linked-type hres:type:artefact
+    linked-type hres:type:audio
+    linked-type hres:type:book-chapter
+    linked-type hres:type:composition
+    linked-type hres:type:conference-item
+    linked-type hres:type:design
+    linked-type hres:type:devices-and-products
+    linked-type hres:type:digital-or-visual-media
+    linked-type hres:type:exhibition
+    linked-type hres:type:journal-article
+    linked-type hres:type:online-educational-resource
+    linked-type hres:type:other
+    linked-type hres:type:patent
+    linked-type hres:type:performance
+    linked-type hres:type:report
+    linked-type hres:type:software
+    linked-type hres:type:thesis
+    linked-type hres:type:video
+    linked-type hres:type:website
+    linked-type hres:type:dataset
+
+# -------- Aliased Attributes -----------------
+
+aliased-attribute hres:aliased-attribute:participants as Participants
+    title: Participants
+    search-name: participants
+    alias-of hres:attribute:researcher
+    on-qualifier std:qualifier:null
+
+# -------- Lists ------------------------------
+
+type hres:type:impact-type as ImpactType
+    title: Impact type
+    search-name: impact-type
+    apply-schema-template hres:template-type:list
+    behaviour classification
+    render-type classification
+    label-base: std:label:concept
+
+object hres:list:impact-type:political
+    type hres:type:impact-type
+    title: Political
+
+object hres:list:impact-type:health
+    type hres:type:impact-type
+    title: Health
+
+object hres:list:impact-type:technological
+    type hres:type:impact-type
+    title: Technological
+
+object hres:list:impact-type:economic
+    type hres:type:impact-type
+    title: Economic
+
+object hres:list:impact-type:legal
+    type hres:type:impact-type
+    title: Legal
+
+object hres:list:impact-type:cultural
+    type hres:type:impact-type
+    title: Cultural
+
+object hres:list:impact-type:societal
+    type hres:type:impact-type
+    title: Societal
+
+object hres:list:impact-type:environmental
+    type hres:type:impact-type
+    title: Environmental
+
+type hres:type:impact-stage as ImpactStage
+    title: Impact stage
+    search-name: impact-stage
+    apply-schema-template hres:template-type:list
+    behaviour classification
+    render-type classification
+    label-base: std:label:concept
+
+object hres:list:impact-stage:planning
+    type hres:type:impact-stage
+    title: Planning
+
+object hres:list:impact-stage:in-progress
+    type hres:type:impact-stage
+    title: In progress
+
+object hres:list:impact-stage:awaiting-evidence
+    type hres:type:impact-stage
+    title: Occurred - awaiting evidence
+
+object hres:list:impact-stage:complete
+    type hres:type:impact-stage
+    title: Complete

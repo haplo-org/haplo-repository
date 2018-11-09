@@ -1,0 +1,11 @@
+
+backLink(std:object:url(item))
+
+std:object(item "linkedheading")
+
+each(sections) {
+    render(deferred)
+}
+
+render(timeline)
+

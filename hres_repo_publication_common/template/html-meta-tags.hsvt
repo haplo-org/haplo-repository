@@ -1,0 +1,8 @@
+"\n\n" // Use newlines for clarity when people view source
+each(links) {
+  <link rel=rel href=href> "\n"
+}
+each(tags) {
+  <meta name=name scheme=scheme content=content> "\n"
+}
+"\n"

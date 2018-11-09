@@ -20,6 +20,7 @@
       "hres:doi"
     ],
   "load": [
-      "js/hres_repo_doi_minting.js"
+      "js/hres_repo_doi_minting.js",
+      "js/mint_test_data.js"
     ]
 }

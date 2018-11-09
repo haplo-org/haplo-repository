@@ -5,6 +5,7 @@
   "displayName": "Haplo RM Repository",
   "displayDescription": "Repository schema and display for Haplo Research Manager",
   "apiVersion": 4,
+  "loadPriority": 5600,
   "depend": [
       "std_reporting",
       "haplo_activity_navigation",

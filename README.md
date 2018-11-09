@@ -1,35 +1,19 @@
 
 # Haplo Academic Repository
 
-Plugins to the [Haplo Platform](http://haplo.org) which implement the Academic Repository module of [Haplo Research Manager](http://www.research-manager.co.uk).
+Plugins to the [Haplo Platform](https://haplo.org) which implement the [Academic Repository](https://www.haplo.com/repository) module of [Haplo Research Manager](https://www.haplo.com/research-manager).
 
+### Quickstart
 
-### Setup
+The quickest way to get started is to use the [Docker quickstart](https://haplo.org/documentation/run/docker) guide with `APPPLUGIN="hresrepodemo_application"` set in the installation configuration data.
 
-Create blank Haplo application on the server with:
+This will create a system running on the Haplo Platform with the Repository and Research Manager plugins installed for an example repository application.
 
-`db/init_app.sh haplo HOSTNAME "Haplo Research Manager" minimal XXXXXX`
+Logging in, use the "Generate test data" option on the right hand side to populate the system with randomly generated data (which will take a couple of minutes). This will create users within the system, assign them to roles, and fill the system with random data for the key data types relevant to an institutional repository. 
 
-where `XXXXX` is a random integer no longer than 9 digits, and `HOSTNAME` is a valid hostname on your server.
+The homepage of the application contains instructions for the processes and features included, as well as suggested users from different roles to impersonate.
 
-Log in as a SUPPORT user using the developer portal application on your development server.
-
-Auth your server with the [Haplo Plugin Tool](http://docs.haplo.org/dev/tool/plugin), by running:
-	
-`haplo-plugin auth HOSTNAME`
-
-locally on your machine, from this directory.
-
-Push all plugins with:
-
-`haplo-plugin -p hresrepodemo_application`
-
-Follow the links on the right of the home page to populate the system with some test data (requires administrative privileges).
-
-To use the example workflow and reporting dashboards, add users to the Research Data Managers group via **System mangement -> Groups -> Research Data Managers -> Members of this group -> Edit**. This will give those users the ability to approve datasets via the example Ingest Approval workflow.
-
-Users added to the Classification Editors group can edit taxonomies.
-
+An example public interface to the repository is also provided, linked from the homepage, as an illustration of the ways Haplo repositories can publish information held and managed internally to the external world.
 
 ### License
 

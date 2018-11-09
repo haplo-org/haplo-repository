@@ -3,31 +3,51 @@ group hres:group:repository-editors as RepositoryEditors
 
 # ---------------------------------------------------------------------------
 
-schema-template hres:template-type:repository-item
-
-# ---------------------------------------------------------------------------
-
 qualifier hres:qualifier:accepted as Accepted
 
 # ---------------------------------------------------------------------------
 
 attribute dc:attribute:author as Author
+attribute dc:attribute:date as Date
 
 attribute std:attribute:file as File
 attribute std:attribute:isbn as ISBN
 attribute std:attribute:url as WebAddressUrl
 
 attribute hres:attribute:accepted-author-manuscript as AcceptedAuthorManuscript
+attribute hres:attribute:authors-citation as AuthorsCitation
+attribute hres:attribute:digital-object-identifier-doi as DOI
+attribute hres:attribute:editors-citation as EditorsCitation
 attribute hres:attribute:funder as Funder
 attribute hres:attribute:issn as ISSN
 attribute hres:attribute:license as License
+attribute hres:attribute:orcid as ORCID
 attribute hres:attribute:publication-dates as PublicationDates
 attribute hres:attribute:publication-process-dates as PublicationProcessDates
 attribute hres:attribute:published-file as PublishersVersion
 
 # ---------------------------------------------------------------------------
 
+type std:type:book as Book
+
+type hres:type:artefact as Artefact
+type hres:type:audio as Audio
 type hres:type:book-chapter as BookChapter
+type hres:type:conference-item as ConferenceItem
 type hres:type:conference-item:conference-paper as ConferencePaper
-type hres:type:license as License
+type hres:type:composition as Composition
+type hres:type:dataset as Dataset
+type hres:type:design as Design
+type hres:type:devices-and-products as DevicesAndProducts
+type hres:type:digital-or-visual-media as DigitalOrVisualMedia
+type hres:type:exhibition as Exhibition
 type hres:type:journal-article as JournalArticle
+type hres:type:license as License
+type hres:type:online-educational-resource as OnlineEducationalResource
+type hres:type:patent as Patent
+type hres:type:performance as Performance
+type hres:type:report as Report
+type hres:type:software as Software
+type hres:type:thesis as Thesis
+type hres:type:video as Video
+type hres:type:website as Website

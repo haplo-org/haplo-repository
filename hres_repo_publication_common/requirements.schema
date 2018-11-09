@@ -2,5 +2,32 @@
 label hres:label:accepted-into-repository as AcceptedIntoRepository
 
 type std:type:person as Person
+type hres:type:person:researcher as Researcher
 
 attribute hres:attribute:research-institute as ResearchInstitute
+
+attribute dc:attribute:date as Date
+attribute dc:attribute:publisher as Publisher
+
+attribute dc:attribute:author as Author
+attribute hres:attribute:authors-citation as AuthorsCitation
+
+attribute hres:attribute:editor as Editor
+attribute hres:attribute:editors-citation as EditorsCitation
+
+attribute hres:attribute:research-interests as ResearchInterests
+attribute hres:attribute:supervision-interests as SupervisionInterests
+
+attribute std:attribute:job-title as JobTitle
+attribute std:attribute:event as Event
+
+attribute dc:attribute:date as Date
+
+OPTIONAL attribute hres:attribute:orcid as ORCID
+OPTIONAL attribute hres:attribute:contributors as Contributors
+attribute hres:attribute:abstract as Abstract
+attribute hres:attribute:journal as Journal
+attribute hres:attribute:journal-citation as JournalCitation
+attribute hres:attribute:keywords as Keywords
+attribute hres:attribute:page-range as PageRange
+

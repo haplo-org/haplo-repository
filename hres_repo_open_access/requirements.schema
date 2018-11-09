@@ -35,12 +35,6 @@ type hres:type:open-access as OpenAccess
     search-name: open access
     apply-schema-template hres:template-type:list
 
-object hres:list:open-access:not-open-access
-    type hres:type:open-access
-    title: Published as non-open access 
-object hres:list:open-access:green
-    type hres:type:open-access
-    title: Published as green open access
 object hres:list:open-access:gold
     type hres:type:open-access
     title: Published as ‘gold’ (paid) open access

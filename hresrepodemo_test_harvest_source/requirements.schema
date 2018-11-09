@@ -1,0 +1,8 @@
+
+group std:group:administrators as Administrators
+
+attribute dc:attribute:author as Author
+attribute hres:attribute:abstract as Abstract
+attribute hres:attribute:authors-citation as AuthorsCitation
+
+type hres:type:person:researcher as Researcher

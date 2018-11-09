@@ -1,0 +1,18 @@
+{
+  "pluginName": "hres_repo_irus_uk",
+  "pluginAuthor": "Haplo Services",
+  "pluginVersion": 1,
+  "displayName": "Haplo IRUS-UK integration",
+  "displayDescription": "Implementation of IRUS-UK and IRUSdata-UK statistics gathering for Haplo Repositories",
+  "installSecret": "375e5eff8fb82c44d852b9496ef77b06f6699132",
+  "apiVersion": 4,
+  "privilegesRequired": ["pHTTPClient"],
+  "depend": [
+      "std_web_publisher",
+      "hres_oai_pmh"
+    ],
+  "load": [
+      "js/hres_repo_irus_uk.js"
+    ],
+  "respond": []
+}

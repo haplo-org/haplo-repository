@@ -25,7 +25,7 @@
     ],
   "load": [
       "js/hres_ref_repository.js",
-      "js/ref_test_data.js",
+      "js/ref_permissions.js",
       "js/ref_workflow.js",
       "js/ref_exceptions.js",
       "js/ref_requirements.js",

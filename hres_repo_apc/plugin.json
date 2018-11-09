@@ -1,0 +1,31 @@
+{
+  "pluginName": "hres_repo_apc",
+  "pluginAuthor": "Haplo Services",
+  "pluginVersion": 1,
+  "displayName": "Haplo RM APC",
+  "displayDescription": "APC information support for Haplo Research Manager repositories",
+  "installSecret": "6c99a255d417bac091054cf2210db6fccd2f1edc",
+  "apiVersion": 4,
+  "privilegesRequired": ["pDatabase"],
+  "use": [
+      "std:reporting",
+      "std:document_store",
+      "hres:schema:entities"
+    ],
+  "depend": [
+    "std_reporting",
+    "hres_repo_open_access",
+    "std_action_panel",
+    "hres_repository",
+    "hres_schema",
+    "hres_repo_schema_recommended",
+    "hres_schema_projects",
+    "hres_digital_object_identifier"
+  ],
+  "load": [
+      "js/hres_repo_apc.js",
+      "js/apc_reporting.js",
+      "js/apc_jisc_spreadsheet.js"
+    ],
+  "respond": ["/do/hres-repo-apc"]
+}

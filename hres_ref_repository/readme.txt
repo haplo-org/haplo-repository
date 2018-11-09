@@ -21,10 +21,10 @@ This is done here by:
 
 This is available through @P.getFirstFileDeposit(output)@
 
-2) REF Unit of Assessment objects should have a Ref Panel object as their parent. This is used to calculate whether the embargo (if present) is too long.
+2) REF Unit of Assessment objects should have a REF Panel object as their parent. This is used to calculate whether the embargo (if present) is too long.
 
 3) The object is audited for the required metadata.
 
-As well as providing an interface to reguster REFG exceptions during the deposit workflow. 
+As well as providing an interface to reguster REF exceptions during the deposit workflow. 
 
 Note that the metadata requirements can be satisfied at any time before the audit in 2021.

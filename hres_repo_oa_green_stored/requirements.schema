@@ -1,0 +1,13 @@
+
+type hres:type:conference-item as ConferenceItem
+type hres:type:journal-article as JournalArticle
+
+attribute hres:attribute:open-access as OpenAccess
+
+object hres:list:open-access:not-open-access
+    type hres:type:open-access
+    title: Published as non-open access 
+object hres:list:open-access:green
+    type hres:type:open-access
+    title: Published as green open access
+

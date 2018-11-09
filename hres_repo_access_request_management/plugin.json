@@ -1,0 +1,16 @@
+{
+  "pluginName": "hres_repo_access_request_management",
+  "pluginAuthor": "Haplo Services",
+  "pluginVersion": 1,
+  "displayName": "Haplo RM Repository Access Request Management",
+  "displayDescription": "Management UI for access requests",
+  "installSecret": "766f85582cd74a04b0172495256b9a8e2dbbaaa9",
+  "apiVersion": 4,
+  "depend": [
+      "std_workflow"
+    ],
+  "load": [
+      "js/hres_repo_access_request_management.js"
+    ],
+  "respond": ["/do/hres-repo-access-request-management"]
+}

@@ -1,0 +1,20 @@
+{
+  "pluginName": "hres_repo_impact_factor",
+  "pluginAuthor": "Haplo Services",
+  "pluginVersion": 1,
+  "displayName": "Haplo RM Repository Impact Factors",
+  "displayDescription": "Reporting on impact factors",
+  "installSecret": "d29d1c771a0f74e7a4aa0ea75b26cdf81a5804e9",
+  "apiVersion": 4,
+  "use": [
+      "std:reporting"
+    ],
+  "depend": [
+      "std_reporting",
+      "hres_repository"
+  ],
+  "load": [
+      "js/hres_repo_impact_factor.js"
+    ],
+  "respond": ["/do/hres-repo-impact-factor"]
+}

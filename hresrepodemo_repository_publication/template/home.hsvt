@@ -1,0 +1,54 @@
+
+pageTitle("Welcome")
+
+<h2> "Welcome to Example Repository" </h2>
+<p class="lead">"This repository is a demonstration of the Haplo Repository for research outputs."</p>
+<p>"The researchers and outputs listed here are fictitious and for demonstration purposes only."</p>
+
+std:web-publisher:block("below") {
+  <div class="panel panel-primary">
+    <div class="panel-heading">
+      <h3 class="panel-title"><a href="/staff">"Browse by Researcher"</a></h3>
+    </div>
+    <div class="panel-body">
+      "Browse the list of Researchers with outputs in Example Repository."
+    </div>
+  </div>
+  <div class="panel panel-primary">
+    <div class="panel-heading">
+      <h3 class="panel-title"><a href="/repository/search">"Search the repository"</a></h3>
+    </div>
+    <div class="panel-body">
+      "Search the repository for outputs matching your chosen query."
+    </div>
+  </div>
+  <div class="panel panel-primary">
+    <div class="panel-heading">
+      <h3 class="panel-title"><a href="/departments/">"Browse by Subject"</a></h3>
+    </div>
+    <div class="panel-body">
+      "View outputs filtered by Faculty and Department."
+    </div>
+  </div>
+  <div class="panel panel-primary">
+    <div class="panel-heading">
+      <h3 class="panel-title"><a href="/year">"Browse by year"</a></h3>
+    </div>
+    <div class="panel-body">
+      "View outputs by year of publication."
+    </div>
+  </div>
+  <div class="panel panel-primary">
+    <div class="panel-heading">
+      <h3 class="panel-title"><a href="https://www.research-manager.co.uk/">"Haplo Research Manager"</a></h3>
+    </div>
+    <div class="panel-body">
+      "Find out more about Haplo Research Manager."
+    </div>
+  </div>
+  <div class="panel">
+    <div class="panel-body">
+      std:web-publisher:page-part:render("hres:oai-pmh:declare-support")
+    </div>
+  </div>
+}

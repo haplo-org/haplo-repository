@@ -1,7 +1,0 @@
-
-pageTitle("Welcome")
-
-        <h2> "Welcome to Example Repository" </h2>
-        <p class="lead">"This repository is a demonstration of the Haplo Repository for research outputs."</p>
-        <p>"The researchers and outputs listed here are fictitious and for demonstration purposes only."</p>
-

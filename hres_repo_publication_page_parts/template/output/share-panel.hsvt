@@ -1,0 +1,18 @@
+
+<div class="haplo-repository-social-list">
+    <div class="haplo-repository-social-list-header">
+        "Share this"
+    </div>
+    <a href=[twitter.baseUrl twitter.body]>
+        <div class="haplo-repository-social-list-set">
+            <span class="icon-twitter"></span>
+            <div class="haplo-repository-social-list-set-label">"Tweet"</div>
+        </div>
+    </a>
+    <a href=["mailto:?subject=" email.subject "&body=" email.body]>
+        <div class="haplo-repository-social-list-set">
+            <span class="icon-envelope"></span>
+            <div class="haplo-repository-social-list-set-label">"Email"</div>
+        </div>
+    </a>
+</div>

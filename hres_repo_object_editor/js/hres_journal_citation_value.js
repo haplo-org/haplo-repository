@@ -6,7 +6,7 @@
 
 
 // TODO: Refactor this out of the editor plugin
-P.implementTextType("hres:journal_citation", "Journal citation", {
+var createJournalCitation = P.implementTextType("hres:journal_citation", "Journal citation", {
     string: function(value) {
         var s = _.compact([
                 value.volume,
@@ -28,4 +28,21 @@ P.implementTextType("hres:journal_citation", "Journal citation", {
     $setupEditorPlugin: function(value) {
         P.template("include_repo_editor_plugin").render();   // hack to include client side support
     }
+});
+
+// --------------------------------------------------------------------------
+
+P.implementService("hres:journal_citation:append_citation_to_object", function(mutableObject, desc, qual, spec) {
+    var citation;
+    if("volume" in spec) {
+        citation = createJournalCitation(spec);
+    } else {
+        throw new Error("Invalid specification passed to hres:journal_citation:append_citation_to_object");
+    }
+
+    mutableObject.append(citation, desc, qual);
+});
+
+P.implementService("hres:journal_citation:create", function(spec) {
+    return createJournalCitation(spec);
 });

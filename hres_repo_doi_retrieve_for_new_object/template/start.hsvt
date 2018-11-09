@@ -1,0 +1,11 @@
+
+pageTitle("Ingest from DOI...")
+
+<form method="POST"> std:form:token()
+  <p>
+    "DOI to ingest "
+    <input type="text" name="doi" autofocus="autofocus">
+    " "
+    <input type="submit" value="Get DOI metadata">
+  </p>
+</form>

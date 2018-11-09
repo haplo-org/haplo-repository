@@ -2,6 +2,9 @@
 group hres:group:repository-editors as RepositoryEditors
 
 type std:type:journal as Journal
+    annotation hres:repository:managed-list-type
 type std:type:organisation as Organisation
 type hres:type:organisation:publisher as Publisher
+    annotation hres:repository:managed-list-type
 OPTIONAL type hres:type:organisation:funder as Funder
+    annotation hres:repository:managed-list-type

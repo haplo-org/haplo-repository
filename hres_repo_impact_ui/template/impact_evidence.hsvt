@@ -1,0 +1,7 @@
+
+<h2>"Evidence"</h2>
+<br>
+
+each(evidences) {
+    std:object(. "searchresultmini")
+}

@@ -1,0 +1,3 @@
+
+std:web-publisher:template("hres:repository:common:ui:button:primary")
+  { "File access - " title }

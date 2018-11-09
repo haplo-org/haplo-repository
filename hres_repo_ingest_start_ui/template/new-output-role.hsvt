@@ -1,5 +1,5 @@
-pageTitle("New " typeInfo.name ": " researcher.title)
-backLink("/do/repository-ingest-start-ui/new-for/" researcher.ref)
+pageTitle("New " typeInfo.name if(researcher) { ": " researcher.title })
+backLink("/do/repository-ingest-start-ui/new-for" if(researcher) { "/" researcher.ref })
 
 <p> "What is your involvement in this output?" </p>
 

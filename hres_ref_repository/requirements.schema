@@ -1,32 +1,51 @@
 
 group hres:group:repository-editors as RepositoryEditors
+group hres:group:ref-managers as REFManagers
 
 label hres:label:accepted-into-repository as AcceptedIntoRepository
+
+# TODO: remove when the following comment is possible
+restriction hres:restriction:ref-unit-of-assessment:repository-item
+    title Calculated attribute REF Unit of Assesment on repo items
+    label-unrestricted hres:label:ref-unit-of-assessment:calculated
+    # TODO: Uncomment when this is added to the platform
+    # restrict-if-type-annotated hres:annotation:ref-unit-of-assessment:copy-from-researcher
+    restrict-if-label hres:label:repository-item
+    attribute-read-only hres:attribute:ref-unit-of-assessment
+
+label hres:label:ref-unit-of-assessment:calculated
+    title Calculated attribute REF Unit of Assessment on repo items
+    category Restriction
 
 # ---------------------------------------------------------------------------
 
 schema-template hres:template-type:repository-item
-    attribute hres:attribute:ref-unit-of-assessment [sort=17000]
+    REMOVE attribute hres:attribute:ref-unit-of-assessment
+    annotation hres:annotation:ref-unit-of-assessment:copy-from-researcher
 
 # ---------------------------------------------------------------------------
 
+qualifier hres:qualifier:accepted as Accepted
+qualifier hres:qualifier:deposited as Deposited
 qualifier hres:qualifier:online as Online
 qualifier hres:qualifier:print as Print
-qualifier hres:qualifier:accepted as Accepted
 
 # ---------------------------------------------------------------------------
 
 type hres:type:conference-item as ConferenceItem
+type hres:type:research-institute:faculty as Faculty
 type hres:type:journal-article as JournalArticle
-
 type hres:type:ref-unit-of-assessment as REFUnitOfAssessment
 
 # ---------------------------------------------------------------------------
 
 attribute dc:attribute:author as Author
 attribute hres:attribute:accepted-author-manuscript as AcceptedAuthorManuscript
+attribute hres:attribute:output-status as OutputStatus
+attribute hres:attribute:open-access as OpenAccess
 attribute hres:attribute:publication-dates as PublicationDates
 attribute hres:attribute:publication-process-dates as PublicationProcessDates
 attribute hres:attribute:published-file as PublishersVersion
 attribute hres:attribute:ref-panel as REFPanel
 attribute hres:attribute:ref-unit-of-assessment as REFUnitOfAssessment
+attribute hres:attribute:researcher as Researcher

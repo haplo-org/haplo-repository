@@ -1,0 +1,9 @@
+pageTitle("Change output type")
+backLink(std:object:url(item)) { "Cancel" }
+
+std:object(item "linkedheading")
+
+<form method="POST"> std:form:token()
+    std:form(form)
+    <p> <input type="submit" value="Save"> </p>
+</form>

@@ -5,10 +5,14 @@
   "displayName": "Haplo RM Repository Outputs",
   "displayDescription": "Basic schema for repository outputs",
   "apiVersion": 4,
+  "privilegesRequired": ["pBackgroundProcessing"],
   "depend": [
       "hres_repository"
     ],
   "load": [
       "js/hres_repo_schema_outputs.js"
+    ],
+  "respond": [
+      "/do/hres-repo-schema-outputs"
     ]
 }

@@ -1,0 +1,9 @@
+
+<div style="padding-right: 100px;">
+    each(outputs) {
+        <b>output.title</b><br>
+        if(citation) { render(citation) }
+        <br>
+        <br>
+    }
+</div>

@@ -1,0 +1,27 @@
+
+label std:label:archived as ARCHIVED
+label std:label:deleted as DELETED
+
+label hres:label:source-item as SourceItem
+    title: Source Item
+    category: Repository
+
+# ------ Groups ------------------------
+
+group std:group:administrators as Administrators
+
+group hres:group:repository-editors as RepositoryEditors
+
+# ------ Attributes --------------------
+
+# Do not add to any object type, should never be editable
+attribute hres:attribute:authoritative-version as AuthoritativeVersion
+    title: Authoritative version
+    search-name authoritative-version
+    qualifier std:qualifier:null
+    data-type link
+
+# ------ Attributes --------------------
+
+schema-template hres:template-type:repository-item
+    element std:group:everyone top hres_repo_harvest_sources:source_objects

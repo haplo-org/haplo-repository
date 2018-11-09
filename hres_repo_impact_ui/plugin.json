@@ -1,0 +1,16 @@
+{
+  "pluginName": "hres_repo_impact_ui",
+  "pluginAuthor": "Haplo Services",
+  "pluginVersion": 1,
+  "displayName": "Haplo RM Repository Impact UI",
+  "displayDescription": "UI support for impact & impact evidence",
+  "installSecret": "3bd9010cb31dfbec1d06fb4137e869c3eea4e9e7",
+  "apiVersion": 4,
+  "depend": [
+      "hres_repository"
+    ],
+  "load": [
+      "js/hres_repo_impact_ui.js"
+    ],
+  "respond": ["/do/hres-repo-impact-ui"]
+}

@@ -13,12 +13,12 @@ var PROPERTIES = {
     "title": {before:"<i>", after:"</i>", key:"title"},
     "titleNoItalic": {key:"title"},
     "editors": {key:"editors", after:" (ed.)"},
-    "journal": {before:"<i>", after:".</i>", desc:A.Journal},
-    "event_title": {before:"<i>", after:".</i>", desc:A.EventTitle},
-    "event_location": {desc:A.EventLocation},
-    "event_dates": {desc:A.EventDate},
+    "event_title": {before:"<i>", after:".</i>", key:"event"},
+    "event_location": {key:"event_location"},
+    "event_dates": {key:"event_dates"},
     "place_of_pub": {desc:A.PlaceOfPublication},
     "publisher": {after:".", key:"publisher"},
+    "journal": {before:"<i>", after:".</i>", key:"journal"},
     "publicationDate": {key:"publicationDate"},
     "journalCitation": {after:".", desc:A.JournalCitation},
     "pagerange": {before: "pp. ", desc:A.PageRange},
@@ -77,10 +77,77 @@ Values.prototype.__defineGetter__("publisher", function() {
     if(!v) { return null; }
     return O.isRef(v) ? v.load().title : v.toString();
 });
+Values.prototype.__defineGetter__("journal", function() {
+    var v = this.object.first(A.Journal);
+    if(!v) { return null; }
+    return O.isRef(v) ? v.load().title : v.toString();
+});
+Values.prototype.__defineGetter__("event", function() {
+    var v = this.object.first(A.Event);
+    if(!v) { return null; }
+    return O.isRef(v) ? v.load().title : v.toString();
+});
+Values.prototype.__defineGetter__("event_location", function() {
+    var v = this.object.first(A.Event);
+    if(!v || !O.isRef(v)) { return null; }
+    var ev = v.load();
+    return ev.first(A.Location) ? ev.first(A.Location).toString() : null;
+});
+Values.prototype.__defineGetter__("event_dates", function() {
+    var v = this.object.first(A.Event);
+    if(!v || !O.isRef(v)) { return null; }
+    var ev = v.load();
+    var d = ev.first(A.EventDate);
+    if(!d) { return null; }
+    if(O.typecode(d) === O.T_DATETIME) {
+        if(d.specifiedAsRange) {
+            return dateRangeAsCitationString(d.start, d.end, d.precision);
+        } else {
+            return (new XDate(d.start)).toString(precisionFormatString(d.precision));
+        }
+    } else {
+        return d.toString();
+    }
+});
+var dateRangeAsCitationString = function(start, end, precision) {
+    // Don't repeat same information. eg. "27 - 29 Jun 2017", not "27 Jun 2017 - 29 Jun 2017"
+    var formatString = precisionFormatString(precision);
+    switch(precision) {
+        case O.PRECISION_YEAR:
+            break;
+        case O.PRECISION_MONTH:
+            if(start.getFullYear() === end.getFullYear()) {
+                formatString = formatString.replace("yyyy", '');
+            }
+            break;
+        default:
+            // Dateranges end the first millisecond of the day *after* the range, so first adjust for that
+            end.setDate(end.getDate()-1);
+            if(start.getFullYear() === end.getFullYear()) {
+                formatString = formatString.replace("yyyy", '');
+            }
+            if(start.getMonth() === end.getMonth()) {
+                formatString = formatString.replace("MMM", '');
+            }
+            break;
+    }
+    return (new XDate(start)).toString(formatString.trim())+" - "+
+        (new XDate(end)).toString(precisionFormatString(precision));
+};
+var precisionFormatString = function(precision) {
+    switch(precision) {
+        case O.PRECISION_MONTH:
+            return "MMM yyyy";
+        case O.PRECISION_YEAR:
+            return "yyyy";
+        default:
+            return "dd MMM yyyy";
+    }
+};
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-P.bibRefHtml = function(object) {
+ var bibRefHtml = function(object) {
     var values = new Values(object);
     var html = [];
     var fields = PROPERTIES_FOR_TYPE.get(object.firstType()) || DEFAULT_PROPERTIES;
@@ -107,18 +174,42 @@ P.bibRefHtml = function(object) {
     return html.join('');
 };
 
+var bibRefPlainText = function(object) {
+    return bibRefHtml(object).replace(/<.*?>/g, '');
+};
+
 // ---------------------------------------------------------------------------------------------------------------------
 
 _.each(SCHEMA.getTypesWithAnnotation('hres:annotation:repository-item'), function(type) {
     P.renderSearchResult(type, function(object, renderer) {
-        renderer.html(P.bibRefHtml(object), "column", undefined, 3);
+        renderer.html(bibRefHtml(object), "column", undefined, 3);
     });
+});
+
+P.implementService("std:reporting:collection:repository_items:setup", function(collection) {
+    collection.fact("citation",     "text",     "Citation");
+});
+
+P.implementService("std:reporting:collection:repository_items:get_facts_for_object", function(object, row) {
+    row.citation = bibRefPlainText(object);
+});
+
+P.implementService("std:reporting:dashboard:repository_overview:setup_export", function(dashboard) {
+    dashboard.columns(5, ["citation"]);
+});
+
+P.implementService("std:reporting:dashboard:outputs_in_progress:setup_export", function(dashboard) {
+    dashboard.columns(5, ["citation"]);
 });
 
 // ---------------------------------------------------------------------------------------------------------------------
 
 var GenericDeferredRender = $GenericDeferredRender; // developer.json needs deleting when this goes
 P.implementService("hres_bibliographic_reference:for_object", function(object) {
-    var html = P.bibRefHtml(object);
+    var html = bibRefHtml(object);
     return new GenericDeferredRender(function() { return html; });
+});
+
+P.implementService("hres_bibliographic_reference:plain_text_for_object", function(object) {
+    return bibRefPlainText(object);
 });

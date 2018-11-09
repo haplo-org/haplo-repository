@@ -1,0 +1,4 @@
+<div>
+  "This repository supports " <a href="https://www.openarchives.org/"> "OAI 2.0" </a>
+  " with a base URL of " <tt> "https://" context.publication.urlHostname endpoint </tt>
+</div>

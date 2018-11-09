@@ -1,0 +1,33 @@
+
+<table>
+    <tr>
+        if(isEditable) { <th> "Select" </th> }
+        <th> "File" </th>
+        <th> "Audience" </th>
+        <th> "Action" </th>
+        <th> "Comment" </th>
+    </tr>
+    each(rows) {
+        <tr>
+            if(^{isEditable}) {
+                <td>
+                    <input
+                        type="checkbox"
+                        name=name
+                        checked=if(selected) { "on" }
+                    >
+                </td>
+            }
+            <td> 
+                if(isNew) {
+                    std:file:thumbnail:with-link-url(file downloadLink "authenticationSignature")
+                } else {
+                    std:file:thumbnail(file)
+                }
+            </td>
+            <td> if(action) { std:object:title(audience) } </td>
+            <td> if(audience) { std:object:title(action) } </td>
+            <td> comments </td>
+        </tr>
+    }
+</table>

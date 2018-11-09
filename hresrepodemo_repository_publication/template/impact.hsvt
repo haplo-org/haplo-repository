@@ -1,0 +1,6 @@
+
+<h2 style="margin-top:0px;"> object.title </h2>
+
+<p>"&nbsp;"</p>
+
+render(object.asTable)

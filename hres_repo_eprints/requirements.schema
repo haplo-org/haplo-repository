@@ -1,0 +1,95 @@
+
+# -------- Attributes -------------------------
+
+attribute dc:attribute:date as Date
+attribute dc:attribute:publisher as Publisher
+attribute dc:attribute:author as Author
+attribute hres:attribute:editor as Editor
+attribute hres:attribute:edition as Edition
+OPTIONAL attribute hres:attribute:research-institute as ResearchInstitute
+OPTIONAL attribute hres:attribute:authors-citation as AuthorsCitation
+OPTIONAL attribute hres:attribute:editors-citation as EditorsCitation
+attribute std:attribute:email as Email
+attribute dc:attribute:title as Title
+OPTIONAL attribute hres:attribute:abstract as Abstract
+OPTIONAL attribute hres:attribute:institution-name as InstitutionName
+OPTIONAL attribute hres:attribute:department-name as DepartmentName
+OPTIONAL attribute hres:attribute:page-range as PageRange
+OPTIONAL attribute hres:attribute:journal as Journal
+OPTIONAL attribute hres:attribute:journal-citation as JournalCitation
+OPTIONAL attribute hres:attribute:place-of-publication as PlaceOfPublication
+OPTIONAL attribute hres:attribute:series as Series
+OPTIONAL attribute hres:attribute:book-title as BookTitle
+OPTIONAL attribute hres:attribute:book-author as BookAuthor
+OPTIONAL attribute hres:attribute:pages as Pages
+attribute std:attribute:isbn as Isbn
+OPTIONAL attribute hres:attribute:issn as Issn
+attribute std:attribute:notes as Notes
+attribute std:attribute:event as Event
+OPTIONAL attribute hres:attribute:event-location as EventLocation
+OPTIONAL attribute hres:attribute:event-title as EventTitle
+OPTIONAL attribute hres:attribute:output-media as OutputMedia
+OPTIONAL attribute hres:attribute:event-date as EventDate
+OPTIONAL attribute hres:attribute:accepted-author-manuscript as OpenAccessFile
+OPTIONAL attribute hres:attribute:published-file as PublishedFile
+OPTIONAL attribute hres:attribute:keywords as Keywords
+OPTIONAL attribute hres:attribute:digital-object-identifier-doi as DOI
+OPTIONAL attribute hres:attribute:output-status as OutputStatus
+OPTIONAL attribute hres:attribute:peer-review as PeerReview
+OPTIONAL attribute std:attribute:url as WebAddressUrl
+OPTIONAL attribute hres:attribute:ref-unit-of-assessment as REFUnitOfAssessment
+OPTIONAL attribute hres:attribute:ref-panel as REFPanel
+OPTIONAL attribute hres:attribute:media-type as MediaType
+
+attribute hres:attribute:event-date as EventDate
+attribute haplo:attribute:location as Location
+
+# -------- Dates (potentially should be optional) -----------------------------------
+
+attribute hres:attribute:publication-dates as PublicationDates
+qualifier hres:qualifier:published as Published
+
+attribute hres:attribute:publication-process-dates as PublicationProcessDates
+qualifier hres:qualifier:accepted as Accepted
+qualifier hres:qualifier:completed as Completed
+qualifier hres:qualifier:deposited as Deposited
+
+# -------- Types -----------------------------------
+
+type std:type:person as Person
+type std:type:book as Book
+OPTIONAL type hres:type:book-chapter as BookChapter
+OPTIONAL type hres:type:report as Report
+OPTIONAL type hres:type:report:discussion-paper as DiscussionPaper
+OPTIONAL type hres:type:report:project-report as ProjectReport
+OPTIONAL type hres:type:report:technical-report as TechnicalReport
+OPTIONAL type hres:type:report:working-paper as WorkingPaper
+OPTIONAL type hres:type:artefact as Artefact
+OPTIONAL type hres:type:composition as Composition
+OPTIONAL type hres:type:conference-item as ConferenceItem
+OPTIONAL type hres:type:conference-item:conference-paper as ConferencePaper
+OPTIONAL type hres:type:conference-item:conference-poster as ConferencePoster
+OPTIONAL type hres:type:conference-item:conference-keynote as ConferenceKeynote
+OPTIONAL type hres:type:exhibition as Exhibition
+OPTIONAL type hres:type:journal-article as JournalArticle
+OPTIONAL type hres:type:patent as Patent
+OPTIONAL type hres:type:performance as Performance
+OPTIONAL type hres:type:thesis as Thesis
+OPTIONAL type hres:type:thesis:phd as PhdThesis
+OPTIONAL type hres:type:thesis:mphil as MPhilThesis
+OPTIONAL type hres:type:thesis:masters as MastersThesis
+OPTIONAL type hres:type:digital-or-visual-media as DigitalOrVisualMedia
+OPTIONAL type hres:type:website as Website
+type hres:type:other as Other
+type hres:type:organisation:publisher as Publisher
+OPTIONAL type std:type:journal as Journal
+
+type hres:type:external-event as ExternalEvent
+
+# -------- Groups -----------------------------------
+
+group std:group:administrators as Administrators
+
+# -------- Labels -----------------------------------
+
+label hres:label:accepted-into-repository as AcceptedIntoRepository

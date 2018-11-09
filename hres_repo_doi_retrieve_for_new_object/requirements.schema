@@ -1,0 +1,6 @@
+
+OPTIONAL group hres:group:repository-editors as RepositoryEditors
+
+attribute hres:attribute:digital-object-identifier-doi as DOI
+
+OPTIONAL type hres:type:journal-article as JournalArticle

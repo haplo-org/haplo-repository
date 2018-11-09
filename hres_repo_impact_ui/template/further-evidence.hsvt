@@ -1,0 +1,9 @@
+pageTitle("Add evidence - " impact.title)
+
+template:std:ui:choose()
+
+<br>
+
+each(evidences) {
+    std:object(. "searchresult")
+}

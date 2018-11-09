@@ -10,6 +10,7 @@
       "hres_repository",
       "hres_repo_navigation"
     ],
+  "privilegesRequired" : ["pDatabase"],
   "use": [
       "haplo:activity_guidance_notes"
     ],

@@ -1,0 +1,16 @@
+
+# --------- Groups ----------------------------
+
+group hres:group:repository-editors as RepositoryEditors
+
+# -------- Types -----------------------------------
+
+type hres:type:impact as Impact
+    REMOVE element: std:group:everyone right hres_repo_impact_ui:impact_evidence
+    element: std:group:everyone bottom hres_repo_impact_ui:impact_evidence
+
+type hres:type:impact-evidence as ImpactEvidence
+
+# -------- Attributes -------------------------
+
+attribute hres:attribute:impact as Impact

@@ -1,0 +1,10 @@
+
+group hres:group:oai-pmh-service
+    title: OAI-PMH Service
+
+group hres:group:public-repository-access
+    member hres:group:oai-pmh-service
+
+service-user hres:service-user:oai-pmh
+    title: OAI-PMH Access
+    group hres:group:oai-pmh-service

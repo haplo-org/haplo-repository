@@ -5,17 +5,14 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.         */
 
 
-// TODO: Make list of types for repository editors to maintain configurable (remembering permissions to edit)
-var LIST_TYPES = [T.Publisher, T.Journal];
-if("Funder" in T) {
-    LIST_TYPES.push(T["Funder"]);
-}
+var LIST_TYPES = SCHEMA.getTypesWithAnnotation("hres:repository:managed-list-type");
 
 // --------------------------------------------------------------------------
 
 P.implementService("haplo:user_roles_permissions:setup", function(setup) {
-    setup.groupPermission(Group.RepositoryEditors, "read-write", T.Organisation);
-    setup.groupPermission(Group.RepositoryEditors, "read-write", T.Journal);
+    _.each(LIST_TYPES, function(type) {
+        setup.groupPermission(Group.RepositoryEditors, "read-write", type);
+    });
 });
 
 var CanManageRepositoryLists = O.action("hres:action:repository:manage-lists").

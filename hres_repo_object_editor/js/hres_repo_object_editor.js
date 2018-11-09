@@ -16,7 +16,9 @@ NOTES[A.PublicationDates] = "pubdt";
 NOTES[A.AcceptedAuthorManuscript] = "aam";
 NOTES[A.WebAddressUrl] = 'url';
 NOTES[A.Author] = 'author'; // TODO: New authors notes?
-NOTES[A.RefUnitOfAssessment] = 'refunit';
+if("RefUnitOfAssessment" in A) {
+    NOTES[A["RefUnitOfAssessment"]] = 'refunit';
+}
 // TODO: Unconmment when Embargoes schema exists
 // NOTES[A LicenseUrl] = 'license';
 NOTES[A.File] = 'file';

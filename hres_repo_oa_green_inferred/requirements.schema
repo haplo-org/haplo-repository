@@ -1,0 +1,6 @@
+
+type hres:type:journal-article as JournalArticle
+type hres:type:conference-item as ConferenceItem
+
+attribute hres:attribute:open-access as OpenAccess
+attribute hres:attribute:accepted-author-manuscript as AcceptedAuthorManuscript

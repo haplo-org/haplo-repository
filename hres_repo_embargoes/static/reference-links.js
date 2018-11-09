@@ -22,18 +22,33 @@
                 var publishers = response.publishers;
                 var html = [];
                 if(!doneHeading) {
-                    html.push('<h2>SHERPA/RoMEO reference links</h2>');
+                    html.push('<h2>SHERPA/RoMEO guidance</h2><br>');
                     doneHeading = true;
                 }
                 if(publishers.length > 0) {
                     haveResults = true;
                 }
                 _.each(publishers, function(p) {
-                    html.push('<h3>', _.escape(p.name), '</h3>');
-                    _.each(p.links, function(l) {
-                        // rel=noopener for security
-                        html.push("<li><a target='_blank' rel='noopener' href='", _.escape(l.url), "'>", _.escape(l.text), "</a></li>");
+                    html.push('<h2>', _.escape(p.name), '</h2>');
+                    if(p.paidAccess) { 
+                        html.push("<h4><a target='_blank' rel='noopener' href='", _.escape(p.paidAccess.url), "'>", _.escape(p.paidAccess.name), "</a>", _.escape(p.paidAccess.notes), "</h4>");
+                    }
+                    _.each(p.archiving, function(a) {
+                        html.push('<h4>Author ', a, '</h4>');
                     });
+                    if(p.conditions) {
+                        html.push("<h3>Conditions:</h3>");
+                    }
+                    _.each(p.conditions, function(c) {
+                        html.push("<li>", _.escape(c), "</li>"); 
+                    });
+                    if(p.copyright) {
+                        html.push("<h3>Copyright:</h3>");
+                    }
+                    _.each(p.copyright, function(c) {
+                        html.push("<li><a target='_blank' rel='noopener' href='", _.escape(c.url), "'>", _.escape(c.text), "</a></li>"); 
+                    });
+                    html.push("<hr>");
                 });
                 if(!response.more && !haveResults) {
                     html.push('<p>No links available. <a target="_blank" href="http://www.sherpa.ac.uk/romeo/">RoMEO home page</a><p>');

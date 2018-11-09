@@ -1,6 +1,6 @@
 
 # ---------------------------------------------------------------------------
-#   Labels & groups for permissions
+#   Labels, restrictions, and groups for permissions
 # ---------------------------------------------------------------------------
 
 label std:label:structure as STRUCTURE
@@ -23,6 +23,12 @@ label hres:label:rejected-from-repository as RejectedFromRepository
     title: Rejected from Repository
     category: Repository
 
+restriction hres:restriction:citation-attribute:calculated
+    # TODO: Uncomment when this is added to the platform
+    # restrict-if-type-annotated hres:annotation:repository-item
+    restrict-if-label hres:label:repository-item
+    attribute-read-only hres:attribute:researcher
+
 group hres:group:repository-editors as RepositoryEditors
     title: Repository Editors
 
@@ -41,10 +47,11 @@ attribute dc:attribute:date as Date
 attribute dc:attribute:publisher as Publisher
 
 attribute std:attribute:configured-behaviour as ConfiguredBehaviour
+attribute std:attribute:project as Project
 
 type std:type:intranet-page as IntranetPage
-type std:type:organisation as Organisation
 type std:type:person as Person
+    annotation hres:annotation:repository:publically-accessible-person
 
 label std:label:archived as ARCHIVED
 
@@ -58,6 +65,7 @@ attribute hres:attribute:research-institute as ResearchInstitute
 
 type hres:type:person:external-researcher as ExternalResearcher
 type hres:type:research-institute:faculty as Faculty
+type hres:type:research-institute:department as Department
 type hres:type:person:researcher as Researcher
 type hres:type:research-institute as ResearchInstitute
 
@@ -80,21 +88,24 @@ schema-template hres:template-type:repository-item
     attribute hres:attribute:abstract [sort=10500]
     attribute hres:attribute:keywords [sort=10600]
     attribute std:aliased-attribute:year [sort=10700]
-    attribute dc:attribute:publisher [sort=10800]
-    attribute hres:attribute:issn [sort=11001]
+    REMOVE attribute dc:attribute:publisher [sort=10800]
+    REMOVE attribute hres:attribute:issn [sort=11001]
     attribute hres:attribute:digital-object-identifier-doi [sort=11100]
     attribute std:attribute:url [sort=11200]
     attribute std:attribute:project [sort=13000]
     attribute std:attribute:file [sort=14100]
-    attribute std:attribute:notes [sort=14800]
-    attribute hres:attribute:publication-dates [sort=15100]
+    REMOVE attribute hres:attribute:publication-dates [sort=15100]
     attribute hres:attribute:license [sort=16000]
-    element: std:group:everyone right std:action_panel {"panel":"repository_item"}
+    REMOVE attribute std:attribute:notes
+    attribute hres:aliased-attribute:additional-information [sort=18000]
+    element: std:group:everyone right std:action_panel {"panel":"repository_item"} [sort=250]
     create-position never
 
 # ---------------------------------------------------------------------------
 #   Related types for repository
 # ---------------------------------------------------------------------------
+
+type std:type:book as Book
 
 type std:type:journal as Journal
     title: Journal
@@ -102,8 +113,8 @@ type std:type:journal as Journal
     search-name: serial
     behaviour physical
     attribute dc:attribute:title
-    attribute dc:attribute:type
-    attribute dc:attribute:author
+    REMOVE attribute dc:attribute:type
+    REMOVE attribute dc:attribute:author
     attribute dc:attribute:date
     attribute dc:attribute:publisher
     attribute std:attribute:notes
@@ -114,12 +125,30 @@ type std:type:journal as Journal
     default-subtype std:type:journal
     create-position never
 
+type std:type:organisation as Organisation
+    attribute dc:attribute:type [sort=10]
+
+type std:type:project as Project
+
 type hres:type:organisation:publisher as Publisher
     title: Publisher
     parent-type std:type:organisation
     search-name: publisher
     render-icon: E210,6,a E210,2,c E210,1,e
     render-category 4
+
+type hres:type:external-event as ExternalEvent
+    title Event
+    search-name external-event
+    attribute dc:attribute:title [sort=1000]
+    REMOVE attribute dc:attribute:date [sort=1500]
+    attribute hres:attribute:event-date [sort=1500]
+    attribute haplo:attribute:location [sort=2000]
+    attribute std:attribute:url [sort=2500]
+    attribute std:attribute:notes [sort=10000]
+    render-icon E517,7,f E207,c
+    render-category 4
+    create-position never
 
 # ---------------------------------------------------------------------------
 #   Qualifiers required for Outputs
@@ -156,15 +185,16 @@ aliased-attribute hres:aliased-attribute:chapter-title as ChapterTitle
     search-name: chapter-title
     alias-of dc:attribute:title
 
-aliased-attribute hres:aliased-attribute:conference-location as ConferenceLocation
-    title: Conference location
-    search-name: conference-location
-    alias-of hres:attribute:event-location
-
-aliased-attribute hres:aliased-attribute:conference-title as ConferenceTitle
-    title: Conference title
-    search-name: conference-title
-    alias-of hres:attribute:event-title
+aliased-attribute hres:aliased-attribute:external-event
+    title Event
+    search-name event
+    alias-of std:attribute:event
+    on-linked-type hres:type:external-event
+aliased-attribute hres:aliased-attribute:conference
+    title Conference
+    search-name conference
+    alias-of std:attribute:event
+    on-linked-type hres:type:external-event
 
 attribute hres:attribute:abstract as Abstract
     title: Abstract
@@ -210,25 +240,6 @@ attribute hres:attribute:edition as Edition
     qualifier std:qualifier:null
     data-type text
 
-attribute hres:attribute:event-date as EventDate
-    title: Event date
-    search-name: event-date
-    qualifier std:qualifier:null
-    data-type datetime
-    ui-options d,y,n,n,n
-
-attribute hres:attribute:event-location as EventLocation
-    title: Event location
-    search-name: event-location
-    qualifier std:qualifier:null
-    data-type text
-
-attribute hres:attribute:event-title as EventTitle
-    title: Event title
-    search-name: event-title
-    qualifier std:qualifier:null
-    data-type text
-    
 attribute hres:attribute:institution-name as InstitutionName
     title: Institution name
     search-name: institution-name
@@ -322,6 +333,18 @@ attribute hres:attribute:series as Series
     qualifier std:qualifier:null
     data-type text
 
+aliased-attribute hres:aliased-attribute:additional-information
+    title Additional information
+    search-name additional-information
+    alias-of std:attribute:notes
+
+attribute hres:attribute:event-date as EventDate
+    title: Event date
+    search-name: event-date
+    qualifier std:qualifier:null
+    data-type datetime
+    ui-options d,y,y,n,n
+
 # ---------------------------------------------------------------------------
 #   Lists (types + objects)
 # ---------------------------------------------------------------------------
@@ -342,4 +365,21 @@ type hres:type:license as License
     search-name license
     apply-schema-template hres:template-type:list
     attribute std:attribute:url
-# Objects defined elsewhere
+object hres:list:license:cc-by
+    title CC BY
+    type hres:type:license
+object hres:list:license:cc-by-sa
+    title CC BY-SA
+    type hres:type:license
+object hres:list:license:cc-by-nc
+    title CC BY-NC
+    type hres:type:license
+object hres:list:license:cc-by-nd
+    title CC BY-ND
+    type hres:type:license
+object hres:list:license:cc-by-nc-sa
+    title CC BY-NC-SA
+    type hres:type:license
+object hres:list:license:cc-by-nc-nd
+    title CC BY-NC-ND
+    type hres:type:license

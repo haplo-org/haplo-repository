@@ -6,13 +6,13 @@ attribute hres:attribute:book-title as BookTitle
 attribute dc:attribute:date as Date
 attribute hres:attribute:department-name as DepartmentName
 attribute hres:attribute:editors-citation as EditorsCitation
+attribute std:attribute:event as Event
 attribute hres:attribute:event-date as EventDate
-attribute hres:attribute:event-location as EventLocation
-attribute hres:attribute:event-title as EventTitle
 attribute hres:attribute:institution-name as InstitutionName
 attribute hres:attribute:issn as Issn
 attribute hres:attribute:journal as Journal
 attribute hres:attribute:journal-citation as JournalCitation
+attribute haplo:attribute:location as Location
 attribute hres:attribute:page-range as PageRange
 attribute hres:attribute:place-of-publication as PlaceOfPublication
 attribute dc:attribute:publisher as Publisher

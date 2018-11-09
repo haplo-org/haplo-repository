@@ -1,0 +1,10 @@
+
+label std:label:deleted as DELETED
+
+label hres:label:source-item as SourceItem
+
+attribute dc:attribute:author as Author
+
+attribute hres:attribute:researcher as Researcher
+attribute hres:attribute:authoritative-version as AuthoritativeVersion
+attribute hres:attribute:authors-citation as AuthorsCitation

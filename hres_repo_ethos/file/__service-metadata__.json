@@ -1,0 +1,14 @@
+{
+    "hres:repository:ethos:write-store-object-below-xml-cursor": {
+        "statements": [
+            "conforms-to hres:write-store-object-below-xml-cursor",
+            "hres:oai-pmh:exposed-metadata-format"
+        ],
+        "metadata": {
+            "hres:oai-pmh:metadata-prefix":     "uketd_dc",
+            "hres:oai-pmh:schema":              "http://naca.central.cranfield.ac.uk/ethos-oai/2.0/uketd_dc.xsd",
+            "hres:oai-pmh:metadata-namespace":  "http://naca.central.cranfield.ac.uk/ethos-oai/2.0/",
+            "hres:oai-pmh:root-element":        "uketddc"
+        }
+    }
+}

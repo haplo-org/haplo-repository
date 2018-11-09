@@ -4,47 +4,132 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.         */
 
+var NODE_LOOKUP = [
+    {
+        "name": "copyrightlinktext",
+        "shortname": "text"
+    },
+    {
+        "name": "copyrightlinkurl",
+        "shortname": "url"
+    }
+];
 
-// TODO: Would other information returned be useful here? Eg. prearchiving and postarchiving details
-// or the <conditions> info?
-var NODE_LOOKUP = {
-    "name": "name",
-    "copyrightlinktext": "text",
-    "copyrightlinkurl": "url"
-};
+var ARCHIVING = [
+    {
+        "tag": "preprints",
+        "type": "prearchiving",
+        "text": " archive submitted version (i.e. pre-refereeing)"
+    },
+    {
+        "tag": "postprints",
+        "type": "postarchiving",
+        "text": " archive accepted version (i.e. final draft post-refereeing)"
+    },
+    {
+        "tag": "pdfversion",
+        "type": "pdfarchiving",
+        "text": " archive publisher's version"
+    }
+];
 
-var parseResponse = function(body, results) {
-    var parser = O.service("hres_thirdparty_libs:sax_parser");
-    var inPublisherDetails;
-    var tagName;
-    parser.onopentag = function(node) {
-        if(node.name === "publisher") {
-            inPublisherDetails = true;
-        } else if(inPublisherDetails) {
-            tagName = NODE_LOOKUP[node.name];
-        }
-    };
-    parser.ontext = function(text) {
-        if(text && tagName) {
-            if(tagName === "name") {
-                results.unshift({name: text, links:[{}]});
-            } else if(results[0].links[0] && results[0].links[0][tagName]) {
-                results[0].links.unshift({});
-                results[0].links[0][tagName] = text;
-            } else {
-                results[0].links[0][tagName] = text;
+P.db.table('sherpaArchivingData', {
+    object: { type: 'ref' },
+    data: { type: 'json' }
+});
+
+var parseResponse = function(xml, results) {
+    let cursor = O.xml.parse(xml).cursor();
+    // SHERPA / RoMEO information
+    if(cursor.firstChildElementMaybe("romeoapi") && cursor.firstChildElementMaybe("publishers")) {
+        cursor.eachChildElement("publisher", function(c) {
+            let result = {};
+            let publisherName;
+            let publisherAlias;
+            // Publisher
+            if(c.firstChildElementMaybe("name")) {
+                if(c.getText()) { publisherName = c.getText().replace(/<(?:.|\n)*?>/gm, ''); }
+                c.up();
             }
-        }
-    };
-    parser.onclosetag = function(nodeName) {
-        if(tagName) {
-            tagName = undefined;
-        }
-        if(nodeName === "publisher") {
-            inPublisherDetails = false;
-        }
-    };
-    parser.write(body);
+            if(c.firstChildElementMaybe("alias")) {
+                if(c.getText()) { publisherAlias = c.getText().replace(/<(?:.|\n)*?>/gm, ''); }
+                c.up();
+            }
+            if(publisherName) { 
+                result.name = publisherName+(publisherAlias ? " ("+publisherAlias+")" : "");
+            }
+
+            // Paid access
+            if(c.firstChildElementMaybe("paidaccess")) {
+                let paidAccessName;
+                let paidAccessNotes;
+                let paidAccessURL;
+
+                if(c.firstChildElementMaybe("paidaccessname")) {
+                    paidAccessName = c.getText();
+                    c.up();
+                }
+                if(c.firstChildElementMaybe("paidaccessnotes")) {
+                    paidAccessNotes = c.getText();
+                    c.up();
+                }
+                if(c.firstChildElementMaybe("paidaccessurl")) {
+                    paidAccessURL = c.getText();
+                    c.up();
+                }
+                if(paidAccessName) {
+                    result.paidAccess = {
+                        name: paidAccessName,
+                        notes: paidAccessNotes,
+                        url: paidAccessURL
+                    };
+                    c.up();
+                }
+            }
+
+            // Conditions
+            if(c.firstChildElementMaybe("conditions")) {
+                while(c.firstChildElementMaybe("condition") || c.nextSiblingElementMaybe("condition")) {
+                    if(!result.conditions) { result.conditions = []; }
+                    if(c.getText()) {
+                        result.conditions.push(c.getText().replace(/<(?:.|\n)*?>/gm, ''));
+                    }
+                }
+                c.up().up();
+            }
+
+            // Copyright text and links
+            if(c.firstChildElementMaybe("copyrightlinks")) {
+                while(c.firstChildElementMaybe("copyrightlink") || c.nextSiblingElementMaybe("copyrightlink")) {
+                    if(!result.copyright) { result.copyright = []; }
+                    let copyright = {};
+                    _.each(NODE_LOOKUP, (node) => {
+                        if(c.firstChildElementMaybe(node["name"])) {
+                            if(c.getText()) {
+                                copyright[node['shortname']] = c.getText().replace(/<(?:.|\n)*?>/gm, '');
+                            }
+                            c.up();
+                        }
+                    });
+                    result.copyright.push(copyright);
+                }
+                c.up();
+                c.up();
+            }
+
+            // Archiving
+            _.each(ARCHIVING, (archive) => {
+                if(c.firstChildElementMaybe(archive["tag"]) && c.firstChildElementMaybe(archive["type"])) {
+                    if(!result.archiving) { result.archiving = []; }
+                    if(c.getText()) {
+                        result.archiving.push(c.getText()+archive["text"]);
+                    }
+                    c.up().up();
+                }
+            });
+            results.push(result);
+        });
+    }
 };
 
 var QUERY_STRING_TO_ATTRIBUTE = {
@@ -58,8 +143,6 @@ P.respondAfterHTTPRequest("GET", "/api/hres-repo-embargoes/sherpa-romeo", [
     {parameter:"done", as:"string", optional:true}
 ], {
     setup: function(data, E, output, keysDoneStr) {
-        P.CanEditEmbargoes.enforce();
-
         var keysDoneIn = (keysDoneStr||'').split(',');
         var keysDoneOut = [];   // rebuild to avoid trusting input
 
@@ -68,7 +151,7 @@ P.respondAfterHTTPRequest("GET", "/api/hres-repo-embargoes/sherpa-romeo", [
             var v = output.first(desc);
             if(v && (-1 === keysDoneIn.indexOf(key))) {
                 var search;
-                var params = {};
+                var params = {};                            
                 if(key === "issn") {
                     search = v.toString();
                 } else {
@@ -86,6 +169,7 @@ P.respondAfterHTTPRequest("GET", "/api/hres-repo-embargoes/sherpa-romeo", [
             var q = queries[0];
             data.done = keysDoneOut.concat(q.key);
             data.key = q.key;
+            data.object = output.ref.toString();
             var http = O.httpClient("http://www.sherpa.ac.uk/romeo/api29.php");
             _.each(q.params, function(v,k) { http.queryParameter(k,v); });
             return http;
@@ -97,6 +181,7 @@ P.respondAfterHTTPRequest("GET", "/api/hres-repo-embargoes/sherpa-romeo", [
             parseResponse(result.body.readAsString("UTF-8"), results);
         }
         return {
+            object: data.object,
             more: data.more,
             key: data.key,
             done: data.done,
@@ -104,6 +189,12 @@ P.respondAfterHTTPRequest("GET", "/api/hres-repo-embargoes/sherpa-romeo", [
         };
     },
     handle: function(data, result, E, output) {
+        var object = O.ref(data.object);
+        P.db.sherpaArchivingData.select().where('object', '=', object).deleteAll();
+        P.db.sherpaArchivingData.create({
+            object: object,
+            data: data
+        }).save();
         E.response.body = JSON.stringify(data);
         E.response.kind = 'json';
     }

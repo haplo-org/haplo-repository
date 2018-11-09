@@ -1,0 +1,5 @@
+
+type std:type:book as Book
+
+attribute dc:attribute:author as Author
+attribute hres:attribute:editor as Editor

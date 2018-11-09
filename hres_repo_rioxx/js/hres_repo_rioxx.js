@@ -4,6 +4,9 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.         */
 
+var CanViewRIOXX = O.action("hres_repo_rioxx:view_compliance_panel").
+    title("View RIOXX compliance").
+    allow("group", Group.RepositoryEditors);
 
 var RIOXX_MANDATORY_FIELDS = {
     "license": {
@@ -104,8 +107,8 @@ var getMissingRequirements = function(item) {
     return missing;
 };
 
-P.implementService("std:action_panel:repository_item", function(display, builder) {
-    if(O.currentUser.isMemberOf(Group.RepositoryEditors)) {
+P.implementService("std:action_panel:outpu", function(display, builder) {
+    if(O.currentUser.allowed(CanViewRIOXX)) {
         var missing = getMissingRequirements(display.object);
         builder.panel(120).element(0, {title: "RIOXX", label: (_.isEmpty(missing)) ? "Compliant" : "Missing mandatory metadata"});
         _.each(missing, function(requirement, key) {
@@ -120,7 +123,7 @@ P.respond("GET", "/do/hres-repo-rioxx/missing-metadata", [
     {pathElement:0, as:"object"},
     {pathElement:1, as:"string"}
 ], function(E, item, selected) {
-    if(!O.currentUser.isMemberOf(Group.RepositoryEditors)) { O.stop("Not permitted."); }
+    CanViewRIOXX.enforce();
     var missing = getMissingRequirements(item);
     var rows = [];
     _.each(missing, function(requirement, key) {

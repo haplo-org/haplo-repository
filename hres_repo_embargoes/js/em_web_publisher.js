@@ -5,18 +5,32 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.         */
 
 
-P.implementService("hres_repo_file_restrictions:collect_file_restrictions", function(user, object, restrictions) {
+P.implementService("hres_repo_publication_common:collect_renders_for_restricted_desc", function(object, desc, restrictions) {
     
-    var embargo = P.getEmbargoData(object);
-    if(embargo && embargo.isUnderEmbargo()) {
-        restrictions.push({
-            sort: 10,
-            deferredRender: function(E, context, options) {
-                return P.template("web-publisher/restriction-panel").deferredRender({
-                    dates: embargo.getDatesForDisplay()
+    var q = P.getEmbargoData(object);
+    if(q) {
+        q.or(function(sq) {
+            // TODO remove this when "whole object" restrictions are implemented in the Publication UI
+            sq.where("desc", "=", desc).
+                where("desc", "=", null);
+        });
+        if(q.length) {
+            var activeEmbargoes = _.filter(q, function(embargo) {
+                return embargo.isActive();
+            });
+            if(activeEmbargoes.length) {
+                restrictions.push({
+                    sort: 10,
+                    deferredRender: P.template("web-publisher/restriction-panel").deferredRender({
+                        embargoes: _.map(activeEmbargoes, function(embargo) {
+                            return {
+                                end: embargo.end
+                            };
+                        })
+                    })
                 });
             }
-        });
-    }
-    
+        }
+   }
+ 
 });

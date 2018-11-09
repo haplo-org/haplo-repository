@@ -2,15 +2,38 @@
 schema-template hres:template-type:repository-item
     attribute dc:attribute:subject [sort=11300]
     attribute hres:attribute:funder [sort=11800]
-    attribute hres:attribute:research-or-scholarly [sort=12100]
+    REMOVE attribute hres:attribute:research-or-scholarly [sort=12100]
     attribute hres:attribute:research-group [sort=13100]
-    attribute hres:attribute:output-status [sort=15000]
-    attribute hres:attribute:file-access-level [sort=15500]
-    attribute hres:attribute:publication-process-dates [sort=15101]
+    REMOVE attribute hres:attribute:output-status [sort=15000]
+    REMOVE attribute hres:attribute:publication-process-dates [sort=15101]
+
+# ---------------------------------------------------------------------------
+
+group hres:group:repository-editors as RepositoryEditors
 
 # ---------------------------------------------------------------------------
 
 label std:label:archived as ARCHIVED
+
+label hres:label:view-prepared-files as ViewPreparedFiles
+    title: Allow viewing of prepared files
+    category: Restriction
+
+label hres:label:edit-prepared-files
+    title: Allow editing prepared files
+    category: Restriction
+
+# ---------------------------------------------------------------------------
+
+restriction hres:restriction:prepared-files
+    title: Prevent viewing of prepared files
+    attribute-restricted hres:attribute:prepared-file
+    label-unrestricted hres:label:view-prepared-files
+
+restriction hres:restriction:edit-prepared-files
+    title: Prevent edit of prepared files
+    attribute-read-only hres:attribute:prepared-file
+    label-unrestricted hres:label:edit-prepared-files
 
 # ---------------------------------------------------------------------------
 
@@ -19,21 +42,13 @@ type hres:type:research-institute:research-group as ResearchGroup
 
 # ---------------------------------------------------------------------------
 
-attribute hres:attribute:file-access-level as AccessLevel
-    title: File Access Level
-    search-name: access-level
-    qualifier: std:qualifier:null
-    data-type link
-    ui-options radio
-    linked-type hres:type:file-access-level
-
 attribute hres:attribute:funder as Funder
     title: Funder
     search-name: funder
     qualifier std:qualifier:null
     data-type link
     ui-options lookup
-    linked-type std:type:organisation
+    linked-type hres:type:organisation:funder
 
 attribute hres:attribute:research-or-scholarly as ResearchOrScholarly
     title: Research or scholarly
@@ -98,24 +113,6 @@ qualifier hres:qualifier:deposited as Deposited
         
 # ---------------------------------------------------------------------------
 
-    
-type hres:type:file-access-level as AccessLevel
-    title: File Access Level
-    search-name: access-level
-    apply-schema-template hres:template-type:list
-object hres:list:file-access-level:safeguarded
-    type hres:type:file-access-level
-    title: Safeguarded
-object hres:list:file-access-level:open
-    type hres:type:file-access-level
-    title: Open
-object hres:list:file-access-level:controlled
-    type hres:type:file-access-level
-    title: Controlled
-object hres:list:file-access-level:restricted
-    type hres:type:file-access-level
-    title: Restricted
-
 type hres:type:peer-review as PeerReview
     title: Peer-review
     search-name: peer review
@@ -151,3 +148,38 @@ object hres:list:output-status:published
 object hres:list:output-status:unpublished
     type hres:type:output-status
     title: Unpublished
+
+# ---------------------------------------------------------------------------
+
+type hres:type:intended-audience
+    title: Intended audience
+    search-name: intended-audience
+    apply-schema-template hres:template-type:list
+object hres:list:intended-audience:internal
+    type hres:type:intended-audience
+    title: Internal
+object hres:list:intended-audience:external
+    type hres:type:intended-audience
+    title: External
+object hres:list:intended-audience:trusted
+    type hres:type:intended-audience
+    title: Trusted
+
+# ---------------------------------------------------------------------------
+
+type hres:type:preparation-action
+    title: Preparation action
+    search-name: preparation-action
+    apply-schema-template hres:template-type:list
+object hres:list:preparation-action:anonymised
+    type hres:type:preparation-action
+    title: Anonymised
+object hres:list:preparation-action:remove-fields
+    type hres:type:preparation-action
+    title: Remove fields
+object hres:list:preparation-action:remove-records
+    type hres:type:preparation-action
+    title: Remove records
+object hres:list:preparation-action:release-original
+    type hres:type:preparation-action
+    title: Release original

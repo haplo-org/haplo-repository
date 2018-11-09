@@ -1,4 +1,46 @@
 
+# -------- Restrictions ----------------------------
+
+label hres:label:lift-all-embargo-restrictions as LiftAllEmbargoRestrictions
+    title: Lift all embargo restrictions
+    category: Restriction
+
+label hres:label:embargo-all-files as EmbargoAllFiles
+    title: Embargo all files
+    category: Restriction
+
+label hres:label:embargo-accepted-author-manuscript as EmbargoAcceptedAuthorManuscript
+    title: Embargo Author Accepted Manuscript
+    category: Restriction
+restriction hres:restriction:embargo-accepted-author-manuscript
+    title Embargo Author Accepted Manuscript
+    restrict-if-label hres:label:embargo-accepted-author-manuscript
+    restrict-if-label hres:label:embargo-all-files
+    label-unrestricted hres:label:lift-all-embargo-restrictions
+    attribute-restricted hres:attribute:accepted-author-manuscript
+
+label hres:label:embargo-published-file as EmbargoPublishersVersion
+    title: Embargo Publishers Version
+    category: Restriction
+restriction hres:restriction:embargo-published-file
+    title Embargo Publishers Version
+    restrict-if-label hres:label:embargo-published-file
+    restrict-if-label hres:label:embargo-all-files
+    label-unrestricted hres:label:lift-all-embargo-restrictions
+    attribute-restricted hres:attribute:published-file
+
+label hres:label:embargo-file as EmbargoFile
+    title: Embargo generic file
+    category: Restriction
+restriction hres:restriction:embargo-file
+    title Embargo generic file
+    restrict-if-label hres:label:embargo-file
+    restrict-if-label hres:label:embargo-all-files
+    label-unrestricted hres:label:lift-all-embargo-restrictions
+    attribute-restricted std:attribute:file
+
+# --------- Schema --------------------------------
+
 group hres:group:repository-editors as RepositoryEditors
 
 attribute dc:attribute:publisher as Publisher

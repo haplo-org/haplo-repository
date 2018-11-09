@@ -1,0 +1,22 @@
+std:plugin:resources("outputs-order.js")
+std:plugin:resources("outputs-order.css")
+template:std:jquery_ui:sortable()
+
+if(updated) {
+    std:ui:notice("Your preferences have been saved.")
+}
+
+<p>"Please drag your outputs into the order you'd like them displayed on your web profile, then click 'Save changes'."</p>
+<p>"Any new outputs will appear at the bottom of this list."</p>
+
+<form method="POST">
+  std:form:token()
+  <input type="hidden" name="outputs" value="!">
+  <p><input type="submit" value="Save changes"></p>
+
+  <div id="cv-outputs-list">
+  each(outputs) {
+    <div class="cv-outputs-item" data-ref=ref>title</div>
+  }
+  </div>
+</form>

@@ -1,0 +1,19 @@
+{
+    "specificationVersion": 0,
+    "formId": "xmlUpload",
+    "formTitle": "Upload XML for EPrints import",
+    "elements": [
+        {
+            "type": "file-repeating-section",
+            "path": "xmlFile",
+            "label": "Upload XML file",
+            "allowAdd": false,
+            "allowDelete": false,
+            "elements": [
+                {"type":"file", "path":"."}
+            ],
+            "minimumCount": 1,
+            "maximumCount": 1
+        }
+    ]
+}

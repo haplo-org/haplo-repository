@@ -1,0 +1,11 @@
+<div class="panel panel-default">
+  <div class="panel-heading">
+    <h3 class="panel-title">"Research Impact"</h3>
+  </div>
+  <div class="panel-body">
+    each(impacts) {
+      <a href=href> impact.title </a>
+      if(summary) { <br> <small> <p> summary </p> </small> }
+    }
+  </div>
+</div>

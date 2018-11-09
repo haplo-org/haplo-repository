@@ -6,12 +6,17 @@
   "displayDescription": "Support for Rioxx metadata guidelines in Haplo repositories",
   "installSecret": "86b322dbc7a7b79c3396ba4f7b905f7e7c907ec2",
   "apiVersion": 4,
+  "use": ["hres:doi", "hres:orcid"],
   "depend": [
       "hres_repository",
-      "hres_repo_schema_outputs_recommended"
+      "hres_repo_schema_outputs_recommended",
+      "hres_repo_metadata_dc",
+      "hres_digital_object_identifier",
+      "hres_orcid"
     ],
   "load": [
-      "js/hres_repo_rioxx.js"
+      "js/hres_repo_rioxx.js",
+      "js/rioxx_xml.js"
     ],
   "respond": ["/do/hres-repo-rioxx"]
 }

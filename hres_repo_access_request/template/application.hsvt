@@ -1,9 +1,0 @@
-
-pageTitle("Access request: " requester.name)
-backLink(std:object:url(item))
-
-std:object(item "linkedheading")
-std:document(form)
-
-render(timeline)
-

@@ -1,0 +1,54 @@
+{
+    "specificationVersion": 0,
+    "formId": "apc_form",
+    "formTitle": "Article processing charge",
+    "elements": [
+        {
+            "type": "choice",
+            "label": "APC currency",
+            "path": "currency",
+            "choices": [
+                "GBP", "EUR", "USD", "CHF" 
+            ]
+        },
+        {
+            "type": "number",
+            "label": "APC cost (excluding VAT)",
+            "path": "costNoVAT"
+        },
+        {
+            "type": "number",
+            "label": "APC cost (including VAT)",
+            "path": "costVAT",
+            "htmlPrefix": "£"
+        },
+        {
+            "type": "display-value",
+            "as": "html",
+            "path": "xeLink",
+            "inDocument": false
+        },
+        {
+            "type": "paragraph",
+            "label": "Notes",
+            "path": "apcNotes"
+        },
+        {
+            "type": "repeating-section",
+            "path": "otherCosts",
+            "elements": [
+                {
+                    "type": "number",
+                    "label": "Other publication cost:",
+                    "path": "otherCost",
+                    "htmlPrefix": "£"
+                },
+                {
+                    "type": "paragraph",
+                    "label": "Description",
+                    "path": "otherCostNotes"
+                }
+            ]
+        }
+    ]
+}

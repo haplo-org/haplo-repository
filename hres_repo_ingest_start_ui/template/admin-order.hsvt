@@ -1,0 +1,40 @@
+pageTitle("Re-order repository output types")
+
+std:plugin:resources("outputs-order.css")
+std:plugin:resources("outputs-order.js")
+template:std:jquery_ui:sortable()
+
+if(updated) {
+    std:ui:notice("Your preferences have been saved.")
+}
+
+<p>
+    "Drag the output types into the order you'd like them to be displayed on "
+    <a href="/do/repository-ingest-start-ui/new-for">"this page"</a>
+    ", where users select the type of their output."
+</p>
+<p>"The dividing line between important and less important types can also be hidden in the same way as types."</p>
+<p>"Any new types added will appear directly above the hidden line."</p>
+<p>"Please note that the changes you make here will affect all users. When you are finished, click 'Save changes'."</p>
+
+<form method="POST" action="/do/repository-ingest-start-ui/admin-order/submit">
+    std:form:token()
+
+    <input type="hidden" name="types" value="!">
+    
+    <p><input type="submit" value="Save changes"></p>
+
+    <div id="types-list">
+
+        each(types) {
+            if(dividerType) {
+                <div class="types-item divider" data-ref=dividerType>
+                    <div><span> dividerText </span></div>
+                </div>
+            } else {
+                <div class="types-item" data-ref=ref>name</div>
+            }
+        }
+
+    </div>
+</form>

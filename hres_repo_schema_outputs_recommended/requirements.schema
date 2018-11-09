@@ -1,16 +1,147 @@
 
+schema-template hres:template-type:repository:output
+    attribute hres:attribute:research-or-scholarly [sort=12100]
+    attribute hres:attribute:output-status [sort=15000]
+    attribute hres:attribute:publication-process-dates [sort=15101]
+
+schema-template hres:template-type:repository:practice-based-research
+    annotation hres:annotation:repository:practice-based-research
+    # For schema annotation queries
+    annotation hres:annotation:repository:output
+    search-name practice-based
+    search-name output
+    FORCE-REMOVE attribute hres:attribute:authors-citation
+    attribute hres:aliased-attribute:creators-citation [sort=10200]
+    FORCE-REMOVE attribute hres:attribute:abstract
+    attribute hres:aliased-attribute:description [sort=10500]
+    attribute hres:attribute:contributors [sort=10500]
+    FORCE-REMOVE attribute std:aliased-attribute:year
+    attribute dc:attribute:date [sort=10700]
+    REMOVE attribute dc:attribute:publisher
+    attribute hres:aliased-attribute:publisher-or-commissioning-body [sort=13500]
+    attribute hres:attribute:media-type [sort=14200]
+    attribute hres:attribute:image-credit [sort=14300]
+    attribute hres:attribute:measurements [sort=15500]
+    attribute hres:attribute:rights [sort=16100]
+
+# -------- Aliased attributes -------------------------------------
+
+aliased-attribute hres:aliased-attribute:publisher-or-commissioning-body
+    title Publisher or commissioning body
+    search-name publisher
+    search-name commissioning-body
+    alias-of dc:attribute:publisher
+aliased-attribute hres:aliased-attribute:description
+    title: Description
+    search-name: description
+    alias-of hres:attribute:abstract
+
+aliased-attribute hres:aliased-attribute:creators-citation
+    title: Creators
+    search-name: creators
+    alias-of hres:attribute:authors-citation
+    on-qualifier std:qualifier:null
+    on-qualifier hres:qualifier:actor
+    on-qualifier hres:qualifier:animator
+    on-qualifier hres:qualifier:author-of-screenplay
+    on-qualifier hres:qualifier:calligrapher
+    on-qualifier hres:qualifier:choreographer
+    on-qualifier hres:qualifier:cinematographer
+    on-qualifier hres:qualifier:composer
+    on-qualifier hres:qualifier:conductor
+    on-qualifier hres:qualifier:conference-organizer
+    on-qualifier hres:qualifier:costume-designer
+    on-qualifier hres:qualifier:curator
+    on-qualifier hres:qualifier:dancer
+    on-qualifier hres:qualifier:designer
+    on-qualifier hres:qualifier:director
+    on-qualifier hres:qualifier:exhibitor
+    on-qualifier hres:qualifier:film-editor
+    on-qualifier hres:qualifier:illustrator
+    on-qualifier hres:qualifier:instrumentallist
+    on-qualifier hres:qualifier:librettist
+    on-qualifier hres:qualifier:lighting-designer
+    on-qualifier hres:qualifier:lyricist
+    on-qualifier hres:qualifier:musician
+    on-qualifier hres:qualifier:performer
+    on-qualifier hres:qualifier:photographer
+    on-qualifier hres:qualifier:printmaker
+    on-qualifier hres:qualifier:producer
+    on-qualifier hres:qualifier:production-personnel
+    on-qualifier hres:qualifier:programmer
+    on-qualifier hres:qualifier:recording-engineer
+    on-qualifier hres:qualifier:researcher
+    on-qualifier hres:qualifier:set-designer
+    on-qualifier hres:qualifier:singer
+    on-qualifier hres:qualifier:translator
+    on-qualifier hres:qualifier:videographer
+    on-qualifier hres:qualifier:vocalist
+
+# -------- Attributes --------------------------------------------
+
+attribute dc:attribute:author as Author
+attribute dc:attribute:date as Date
+attribute hres:attribute:researcher as Researcher
+
 attribute hres:attribute:place-of-publication as PlaceOfPublication
     title: Place of publication
     search-name: place-of-publication
     qualifier std:qualifier:null
     data-type text
 
-# -----------------------------------------------------------------
+attribute hres:attribute:image-credit
+    title Image credit
+    search-name image-credit
+    qualifier std:qualifier:null
+    data-type text
+
+attribute hres:attribute:measurements
+    title Measurements
+    search-name measurements
+    qualifier std:qualifier:null
+    data-type text
+
+attribute hres:attribute:rights
+    title Rights
+    search-name rights
+    qualifier std:qualifier:null
+    data-type text
+
+attribute hres:attribute:media-type
+    title Media type
+    search-name media-type
+    qualifier std:qualifier:null
+    data-type link
+    ui-options dropdown
+    linked-type hres:type:media-type
+
+# TODO: Will this need shadowing configuration?
+attribute hres:attribute:contributors as Contributors
+    REMOVE title Contributors
+    REMOVE search-name contributors
+    title Collaborators
+    search-name collaborators
+    qualifier std:qualifier:null
+    data-type plugin
+    data-type-options hres:author_citation
+
+attribute hres:attribute:qualification-name
+    title: Qualification name
+    search-name qualification-name
+    qualifier std:qualifier:null
+    data-type text
+
+attribute hres:attribute:book-author as BookAuthor
+    title: Book author
+    search-name book-author
+    qualifier std:qualifier:null
+    data-type plugin
+    data-type-options hres:author_citation
+
+# -------- Types --------------------------------------------------
 
 type hres:type:artefact as Artefact
-    attribute hres:attribute:place-of-publication [sort=10850]
-
-type hres:type:audio as Audio
+    apply-schema-template hres:template-type:repository:practice-based-research
     attribute hres:attribute:place-of-publication [sort=10850]
 
 type std:type:book as Book
@@ -18,27 +149,37 @@ type std:type:book as Book
     attribute hres:attribute:peer-review [sort=12000]
 
 type hres:type:book-chapter as BookChapter
+    attribute hres:attribute:book-author [sort=10770]
     attribute hres:attribute:place-of-publication [sort=10850]
     attribute hres:attribute:peer-review [sort=12000]
 
 type hres:type:composition as Composition
+    apply-schema-template hres:template-type:repository:practice-based-research
     attribute hres:attribute:place-of-publication [sort=10850]
 
 type hres:type:conference-item as ConferenceItem
     attribute hres:attribute:funder [sort=13050]
 
 type hres:type:design as Design
+    apply-schema-template hres:template-type:repository:practice-based-research
     attribute hres:attribute:place-of-publication [sort=10850]
 
 type hres:type:devices-and-products as DevicesAndProducts
     attribute hres:attribute:place-of-publication [sort=10850]
 
 type hres:type:digital-or-visual-media as DigitalOrVisualMedia
+    apply-schema-template hres:template-type:repository:practice-based-research
     attribute hres:attribute:place-of-publication [sort=10850]
+
+type hres:type:exhibition as Exhibition
+    apply-schema-template hres:template-type:repository:practice-based-research
 
 type hres:type:journal-article as JournalArticle
     attribute hres:attribute:peer-review [sort=12000]
     attribute hres:attribute:funder [sort=13050]
+
+type hres:type:performance as Performance
+    apply-schema-template hres:template-type:repository:practice-based-research
 
 type hres:type:report as Report
     attribute hres:attribute:place-of-publication [sort=10850]
@@ -46,5 +187,185 @@ type hres:type:report as Report
 type hres:type:software as Software
     attribute hres:attribute:place-of-publication [sort=10850]
 
-type hres:type:video as Video
-    attribute hres:attribute:place-of-publication [sort=10850]
+type hres:type:thesis
+    attribute hres:attribute:qualification-name [sort=10350]
+type hres:type:thesis:phd
+    title: PhD Thesis
+    parent-type hres:type:thesis
+    search-name phd-thesis
+    render-icon: E209,2,f E1FF,0,c
+    render-category 3
+type hres:type:thesis:mphil
+    title: MPhil Thesis
+    parent-type hres:type:thesis
+    search-name mphil-thesis
+    render-icon: E209,3,f E1FF,0,c
+    render-category 4
+type hres:type:thesis:masters
+    title: Masters Thesis
+    parent-type hres:type:thesis
+    search-name masters-thesis
+    render-icon: E209,4,f E1FF,0,c
+    render-category 5
+
+# ----- Lists -----------------------------------------------------
+
+type hres:type:media-type
+    title Media type
+    search-name media-type
+    apply-schema-template hres:template-type:list
+object hres:list:media-type:video
+    title Video
+    type hres:type:media-type
+object hres:list:media-type:image
+    title Image
+    type hres:type:media-type
+object hres:list:media-type:audio
+    title Audio
+    type hres:type:media-type
+
+# ----- Qualifiers ------------------------------------------------
+
+qualifier hres:qualifier:actor
+    title Actor
+    search-name Actor
+
+qualifier hres:qualifier:animator
+    title Animator
+    search-name animator
+
+qualifier hres:qualifier:author-of-screenplay
+    title Author of screenplay
+    search-name author-of-screenplay
+
+qualifier hres:qualifier:calligrapher
+    title Calligrapher
+    search-name calligrapher
+
+qualifier hres:qualifier:choreographer
+    title Choreographer
+    search-name choreographer
+
+qualifier hres:qualifier:cinematographer
+    title Cinematographer
+    search-name cinematographer
+
+qualifier hres:qualifier:composer
+    title Composer
+    search-name composer
+
+qualifier hres:qualifier:conductor
+    title Conductor
+    search-name conductor
+
+qualifier hres:qualifier:conference-organizer
+    title Conference organizer
+    search-name conference-organizer
+
+qualifier hres:qualifier:costume-designer
+    title Costume designer
+    search-name costume-designer
+
+qualifier hres:qualifier:curator
+    title Curator
+    search-name curator
+
+qualifier hres:qualifier:dancer
+    title Dancer
+    search-name dancer
+
+qualifier hres:qualifier:designer
+    title Designer
+    search-name designer
+
+qualifier hres:qualifier:director
+    title Director
+    search-name director
+
+qualifier hres:qualifier:exhibitor
+    title Exhibitor
+    search-name exhibitor
+
+qualifier hres:qualifier:film-editor
+    title Film editor
+    search-name film-editor
+
+qualifier hres:qualifier:illustrator
+    title Illustrator
+    search-name illustrator
+
+qualifier hres:qualifier:instrumentallist
+    title Instrumentallist
+    search-name instrumentallist
+
+qualifier hres:qualifier:librettist
+    title Librettist
+    search-name librettist
+
+qualifier hres:qualifier:lighting-designer
+    title Lighting designer
+    search-name lighting-designer
+
+qualifier hres:qualifier:lyricist
+    title Lyricist
+    search-name lyricist
+
+qualifier hres:qualifier:musician
+    title Musician
+    search-name musician
+
+qualifier hres:qualifier:performer
+    title Performer
+    search-name performer
+
+qualifier hres:qualifier:photographer
+    title Photographer
+    search-name photographer
+
+qualifier hres:qualifier:printmaker
+    title Printmaker
+    search-name printmaker
+
+qualifier hres:qualifier:producer
+    title Producer
+    search-name producer
+
+qualifier hres:qualifier:production-personnel
+    title Production personnel
+    search-name production-personnel
+
+qualifier hres:qualifier:programmer
+    title Programmer
+    search-name programmer
+
+qualifier hres:qualifier:recording-engineer
+    title Recording engineer
+    search-name recording-engineer
+
+qualifier hres:qualifier:researcher
+    title Researcher
+    search-name researcher
+
+qualifier hres:qualifier:set-designer
+    title Set designer
+    search-name set-designer
+
+qualifier hres:qualifier:singer
+    title Singer
+    search-name singer
+
+qualifier hres:qualifier:translator
+    title Translator
+    search-name translator
+
+qualifier hres:qualifier:videographer
+    title Videographer
+    search-name videographer
+
+qualifier hres:qualifier:vocalist
+    title Vocalist
+    search-name vocalist
+
+
+
+

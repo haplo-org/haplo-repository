@@ -20,3 +20,4 @@ attribute dc:attribute:author as Author
 # ---------- Groups ------------------------------------
 
 group hres:group:repository-editors as RepositoryEditors
+group hres:group:data-preparers as DataPreparers

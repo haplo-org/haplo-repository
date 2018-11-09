@@ -1,0 +1,5 @@
+pageTitle("Browse by year")
+
+each(years) {
+  <p> <a href=["/year/" .]> . </a> </p>
+}

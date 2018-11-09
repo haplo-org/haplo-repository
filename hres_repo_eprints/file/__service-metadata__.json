@@ -1,0 +1,7 @@
+{
+    "hres:repository:eprints:write-store-object-below-xml-cursor": {
+        "statements": [
+            "conforms-to hres:write-store-object-below-xml-cursor"
+        ]
+    }
+}

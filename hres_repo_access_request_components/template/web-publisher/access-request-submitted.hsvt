@@ -1,0 +1,15 @@
+
+    <h2> title ": " std:object:title(object) </h2>
+    
+    <p> "&nbsp;" </p>
+    
+    <p> "Your request for access to the files on this record has been submitted successfully." </p>
+    <p> "The repository team have been notified and are reviewing your request." </p>
+    <p> "You will be notified when the request has been processed." </p>
+    
+    <p> "&nbsp;" </p>
+
+    within(button) {
+      std:web-publisher:template("hres:repository:common:ui:button:secondary")
+        { "Back to repository" }
+    }

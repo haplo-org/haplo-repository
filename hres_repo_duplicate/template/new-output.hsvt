@@ -1,0 +1,7 @@
+pageTitle("Choose new item type")
+
+within(primary)   { template:std:ui:choose() }
+if(secondary) {
+    <hr>
+    within(secondary) { template:std:ui:choose() }
+}

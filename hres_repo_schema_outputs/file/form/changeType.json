@@ -1,0 +1,13 @@
+{
+    "formId": "changeType",
+    "elements": [
+        {
+            "type": "choice",
+            "style": "radio",
+            "label": "Change type to:",
+            "required": true,
+            "path": "type",
+            "choices": "types"
+        }
+    ]
+}

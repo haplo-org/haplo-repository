@@ -7,15 +7,24 @@
 
 P.webPublication.pagePart({
     name: "hres:repository:person:outputs",
-    category: "hres:repository:person:sidebar",
+    category: "hres:repository:person:below",
     sort: 2000,
     deferredRender: function(E, context, options) {
         if(context.object) {
-            var outputs = _.map(O.query().
+            var outputs = [];
+            if(O.serviceImplemented("hres:repo-publication-parts-person:get-ordered-outputs-for-researcher")) {
+                outputs = O.service("hres:repo-publication-parts-person:get-ordered-outputs-for-researcher", context.object.ref);
+            } else {
+                outputs = O.query().
                 link(SCHEMA.getTypesWithAnnotation('hres:annotation:repository-item'), A.Type).
-                link(context.object.ref, A.Author).
+                or(function(subquery) {
+                    subquery.link(context.object.ref, A.Author).
+                             link(context.object.ref, A.Editor);
+                }).
                 sortByDate().
-                execute(), function(output) {
+                execute();
+            }
+            var displayOutputs = _.map(outputs, function(output) {
                     return {
                         output: output,
                         href: context.publishedObjectUrlPath(output),
@@ -23,8 +32,8 @@ P.webPublication.pagePart({
                     };
                 }
             );
-            if(outputs.length === 0) { return; }
-            return P.template("person/outputs").deferredRender({outputs:outputs});
+            if(displayOutputs.length === 0) { return; }
+            return P.template("person/outputs").deferredRender({outputs:displayOutputs});
         }
     }
 });

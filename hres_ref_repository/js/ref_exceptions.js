@@ -5,7 +5,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.         */
 
 
-var EXCEPTIONS = {
+var EXCEPTIONS = P.EXCEPTIONS = {
     "access-a": {
         title: "Third party content",
         details: "The output depends on the reproduction of third party content for which open access rights could not be granted (either within the specified timescales, or at all).",
@@ -199,4 +199,10 @@ P.respond("GET,POST", "/do/hres-ref-repo/delete-exception", [
         text: "Remove the REF exception information registered for this output.",
         options:[{label:"Delete"}]
     }, "std:ui:confirm");
+});
+
+P.implementService("hres:repository:set_exception", function(row) {
+    if(row.output && row.exception) {
+        P.db.exceptions.create(row).save();
+    }
 });

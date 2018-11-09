@@ -7,36 +7,105 @@
 
 P.implementService("std:reporting:collection:repository_items:setup", function(collection) {
     collection.
-        fact("refIsSubmissible",    "boolean",      "REF Submissible").
-        fact("refEmbargoCheck",     "boolean",      "Embargo within allowed length").
-        fact("refDepositCheck",     "boolean",      "Deposited in time").
-        fact("refMetadataCheck",    "boolean",      "Has required metadata").
-        fact("refHasException",     "boolean",      "Exception registered").
-        fact("refFirstPublished",   "date",         "Publication date").
-        fact("refUnitOfAssessment", "ref",          "REF Unit of Assessment").
+        fact("refUnitOfAssessment",     "ref",          "Unit of Assessment").
+        fact("refEmbargoCheck",         "boolean",      "Embargo within allowed length").
+        fact("refDepositCheck",         "boolean",      "Deposited in time").
+        fact("refMetadataCheck",        "boolean",      "Has required metadata").
+        fact("refWillPassOnPublication", "boolean",     "Will pass when published").
+        fact("refHasException",         "boolean",      "Exception registered").
         
+        fact("refFirstPublished",       "date",         "Publication date").
+        fact("refPublishedInOAPeriod",  "boolean",      "Accepted in REF OA period").   // Since 2016-04-01
+        fact("refPublishedInREFPeriod", "boolean",      "Accepted in current REF period").   // Since 2014-04-01
+        fact("refIsOACompliant",        "boolean",      "OA compliant").
+        // NOTE: Published as Green OA !== Green OA compliant (for REF purposes). See hres_open_access plugin
+        fact("refIsGreenOACompliant",   "boolean",      "Green OA compliant").
+        
+        fact("refFirstPublished",       "date",         "Publication date").
+        fact("refPublishedInOAPeriod",  "boolean",      "Accepted in REF OA period").   // Since 2016-04-01
+        fact("refPublishedInREFPeriod", "boolean",      "Accepted in current REF period").   // Since 2014-04-01
+        fact("refIsOACompliant",        "boolean",      "OA compliant").
+        // NOTE: Published as Green OA !== Green OA compliant (for REF purposes). See hres_open_access plugin
+        fact("refIsGreenOACompliant",   "boolean",      "Green OA compliant").
         statistic({
             name:"refSubmissibleCount",
             description:"Items submissible to the REF",
-            filter: function(select) {
+            filter(select) {
                 select.where("refIsSubmissible", "=", true);
             },
             aggregate:"COUNT"
+        }).
+        statistic({
+            name: "countREFOACompliant", description: "REF OA Compliant items",
+            filter(select) { 
+                select.where("refIsOACompliant", "=", true).
+                    where("refPublishedInOAPeriod", "=", true);
+            },
+            aggregate: "COUNT"
+        }).
+        filter("withinREFOAPolicyScope", (select) => {
+            select.where("refPublishedInOAPeriod", "=", true).
+                where("oaIsConfItemOrArticle", "=", true);
+        }).
+        filter("publishedInREFPeriod", (select) => {
+            select.where("refPublishedInREFPeriod", "=", true);
         });
 });
 
 P.implementService("std:reporting:collection:repository_items:get_facts_for_object", function(object, row) {
-    row.refIsSubmissible = P.isREFSubmissible(object);
-    
-    var checks = P.REFChecks;
-    row.refEmbargoCheck = !!checks.embargo.check(object);
-    row.refDepositCheck = !!checks.deposit.check(object);
-    row.refMetadataCheck = !!checks.metadata.check(object);
-    
-    row.refHasException = !!P.getREFException(object);
-    var published = P.getEarliestPublicationDate(object);
-    row.refFirstPublished =  published ? published.start : null;
     row.refUnitOfAssessment = object.first(A.REFUnitOfAssessment) || null;
+
+    row.refEmbargoCheck = !!P.REFChecks.embargo.check(object);
+    row.refDepositCheck = !!P.REFChecks.deposit.check(object);
+    row.refMetadataCheck = !!P.REFChecks.metadata.check(object);
+    if(!(P.passesREFOAChecks(object) || P.isGoldOA(object))) {
+        row.refWillPassOnPublication = P.willPassOnPublication(object);
+    }
+    row.refHasException = !!P.getREFException(object);
+
+    row.refFirstPublished =  O.service("hres:repository:earliest_publication_date", object) || null;
+    row.refPublishedInOAPeriod = P.isPublishedInREFOAPeriod(object);
+    row.refPublishedInREFPeriod = P.isPublishedInREFPeriod(object);
+
+    if(P.isConfItemOrJournalArticle(object)) {
+        row.refIsGreenOACompliant = P.passesREFOAChecks(object);
+        row.refIsOACompliant = (P.passesREFOAChecks(object) || P.isGoldOA(object));
+    }
+});
+
+P.implementService("hres:reporting-aggregate-dimension:ref-oa-compliance", function() {
+    return [
+        { title: "Gold OA", filter(select) { 
+            select.where("oaIsGoldOA", "=", true).
+                where("refPublishedInOAPeriod", "=", true);
+        }},
+        { title: "Green compliant", filter(select) {
+            select.where("refIsGreenOACompliant", "=", true).
+                where("refPublishedInOAPeriod", "=", true);
+        }},
+        { title: "Total compliant", filter(select) {
+            select.where("refIsOACompliant", "=", true).
+                where("refPublishedInOAPeriod", "=", true);
+        }},
+        { title: "Non-compliant", filter(select) {
+            select.where("refIsOACompliant", "=", false).
+                where("refPublishedInOAPeriod", "=", true);
+        }},
+        { title: "Out of scope", filter(select) {
+            select.or((sq) => {
+                sq.where("oaIsConfItemOrArticle", "=", false).
+                    where("refPublishedInOAPeriod", "=", false);
+            });
+        }},
+        { title: "Total", filter() {} }
+    ];
+});
+
+P.implementService("std:reporting:dashboard:outputs_in_progress:setup_export", function(dashboard) {
+    dashboard.columns(220, [
+        "refUnitOfAssessment",
+        {fact:"refIsOACompliant", heading:"REF OA Compliant"}
+    ]);
 });
 
 // ------------------------------------------------------------
@@ -53,7 +122,7 @@ P.hook('hPostObjectChange', function(response, object, operation, previous) {
 
 P.implementService("hres_repo_open_access:custom_dashboard_filtering", function(details, pathElements) {
     if(pathElements[0] === "ref-unit") {
-        var ref = O.ref(pathElements[1]);
+        let ref = O.ref(pathElements[1]);
         details.filter = function(select) {
             select.where("refUnitOfAssessment", "=", ref);
         };
@@ -61,48 +130,170 @@ P.implementService("hres_repo_open_access:custom_dashboard_filtering", function(
     }
 });
 
-P.implementService("std:reporting:dashboard:repository_overview:setup", function(dashboard) {
-    dashboard.columns(1000, [
-        "refIsSubmissible"
-    ]);
-});
-
-P.implementService("std:reporting:dashboard:embargo_overview:setup", function(dashboard) {
-    dashboard.columns(1000, [
-        {fact:"refEmbargoCheck", heading:"Embargo exceeds REF limit"}
-    ]);
-});
-
 // ------------------------------------------------------------
 
 P.implementService("std:action_panel:activity:menu:repository", function(display, builder) {
     if(O.currentUser.allowed(P.CanManageREF)) {
-        var panel = builder.panel(500).
-            link(400, "/do/hres-ref-repo/compliance-overview", "REF Compliance");
+        builder.panel(550).
+            title("REF Open Access").
+            link(20, "/do/hres-ref-repo/overview", "Overview (submitted in this REF period)").
+            link(100, "/do/hres-ref-repo/items-within-scope", "Items within REF OA policy scope").
+            link(200, "/do/hres-ref-repo/non-compliant-items", "Non-compliant items").
+            link(300, "/do/hres-ref-repo/embargoes", "Embargo overview").
+            link(400, "/do/hres-ref-repo/compliance-by-faculty", "REF OA compliance by "+NAME("Faculty")).
+            link(400, "/do/hres-ref-repo/compliance-by-department", "REF OA compliance by "+NAME("Department")).
+            link(400, "/do/hres-ref-repo/compliance-by-uoa", "REF OA compliance by Unit of Assessment");
     }
 });
 
-P.respond("GET,POST", "/do/hres-ref-repo/compliance-overview", [
+P.respond("GET,POST", "/do/hres-ref-repo/compliance-by-faculty", [
+], function(E) {
+    P.CanManageREF.enforce();
+    P.reporting.dashboard(E, {
+        kind: "aggregate",
+        collection: "repository_items",
+        name: "compliance_by_faculty",
+        title: "REF OA compliance by "+NAME("Faculty"),
+        filter: "publishedInREFPeriod",
+        x: "hres:reporting-aggregate-dimension:ref-oa-compliance",
+        y: "hres:reporting-aggregate-dimension:faculty"
+    }).respond();
+});
+
+P.respond("GET,POST", "/do/hres-ref-repo/compliance-by-department", [
+], function(E) {
+    P.CanManageREF.enforce();
+    P.reporting.dashboard(E, {
+        kind: "aggregate",
+        collection: "repository_items",
+        name: "compliance_by_department",
+        title: "REF OA compliance by "+NAME("Department"),
+        filter: "publishedInREFPeriod",
+        x: "hres:reporting-aggregate-dimension:ref-oa-compliance",
+        y: "hres:reporting-aggregate-dimension:department"
+    }).respond();
+});
+
+P.respond("GET,POST", "/do/hres-ref-repo/compliance-by-uoa", [
+], function(E) {
+    P.CanManageREF.enforce();
+    P.reporting.dashboard(E, {
+        kind: "aggregate",
+        collection: "repository_items",
+        name: "compliance_by_uoa",
+        title: "REF OA compliance by Unit of Assessment",
+        filter: "publishedInREFPeriod",
+        x: "hres:reporting-aggregate-dimension:ref-oa-compliance",
+        y: "hres:reporting-aggregate-dimension:ref-unit-of-assessments"
+    }).respond();
+});
+
+P.respond("GET,POST", "/do/hres-ref-repo/embargoes", [
 ], function(E) {
     P.CanManageREF.enforce();
     P.reporting.dashboard(E, {
         kind:"list",
         collection:"repository_items",
-        name:"ref_compliance",
-        title:"REF Compliance"
+        name:"ref_embargoes",
+        title:"Embargo overview"
     }).
-        summaryStatistic(0, "refSubmissibleCount").
-        order(["refFirstPublished", "descending"]).
+        summaryStatistic(0, "count").
         columns(1, [
             {fact:"ref", heading:"Item", link:true}
         ]).
-        columns(200, [
-            "refFirstPublished",
-            "refEmbargoCheck",
-            "refDepositCheck",
-            "refMetadataCheck",
-            "refHasException",
-            "refIsSubmissible"
+        columns(200, ["refUnitOfAssessment"]).
+        columns(999, ["refEmbargoCheck"]).
+        respond();
+});
+
+P.respond("GET,POST", "/do/hres-ref-repo/non-compliant-items", [
+], function(E) {
+    P.CanManageREF.enforce();
+    P.reporting.dashboard(E, {
+        name: "ref_non_compliance",
+        kind: "list",
+        collection: "repository_items",
+        title: "Items failing REF OA compliance"
+    }).
+        filter((select) => {
+            select.where("refPublishedInOAPeriod", "=", true).
+                where("oaIsConfItemOrArticle", "=", true).
+                or((sq) => {
+                    sq.where("refIsOACompliant", "=", false).
+                        where("refIsOACompliant", "=", null);
+                });
+        }).
+        use("std:row_text_filter", {facts:["title","author"], placeholder:"Search"}).
+        summaryStatistic(0, "count").
+        columns(10, [
+            {type:"linked", style:"wide", column:{fact:"title"}}
+        ]).
+        columns(100, [
+            {
+                fact:"refDepositCheck",
+                type:"boolean",
+                heading:"Deposited too late",
+                truthFunction(value) { return !value; }
+            },
+            {
+                fact:"refEmbargoCheck",
+                type:"boolean",
+                heading:"Embargo too long",
+                truthFunction(value) { return !value; }
+            },
+            {
+                fact:"refMetadataCheck",
+                type:"boolean",
+                heading:"Missing required metadata",
+                truthFunction(value) { return !value; }
+            }
+        ]).
+        columns(150, [
+            "refWillPassOnPublication"
+        ]).
+        respond();
+});
+
+P.respond("GET,POST", "/do/hres-ref-repo/items-within-scope", [
+], function(E) {
+    P.CanManageREF.enforce();
+    P.reporting.dashboard(E, {
+        name: "ref_oa_items_within_scope",
+        kind: "list",
+        collection: "repository_items",
+        title: "Items within REF OA policy scope",
+        filter: "withinREFOAPolicyScope"
+    }).
+        use("std:row_object_filter", {fact: "faculty", objects: T.Faculty}).
+        use("std:row_object_filter", {fact: "refUnitOfAssessment", objects: T.REFUnitOfAssessment}).
+        summaryStatistic(0, "count").
+        summaryStatistic(1, "countREFOACompliant").
+        columns(10, [
+            {type:"linked", style:"wide", column:{fact:"title"}},
+            "type",
+            "author"
+        ]).
+        columns(100, [
+            "refIsGreenOACompliant",
+            {
+                type: "boolean",
+                heading: "Non-compliant",
+                fact: "refIsOACompliant",
+                truthFunction(value) { return !value; }
+            },
+            "refHasException"
+        ]).
+        respond();
+});
+
+P.respond("GET,POST", "/do/hres-ref-repo/overview", [
+], function(E) {
+    P.CanManageREF.enforce();
+    let dashboard = O.service("hres:repository:reporting:overview_dashboard", E, "Overview (submitted in this REF period)");
+    dashboard.filter((select) => { select.where("refPublishedInREFPeriod", "=", true); }).
+        columns(999, [
+            "refPublishedInOAPeriod",
+            "refIsOACompliant"
         ]).
         respond();
 });
@@ -113,7 +304,7 @@ P.respond("GET,POST", "/do/hres-ref-repo/compliance-overview", [
 P.implementService("std:action_panel:activity:menu:repository", function(display, builder) {
     if(O.currentUser.allowed(P.CanManageREF)) {
         builder.panel(600).
-            link(600, "/do/hres-ref-repo/open-access", "REF Unit of Assessment");
+            link(600, "/do/hres-ref-repo/open-access", "Open access by REF Unit of Assessment");
     }
 });
 
@@ -132,43 +323,40 @@ P.implementService("std:reporting:collection:ref_unit_of_assessment:get_facts_fo
     );
 });
 
-var getItemListUrl = function(oaType, unitRef, year) {
-    var url = "/do/hres-repo-open-access/repository-items/"+oaType+"/ref-unit/"+unitRef;
-    if(year) {
-        url = url+"?year="+year;
-    }
-    return url;
-};
+const OA_COLUMN_VIEWS = [
+    { fact: "oaGreenOutputs", oaType: "green" },
+    { fact: "oaGoldOutputs", oaType: "gold" },
+    { fact: "oaNotOAOutputs", oaType: "not-oa" },
+    { fact: "oaTotalEligibleOutputs", oaType: "all" }
+];
 
 P.respond("GET,POST", "/do/hres-ref-repo/open-access", [
     {parameter:"year", as:"int", optional:true}
 ], function(E, year) {
     P.CanManageREF.enforce();
-    var dashboard = P.reporting.dashboard(E, {
+    P.reporting.dashboard(E, {
         kind: "list",
         collection: "ref_unit_of_assessment",
         name: "OA_ref_unit_of_assessment",
-        title: "Open Access: REF Unit of Assessment"
+        title: "Open Access by REF Unit of Assessment"
     }).
         use("hres:schema:calendar_year_navigation_for_json_columns", year).
         columns(0, [
             {fact: "ref", heading: "REF Unit of Assessment", link: true}
         ]).
-        columns(100, [
-            {
-                type:"linked", column:"oaGreenOutputs", link: function(row) {
-                    return getItemListUrl("green", row.ref, year);
-            }},{
-                type:"linked", column:"oaGoldOutputs", link: function(row) {
-                    return getItemListUrl("gold", row.ref, year);
-            }},{
-                type:"linked", column:"oaNotOAOutputs", link: function(row) {
-                    return getItemListUrl("not-oa", row.ref, year);
-            }},{
-                type:"linked", column:"oaTotalEligibleOutputs", link: function(row) {
-                    return getItemListUrl("all", row.ref, year);
-            }}
-        ]).
+        columns(100, _.map(OA_COLUMN_VIEWS, (view) => {
+            return {
+                type: "linked",
+                column: view.fact,
+                link(row) {
+                    return P.template("oa-dashboard-url").render({
+                        type: view.oaType,
+                        ref: row.ref,
+                        year: year
+                    });
+                }
+            };
+        })).
         respond();
 });
 

@@ -1,0 +1,11 @@
+{
+  "pluginName": "hres_repo_metadata_dc",
+  "pluginAuthor": "Haplo Repository",
+  "pluginVersion": 1,
+  "displayName": "Repository Dublin Core metadata",
+  "displayDescription": "Dublin Core metadata management and conversions",
+  "apiVersion": 4,
+  "load": [
+      "js/hres_repo_metadata_dc.js"
+    ]
+}

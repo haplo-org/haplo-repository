@@ -1,14 +1,4 @@
-<div class="panel panel-default">
-  <div class="panel-heading">
-    <h3 class="panel-title">"Permalink"</h3>
-  </div>
-  <div class="panel-body">
-    <p>"Use this permanent URL when citing or linking to this resource:"</p>
-    <p style="overflow: hidden;">
-        // TODO: hardcoded
-        <span style="white-space: nowrap;">
-          <a href=permalink>permalink</a>
-        </span>
-    </p>
-  </div>
+
+<div class="well well--gray haplo-repository-well" style="white-space: nowrap; overflow-x: scroll !important; overflow-y: hidden !important; overflow: scroll;">
+  <p><small><b class="text-uppercase">"Permalink - "</b> <span>permalink</span></small></p>
 </div>

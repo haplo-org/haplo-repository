@@ -5,8 +5,62 @@ group hres:group:admin-staff as AdminStaff
 group hres:group:data-preparers as DataPreparers
     title: Data Preparers
 
+# ------- Schema definitions ------------------------
+
+schema-template hres:template-type:repository:research-data
+    attribute hres:attribute:file-access-level [sort=15500]
+
 attribute hres:attribute:file-access-level as AccessLevel
-
+    title: File Access Level
+    search-name: access-level
+    qualifier: std:qualifier:null
+    data-type link
+    ui-options radio
+    linked-type hres:type:file-access-level
+    
 type hres:type:file-access-level as AccessLevel
+    title: File Access Level
+    search-name: access-level
+    apply-schema-template hres:template-type:list
+object hres:list:file-access-level:safeguarded
+    type hres:type:file-access-level
+    title: Safeguarded
+object hres:list:file-access-level:open
+    type hres:type:file-access-level
+    title: Open
+object hres:list:file-access-level:controlled
+    type hres:type:file-access-level
+    title: Controlled
+object hres:list:file-access-level:restricted
+    type hres:type:file-access-level
+    title: Restricted
 
+# ------- Restrictions ------------------------
 
+label hres:label:view-prepared-files as ViewPreparedFiles
+
+label hres:label:lift-all-file-controls as LiftAllFileControls
+    title: Lift all file control restrictions
+    category: Restriction
+
+label hres:label:control-all-files as ControlAllFiles
+    title: Control all files
+    category: Restriction
+
+restriction hres:restriction:control-accepted-author-manuscript
+    title: Control Author Accepted Manuscript
+    restrict-if-label hres:label:control-all-files
+    label-unrestricted hres:label:lift-all-file-controls
+    attribute-restricted hres:attribute:accepted-author-manuscript
+
+restriction hres:restriction:control-published-file
+    title: Control Published File
+    restrict-if-label hres:label:control-all-files
+    label-unrestricted hres:label:lift-all-file-controls
+    attribute-restricted hres:attribute:published-file
+
+restriction hres:restriction:control-file
+    title: Control generic file
+    restrict-if-label hres:label:control-all-files
+    label-unrestricted hres:label:lift-all-file-controls
+    attribute-restricted std:attribute:file

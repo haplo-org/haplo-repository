@@ -23,7 +23,7 @@ var CanEditRepositoryActivityOverview = O.action("hres:action:repository:can_edi
 
 // Creates link on the homepage action panel to a reporting and guides area
 P.implementService("haplo_activity_navigation:discover", function(activity) {
-    activity(40, "repository", "Repository", "E226,1,f", CanEditRepositoryActivityOverview);
+    activity(40, "repository", "Repository", "E226,0,f", CanEditRepositoryActivityOverview);
 });
 
 // --------------------------------------------------------------------------
@@ -45,7 +45,25 @@ P.implementService("hres:repository:is_repository_item", function(object) {
 });
 
 P.implementService("hres:repository:is_author", function(person, object) {
-    return object.has(person.ref, A.Author);
+    return (object.has(person.ref, A.Author) || 
+        (object.has(person.ref, A.Editor) && object.isKindOf(T.Book)));
+});
+
+P.implementService("hres:repository:earliest_publication_date", function(output) {
+    var published;
+    var publicationDates = output.every(A.PublicationDates);
+    _.each(publicationDates, function(p) {
+        if(p && (!published || (p.start < published))) {
+            published = p.start;
+        }
+    });
+    return published;
+});
+
+// --------------------------------------------------------------------------
+
+P.hresWorkflowEntities.add({
+    "author": ["object", A.Author]
 });
 
 // --------------------------------------------------------------------------
@@ -62,46 +80,34 @@ var shadowingConfigurationForTypes = function(types) {
 };
 shadowingConfigurationForTypes(P.REPOSITORY_TYPES);
 
-// Shadowed fields need to be made read only in the editor
-P.hook('hPreObjectEdit', function(response, object, isTemplate, isNew) {
+// Shadowed fields need to be updated when the object is changed
+P.hook('hComputeAttributes', function(response, object) {
     var type = object.firstType();
     if(type && shadowInTypes.get(type)) {
-        response.readOnlyAttributes = (response.readOnlyAttributes || []);
-        _.each(shadowedAttributes, function(shadowed, author) {
-            response.readOnlyAttributes.push(shadowed);
-        });
-    }
-});
-
-// Shadowed fields need to be updated after the object is saved
-P.hook('hPostObjectEdit', function(response, object, previous) {
-    var type = object.firstType();
-    if(type && shadowInTypes.get(type)) {
-        var r = response.replacementObject || object.mutableCopy();
-        response.replacementObject = r;
+        var toAppend = [];
         _.each(shadowedAttributes, function(shadowed, author) {
             author = 1*author;  // JS keys are always strings
-            r.remove(shadowed);
-            r.every(author, function(v,d,q) {
+            object.every(author, function(v,d,q) {
                 var person = v.load();
                 if(person.isKindOf(T.Person) && !person.isKindOf(T.ExternalResearcher)) {
-                    r.append(v, shadowed);
+                    toAppend.push(v);
                 }
             });
+            // Note this will need changing if more attributes shadow into A.Researcher
+            object.remove(shadowed);
+            toAppend.forEach((v) => object.append(v, shadowed));
         });
     }
 });
 
-// Don't display the shadowed fields
-var preObjectDisplay = function(response, object) {
+// Don't display the shadowed attributes
+var objectRender = function(response, object) {
     var type = object.firstType();
     if(type && shadowInTypes.get(type)) {
-        var r = response.replacementObject || object.mutableCopy();
         _.each(shadowedAttributes, function(shadowed, author) {
-            r.remove(shadowed);
+            response.hideAttributes.push(shadowed);
         });
-        response.replacementObject = r;
     }
 };
-P.hook('hPreObjectDisplay', preObjectDisplay);
-P.hook('hPreObjectDisplayPublisher', preObjectDisplay);
+P.hook('hObjectRender', objectRender);
+P.hook('hObjectRenderPublisher', objectRender);

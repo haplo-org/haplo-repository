@@ -1,0 +1,6 @@
+pageTitle("Search by fields")
+
+<form method="POST" class="haplo-repo-search-by-fields">
+  std:form(form)
+  <div class="haplo-repo-search-by-fields-button"> <input type="submit" value="Search"> </div>
+</form>

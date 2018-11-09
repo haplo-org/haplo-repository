@@ -4,7 +4,6 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.         */
 
-
 P.workflow.registerWorkflowFeature("hres:ref_compliance", function(workflow, spec) {
     
     workflow.actionPanelTransitionUI({state:"wait_editor"}, function(M, builder) {
@@ -13,8 +12,9 @@ P.workflow.registerWorkflowFeature("hres:ref_compliance", function(workflow, spe
             _.each(M.transitions.list, function(t) {
                 builder.link(150,
                     (t.name === "publish" &&
-                        P.isREFOARelevent(output) &&
-                        !P.willPassOnDeposit(output)) ?
+                        P.isConfItemOrJournalArticle(output) &&
+                        P.isPublishedInREFOAPeriod(output) &&
+                        !P.willPassOnPublication(output)) ?
                         "/do/hres-ref-repo/choose-exception/"+output.ref :
                         "/do/workflow/transition/"+M.workUnit.id+"?transition="+t.name,
                     t.label, t.indicator);
@@ -25,7 +25,7 @@ P.workflow.registerWorkflowFeature("hres:ref_compliance", function(workflow, spe
 
     workflow.observeEnter({state:"published"}, function(M, transition, previous) {
         var output = M.workUnit.ref.load();
-        if(!P.isREFOARelevent(output)) { return; }
+        if(!(P.isConfItemOrJournalArticle(output) && P.isPublishedInREFOAPeriod(output))) { return; }
         
         // Does it already have a compliant file deposit?
         if(!P.getFirstFileDeposit(output)) {
@@ -35,12 +35,11 @@ P.workflow.registerWorkflowFeature("hres:ref_compliance", function(workflow, spe
                     P.db.firstFileDeposit.create({
                         output: output.ref,
                         date: new Date(),
-                        fileVersion: SCHEMA.getAttributeInfo(desc).code,
-                        objectVersion: output.version
+                        fileVersion: SCHEMA.getAttributeInfo(desc).code
                     }).save();
                     return;
                 }
-            });        
+            });
         }
     });
     

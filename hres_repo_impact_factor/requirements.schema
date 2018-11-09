@@ -1,0 +1,11 @@
+
+attribute hres:attribute:journal as Journal
+attribute hres:attribute:impact-factor as ImpactFactor
+    title: Impact factor
+    search-name: impact-factor
+    qualifier std:qualifier:null
+    data-type text
+
+type std:type:journal as Journal
+    attribute hres:attribute:impact-factor
+type hres:type:research-institute:faculty as Faculty

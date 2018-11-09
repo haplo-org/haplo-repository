@@ -7,7 +7,8 @@
   "apiVersion": 4,
   "depend": [
       "haplo_information_pages",
-      "hres_repository"
+      "hres_repository",
+      "hres_author_citation_value"
     ],
   "load": [
       "js/hres_repo_navigation.js"

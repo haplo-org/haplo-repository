@@ -3,17 +3,33 @@ label hres:label:output as Output
     title: Output
     category: Repository
 
+label hres:label:lift-repository-research-institute-restrictions as LiftRepositoryResearchInstituteRestrictions
+    title: Lift repository research institute restrictions
+    category: Restriction
+
 # ---------------------------------------------------------------------------
 
+group hres:group:repository-editors as RepositoryEditors
+
+# ---------------------------------------------------------------------------
+
+schema-template hres:template-type:repository-item
+    attribute hres:attribute:original-research-institute [sort=15200]
+    attribute hres:aliased-attribute:current-research-institute [sort=15201]
+
+# Used for traditional outputs - Journal articles, Books, etc.
 schema-template hres:template-type:repository:output
     annotation hres:annotation:repository:output
     search-name: output
+    attribute dc:attribute:publisher [sort=10800]
+    attribute hres:attribute:issn [sort=11001]
+    attribute hres:attribute:publication-dates [sort=15100]
+    element: std:group:everyone right std:action_panel {"panel":"output"} [sort=100]
 
 # ---------------------------------------------------------------------------
 
 type hres:type:artefact as Artefact
     apply-schema-template hres:template-type:repository-item
-    apply-schema-template hres:template-type:repository:output
     title: Artefact
     search-name: artefact
     attribute dc:attribute:title [sort=10000]
@@ -23,7 +39,6 @@ type hres:type:artefact as Artefact
 
 type hres:type:audio as Audio
     apply-schema-template hres:template-type:repository-item
-    apply-schema-template hres:template-type:repository:output
     title: Audio
     search-name: audio
     attribute dc:attribute:title [sort=10000]
@@ -34,7 +49,6 @@ type hres:type:audio as Audio
 type std:type:book as Book
     apply-schema-template hres:template-type:repository-item
     apply-schema-template hres:template-type:repository:output
-    annotation hres:annotation:repository:primary-repository-item
     title: Book
     search-name: book
     behaviour physical
@@ -54,7 +68,6 @@ type std:type:book as Book
 type hres:type:book-chapter as BookChapter
     apply-schema-template hres:template-type:repository-item
     apply-schema-template hres:template-type:repository:output
-    annotation hres:annotation:repository:primary-repository-item
     title: Book chapter
     search-name: book chapter
     attribute hres:aliased-attribute:chapter-title [sort=10000]
@@ -70,7 +83,6 @@ type hres:type:book-chapter as BookChapter
 
 type hres:type:composition as Composition
     apply-schema-template hres:template-type:repository-item
-    apply-schema-template hres:template-type:repository:output
     title: Composition
     search-name: composition
     attribute dc:attribute:title [sort=10000]
@@ -81,14 +93,11 @@ type hres:type:composition as Composition
 type hres:type:conference-item as ConferenceItem
     apply-schema-template hres:template-type:repository-item
     apply-schema-template hres:template-type:repository:output
-    annotation hres:annotation:repository:primary-repository-item
     title: Conference item
     search-name: conference item
     attribute dc:attribute:title [sort=10000]
     attribute dc:attribute:type [sort=10300]
-    attribute hres:aliased-attribute:conference-title [sort=10720]
-    attribute hres:aliased-attribute:conference-location [sort=10730]
-    attribute hres:attribute:event-date [sort=10740]
+    attribute hres:aliased-attribute:conference [sort=10720]
     attribute hres:attribute:journal [sort=10750]
     attribute hres:attribute:published-version-of-record [sort=12150]
     attribute hres:attribute:accepted-author-manuscript [sort=12500]
@@ -122,7 +131,6 @@ type hres:type:conference-item:conference-poster as ConferencePoster
 
 type hres:type:design as Design
     apply-schema-template hres:template-type:repository-item
-    apply-schema-template hres:template-type:repository:output
     title: Design
     search-name: design
     attribute dc:attribute:title [sort=10000]
@@ -142,7 +150,6 @@ type hres:type:devices-and-products as DevicesAndProducts
 
 type hres:type:digital-or-visual-media as DigitalOrVisualMedia
     apply-schema-template hres:template-type:repository-item
-    apply-schema-template hres:template-type:repository:output
     title: Digital or visual media
     search-name: digital or visual media
     attribute dc:attribute:title [sort=10000]
@@ -152,13 +159,10 @@ type hres:type:digital-or-visual-media as DigitalOrVisualMedia
 
 type hres:type:exhibition as Exhibition
     apply-schema-template hres:template-type:repository-item
-    apply-schema-template hres:template-type:repository:output
     title: Exhibition
     search-name: exhibition
     attribute dc:attribute:title [sort=10000]
-    attribute hres:attribute:event-title [sort=10900]
-    attribute hres:attribute:event-location [sort=10910]
-    attribute hres:attribute:event-date [sort=10920]
+    attribute hres:aliased-attribute:external-event [sort=10900]
     render-icon: E504,1,f
     render-category 2
     default-subtype hres:type:exhibition
@@ -166,7 +170,6 @@ type hres:type:exhibition as Exhibition
 type hres:type:journal-article as JournalArticle
     apply-schema-template hres:template-type:repository-item
     apply-schema-template hres:template-type:repository:output
-    annotation hres:annotation:repository:primary-repository-item
     title: Journal article
     search-name: journal article
     attribute dc:attribute:title [sort=10000]
@@ -213,13 +216,10 @@ type hres:type:patent as Patent
 
 type hres:type:performance as Performance
     apply-schema-template hres:template-type:repository-item
-    apply-schema-template hres:template-type:repository:output
     title: Performance
     search-name: performance
     attribute dc:attribute:title [sort=10000]
-    attribute hres:attribute:event-title [sort=10900]
-    attribute hres:attribute:event-location [sort=10910]
-    attribute hres:attribute:event-date [sort=10920]
+    attribute hres:aliased-attribute:external-event [sort=10900]
     render-icon: E233,1,f
     render-category 7
     default-subtype hres:type:performance
@@ -303,3 +303,36 @@ type hres:type:website as Website
     render-category 4
     default-subtype hres:type:website
 
+type std:type:person as Person
+
+# ---------------------------------------------------------------------------
+
+attribute hres:attribute:researcher as Researcher
+attribute hres:attribute:research-institute as ResearchInstitute
+attribute dc:attribute:author as Author
+attribute hres:attribute:editor as Editor
+
+aliased-attribute hres:aliased-attribute:current-research-institute as CurrentResearchInstitute
+    title: Current Research Institute
+    search-name: current-research-institute
+    alias-of hres:attribute:research-institute
+
+attribute hres:attribute:original-research-institute as OriginalResearchInstitute
+    title Original Research Institute
+    search-name original-research-institute
+    qualifier std:qualifier:null
+    data-type link
+    linked-type hres:type:research-institute
+
+# ---------------------------------------------------------------------------
+
+restriction hres:restriction:repository-item:research-institute
+    title: Original research institute read only attribute
+    restrict-if-label hres:label:repository-item
+    label-unrestricted hres:label:lift-repository-research-institute-restrictions
+    attribute-read-only hres:attribute:original-research-institute
+
+restriction hres:restriction:repository-item:current-research-institute
+    title: Current research institute read only attribute
+    restrict-if-label hres:label:repository-item
+    attribute-read-only hres:attribute:research-institute

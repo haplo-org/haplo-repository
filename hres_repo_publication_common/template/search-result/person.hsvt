@@ -1,8 +1,16 @@
 <div class="media">
     <div class="media-body">
+        if(researchInstitute) {
+            <p style="float:right"> std:object:title(researchInstitute) </p>
+        }
         std:web-publisher:object:link(object.object) {
             <h4 class="media-heading"> object.title </h4>
         }
-        <p> render(object.first.ResearchInstitute) </p>
+        if(jobTitle) {
+            <p> jobTitle </p>
+        }
+        if(orcid) {
+            <span class="orcid-id"> orcid </span>
+        }
     </div>
 </div>

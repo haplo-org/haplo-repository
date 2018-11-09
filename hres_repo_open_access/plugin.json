@@ -14,8 +14,9 @@
       "hres_repo_schema_outputs"
     ],
   "load": [
-      "js/hres_repo_open_access_test_data.js",
-      "js/hres_repo_open_access.js"
+      "js/hres_repo_open_access.js",
+      "js/oa_reporting_setup.js",
+      "js/oa_item_counts_reporting.js"
     ],
   "respond": ["/do/hres-repo-open-access"]
 }

@@ -1,0 +1,14 @@
+{
+    "specificationVersion": 0,
+    "formId": "requestSubmit",
+    "formTitle": "Request a copy of embargoed output",
+    "elements": [
+        {
+            "type": "boolean",
+            "style": "confirm",
+            "path": "agreement",
+            "label": "I agree that any files released will be for personal use only, and will not be distributed further.",
+            "trueLabel": "The user has agreed that any files released will be for personal use only, and will not be distributed further."
+        }
+    ]
+}

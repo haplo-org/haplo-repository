@@ -1,0 +1,26 @@
+{
+  "pluginName": "hresrepodemo_request_a_copy",
+  "pluginAuthor": "Haplo Services",
+  "pluginVersion": 1,
+  "displayName": "Haplo RM Repository Demo Request A Copy",
+  "displayDescription": "Demonstration implementation of 'request a copy' workflow",
+  "installSecret": "a7310f6db1d59bfffbdb497ec03c3d5f98efc0e2",
+  "apiVersion": 4,
+  "loadPriority": 10000,
+  "privilegesRequired": ["pDatabase"],
+  "use": [
+      "std:workflow"
+    ],
+  "depend": [
+      "std_workflow",
+      "hres_repository",
+      "hres_repo_access_request_management",
+      "hres_repo_access_request_components"
+    ],
+  "load": [
+      "js/hresrepodemo_request_a_copy.js",
+      "js/rac_workflow.js",
+      "js/rac_text.js"
+    ],
+  "respond": ["/do/hresrepodemo-request-a-copy"]
+}

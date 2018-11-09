@@ -8,17 +8,17 @@ which is provided in the LICENSE file.
 This repository contains software by other authors, licensed to you as follows:
 
 jQuery
-hresrepodemo_repository_publisher/static/jquery.js
+hresrepodemo_repository_publication/static/jquery.js
   http://jquery.com/
   MIT License
 
 Bootstrap
-hresrepodemo_repository_publisher/static/bootstrap.css
-hresrepodemo_repository_publisher/static/bootstrap.js
+hresrepodemo_repository_publication/static/bootstrap.css
+hresrepodemo_repository_publication/static/bootstrap.js
   http://getbootstrap.com/
   MIT License
 
 Bootstrap Lumen theme
-hresrepodemo_repository_publisher/static/bootstrap-lumen.css
+hresrepodemo_repository_publication/static/bootstrap-lumen.css
   https://github.com/thomaspark/bootswatch
   MIT License
