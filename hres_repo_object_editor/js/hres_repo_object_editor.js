@@ -9,21 +9,21 @@ var NOTES = {};
 NOTES[A.AuthorsCitation] = "authcite";
 NOTES[A.EditorsCitation] = "edcite";
 // TODO: Make these notes composable
-// NOTES[A ResearchOrScholarly] = "ressch";
-// TODO: Unconmment when Open Access schema exists
-// NOTES[A OpenAccess] = "opena";
 NOTES[A.PublicationDates] = "pubdt";
 NOTES[A.AcceptedAuthorManuscript] = "aam";
 NOTES[A.WebAddressUrl] = 'url';
-NOTES[A.Author] = 'author'; // TODO: New authors notes?
+NOTES[A.Author] = 'author';
 if("RefUnitOfAssessment" in A) {
     NOTES[A["RefUnitOfAssessment"]] = 'refunit';
 }
-// TODO: Unconmment when Embargoes schema exists
-// NOTES[A LicenseUrl] = 'license';
 NOTES[A.File] = 'file';
 NOTES[A.Issn] = 'issn';
 NOTES[A.Isbn] = 'isbn';
+NOTES[A.Keywords] = 'keywords';
+NOTES[A.PageRange] = 'pagerange';
+if("PublicationProcessDates" in A) {
+    NOTES[A.PublicationProcessDates] = 'processdates';
+}
 
 var AUTHOR_ATTR_FIELDS = [A.Author, A.BookEditor];
 // Hook into object editor to add the notes

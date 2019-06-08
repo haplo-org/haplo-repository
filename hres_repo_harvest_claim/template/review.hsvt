@@ -1,0 +1,6 @@
+pageTitle("Review claimed item: " std:object:title(harvested))
+backLink(std:object:url(harvested))
+
+<form method="POST"> std:form:token()
+  render(deferredForm)
+</form>

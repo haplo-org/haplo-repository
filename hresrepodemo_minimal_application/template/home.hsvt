@@ -1,0 +1,41 @@
+render(instructions)
+
+if(tryImpersonating) {
+    <p> "Try impersonating these authors and Repository Editors:" </p>
+    
+    within(tryImpersonating) {
+        <h5> "Example Authors" </h5>
+        <table>
+            <tr>
+                <th style="width:150px"> "Researcher" </th>
+            </tr>
+            each(authors) {
+                <tr>
+                    <td> std:object:link(.) </td>
+                </tr>
+            }
+        </table>
+        <h5> "Repository Editors" </h5>
+        <table>
+            <tr>
+                <th style="width:150px"> "Repository Editor" </th>
+            </tr>
+            each(repositoryEditors) {
+                <tr>
+                    <td> std:object:link(.) </td>
+                </tr>
+            }
+        </table>
+        <h5> "Data Preparation Team" </h5>
+        <table>
+            <tr>
+                <th style="width:150px"> "Data Preparer" </th>
+            </tr>
+            each(dataPreparers) {
+                <tr>
+                    <td> std:object:link(.) </td>
+                </tr>
+            }
+        </table>
+    }
+}

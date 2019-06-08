@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta name="description" content="">
+  <meta name="author" content="">
+  <link rel="icon" href="../../favicon.ico">
+  "\n\n" // Advertising
+  <meta name="generator" content="Haplo Repository">
+  "\n\n"
+  if(canonicalURL) { <link rel="canonical" href=canonicalURL> }
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <title>
+    if(context.pageTitle) {
+        context.pageTitle " : "
+    } else {
+      if(context.object) {
+          context.object.title " : "
+      }
+    }
+    REPOSITORY_NAME
+  </title>
+
+  if(TEXT.description) {
+    <meta name="description" content=TEXT.description>
+  }
+
+  std:web-publisher:platform-style-tag()
+  // core CSS
+  <link href=url(staticDirectoryUrl "/vendor/bootstrap/css/bootstrap.css") rel="stylesheet">
+  <link href=url(staticDirectoryUrl "/vendor/fontawesome/css/all.css") rel="stylesheet">
+
+  // custom CSS
+  <link href=url(staticDirectoryUrl "/css/haplo-standard.css") rel="stylesheet">
+
+  hres:repository:common:html-meta-tags(context)
+
+  // TODO: This should be in the footer, with all jQuery tags in page parts etc. being added to a 
+  // special-purpose block in the footer to ensure thye're loaded afterwards, to have the jQuery global available
+  scriptTag(staticDirectoryUrl "/jquery.js")
+
+</head>
+<body class="bg-primary">
+
+  <header>
+    <nav class="primary-nav navbar navbar-expand-lg navbar-dark fixed-top bg-primary p-0">
+      <div class="container">
+        <a class="navbar-brand p-0 m-2 ml-lg-0 mr-lg-4" href=HOME_PATH aria-label="REPOSITORY_NAME">
+          if(LOGO) {
+            within(LOGO) {
+              <img class="navbar-logo mr-4 mb-2 mb-sm-0 d-block d-sm-inline" src=src alt=REPOSITORY_NAME>
+              if(nameInHeader) { ^{REPOSITORY_NAME} }
+            }
+          } else {
+            REPOSITORY_NAME
+          }
+        </a>
+
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navbarCollapse">
+          <ul class="navbar-nav mr-auto">
+            <li class=["nav-item" if(context.hint.isResearcherDirectoryPage) { "active" }]>
+                <a class="nav-link p-3 text-white" href=[BASE_PATH "/researchers/a"]> "People" </a>
+            </li>
+            <li class=["nav-item" if(context.hint.isResearchInstituteBrowsePage) { "active"} ]>
+                <a class="nav-link p-3 text-white" href=[BASE_PATH "/departments"]> "Research areas" </a>
+            </li>
+            <li class=["nav-item" if(context.hint.isLatestAdditionsPage) { "active" } ]>
+                <a class="nav-link p-3 text-white" href=[BASE_PATH "/latest"]> "Latest Additions" </a>
+            </li>
+          </ul>
+
+          <form class="form-inline m-2 m-lg-0" role="search" method="GET" action=SEARCH_PATH>
+            <div class="input-group">
+              <input class="form-control py-2 btn-outline-light" type="search" placeholder="Search" aria-label="Search" name="q">
+              <span class="input-group-append">
+                <button class="btn btn-outline-light" type="submit">
+                  <i class="fas fa-search"></i>
+                </button>
+              </span>
+            </div>
+          </form>
+
+        </div>
+      </div>
+    </nav>
+  </header>
+
+  <main class="bg-white" role="main">
+
+    if(blocks.carousel) {
+      render(blocks.carousel)
+    } else {
+      ifAny(context.pageTitle blocks.pageheaderSubtitle blocks.pageheaderExtra) {
+        <div class="jumbotron bg-dark rounded-0">
+          <div class="container">
+            if(context.pageTitle) {
+              <h1 class="display-4 text-primary"> context.pageTitle </h1>
+            }
+            if(blocks.pageheaderSubtitle) {
+              <p class="lead text-white"> render(blocks.pageheaderSubtitle) </p>
+            }
+            <hr class="my-4">
+            if(blocks.pageheaderExtra) {
+              render(blocks.pageheaderExtra)
+            }
+          </div>
+        </div>
+      }
+    }
+
+    if(blocks.pageheader) { render(blocks.pageheader) }
+
+    <div class="container pt-3">
+
+      render(blocks.body)
+
+      <div class="row">
+          <div class="col-md-8 order-md-1 mb-4">
+            if(blocks.below) {
+              render(blocks.below)
+            }
+
+            if(context.hint.objectKind) {
+              std:web-publisher:page-part:render-category(concat("hres:repository:" context.hint.objectKind ":below"))
+            }
+          </div>
+          <div class="col-md-4 order-md-2 mb-4">
+            if(context.hint.objectKind) {
+              std:web-publisher:page-part:render-category(concat("hres:repository:" context.hint.objectKind ":sidebar"))
+            }
+          </div>
+      </div>
+    </div>
+
+    render(blocks.siteinfo)
+
+    <footer class="bg-primary text-white">
+      <div class="container py-4 text-center">
+
+        if(FOOTER_LINKS.length) {
+          <ul class="list-inline mb-4">
+            each(FOOTER_LINKS) {
+              <li class="list-inline-item"><a href=href class="text-white mx-2 p-1"> text </a></li>
+            }
+          </ul>
+        }
+
+        <div class="footer-copyright text-center py-3">
+          <p><span class="haplo-copyright">"&copy; Copyright - "
+          <a href=HOME_PATH class="text-white"> REPOSITORY_NAME </a>
+          " 2019 "</span>
+
+          <span class="haplo-powered">" Powered by " 
+            <a href="https://www.haplo.com/repository" class="pl-1">
+              <img src=[staticDirectoryUrl "/haplo.svg"] alt="Powered by Haplo" class="mw-100">
+            </a></span>
+          </p>
+        </div>
+
+      </div>
+    </footer>
+  </main>
+
+  scriptTag(staticDirectoryUrl "/vendor/bootstrap/js/bootstrap-min.js")
+  // TODO: Use new web publisher resources management when available
+  template:std:resources_html()
+</body>
+</html>

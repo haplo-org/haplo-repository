@@ -1,0 +1,28 @@
+
+pageTitle(concat("Cover sheet: " type))
+backLink(std:object:url(output))
+
+<h1>if(hasCoverSheet) { "Edit" } else { "Attach" } " cover sheet"</h1>
+<br>
+
+if(publisher) {
+    std:object(publisher "linkedheading") <a href=concat("/do/edit/" publisher) target="_blank">"(edit publisher record in a new tab)"</a>
+}
+
+<form method="POST"> std:form:token()
+    std:form(form)
+    <div style="float:right;">
+        <a href=[std:object:url(output)]>"Cancel"</a>
+        <input style="margin-left:10px;" type="submit" value=[if(hasCoverSheet) { "Update" } else { "Attach" } "cover sheet"]>
+    </div>
+</form>
+
+if(hasCoverSheet) {
+    <br>
+    <h1>"Remove cover sheet"</h1>
+    <br>
+
+    within(remove) {
+        template:std:ui:confirm()
+    }
+}

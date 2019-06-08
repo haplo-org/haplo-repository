@@ -1,0 +1,18 @@
+{
+  "pluginName": "hres_repo_cover_sheets",
+  "pluginAuthor": "Haplo Services",
+  "pluginVersion": 1,
+  "displayName": "Haplo RM Repository Cover Sheet",
+  "displayDescription": "Repository plugin to enable the generation of cover sheets for outputs",
+  "apiVersion": 4,
+  "privilegesRequired": ["pDatabase", "pFileTransformPipeline"],
+  "depend": [
+    "hres_repository",
+    "hres_file_templates",
+    "hres_author_citation_value"
+  ],
+  "load": [
+      "js/hres_repo_cover_sheets.js"
+    ],
+  "respond": ["/do/hres-repo-cover-sheets"]
+}

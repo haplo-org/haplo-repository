@@ -1,7 +1,26 @@
-        <h2>"Latest additions"</h2>
-        each(outputs) {
-            <p>
-                <a href=href> output.title </a>
-                if(citation) { <br> <small> render(citation) </small> }
-            </p>
-        }
+
+// WARNING: REPLACEABLE =====================================================
+
+<h2 class="my-4"> "Latest additions" </h2>
+
+each(outputs) {
+  <div class="media my-4 pt-4">
+    if(file) {
+      std:web-publisher:object:link(object) { 
+        std:web-publisher:file:thumbnail(file)
+      } else {
+        <i class="fas fa-file-alt fa-5x mr-3"></i>
+      }
+    }
+
+    <div class="media-body">
+      <h5 class="mt-0 mb-1">
+        <a href=href> output.title </a>
+      </h5>
+
+      if(citation) {
+        <cite class="text-break"> render(citation) </cite>
+      }
+    </div>
+  </div>
+}

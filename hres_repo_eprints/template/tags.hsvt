@@ -1,0 +1,28 @@
+pageTitle("Metatags for object")
+backLink("/do/hres-repo-eprints/admin")
+
+<form method="GET" action="/do/hres-repo-eprints/tags">
+    <p> <input type="text" name="lookup" placeholder="Object ref" style="width:200px">
+    <input type="submit" value="Get tags"> </p>
+</form>
+
+if(output) {
+    std:object(output "searchresult")
+
+    if(tags) {
+        <h2> "Tags" </h2>
+        <p><i>if(eprintId) { "eprint id: " eprintId } else { "No eprint id" }</i></p>
+        <table>
+            each(tags) {
+                <tr>
+                    <td style="width:30%">name</td>
+                    <td>content</td>
+                </tr>
+            }
+        </table>
+    } else {
+        std:ui:notice(concat("Not a valid repository item ref: " refString))
+    }
+} else {
+    std:ui:notice(concat("Invalid ref: " refString))
+}

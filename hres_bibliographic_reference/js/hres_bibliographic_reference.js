@@ -4,51 +4,59 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.         */
 
+if(O.featureImplemented("hres:doi")) {
+    P.use("hres:doi");
+}
 
-var PROPERTIES = {
-    "authors": {key:"authors"},
-    "year": {after:".", key:"year"},
-    "chapter_title": {after:" in:", key:"title"},
-    "book_title": {desc:A.BookTitle},
-    "title": {before:"<i>", after:"</i>", key:"title"},
-    "titleNoItalic": {key:"title"},
-    "editors": {key:"editors", after:" (ed.)"},
-    "event_title": {before:"<i>", after:".</i>", key:"event"},
-    "event_location": {key:"event_location"},
-    "event_dates": {key:"event_dates"},
-    "place_of_pub": {desc:A.PlaceOfPublication},
-    "publisher": {after:".", key:"publisher"},
-    "journal": {before:"<i>", after:".</i>", key:"journal"},
-    "publicationDate": {key:"publicationDate"},
-    "journalCitation": {after:".", desc:A.JournalCitation},
-    "pagerange": {before: "pp. ", desc:A.PageRange},
-    "issn": {desc:A.Issn},
-    "doi": {key:"doi"},
-    "patentId": {key:"patentId"},
-    "type": {key:"type"},
-    "institution": {desc:A.InstitutionName},
-    "department": {desc:A.DepartmentName}
+var properties;
+var propertiesForType;
+
+var ensureProperties = function() {
+    if(properties) { return; }
+    properties = {
+        "authors": {key:"authors"},
+        "year": {after:".", key:"year"},
+        "chapter_title": {after:" in:", key:"title"},
+        "book_title": {desc:A.BookTitle},
+        "title": {before:"<i>", after:"</i>", key:"title"},
+        "title_no_italic": {key:"title"},
+        "editors": {key:"editors", after:" (ed.)"},
+        "event_title": {before:"<i>", after:".</i>", key:"event"},
+        "event_location": {key:"event_location"},
+        "event_dates": {key:"event_dates"},
+        "place_of_pub": {desc:A.PlaceOfPublication},
+        "publisher": {after:".", key:"publisher"},
+        "journal": {before:"<i>", after:".</i>", key:"journal"},
+        "journal_citation": {after:".", desc:A.JournalCitation},
+        "pagerange": {before: "pp. ", desc:A.PageRange},
+        "issn": {desc:A.Issn},
+        "doi": {key:"doi"},
+        "patent_id": {desc:A.PatentId},
+        "type": {key:"type"},
+        "institution": {desc:A.InstitutionName},
+        "department": {desc:A.DepartmentName}
+    };
+    propertiesForType = O.refdictHierarchical();
+    propertiesForType.set(T.Book, ["authors", "editors", "year", "title", "place_of_pub", "publisher"]);
+    propertiesForType.set(T.BookChapter, ["authors", "year", "chapter_title", "editors", "book_title",
+        "place_of_pub", "publisher", "pagerange"]);
+    propertiesForType.set(T.JournalArticle, ["authors", "year", "title_no_italic", "journal",
+        "journal_citation"]);
+    propertiesForType.set(T.ConferenceItem, ["authors", "year", "title_no_italic", "editors",
+        "event_title", "event_location", "event_dates", "place_of_pub", "publisher", "pagerange", "doi"]);
+    propertiesForType.set(T.Report, ["authors", "year", "title", "place_of_pub", "publisher", "doi"]);
+    propertiesForType.set(T.Artefact, ["authors", "year", "title", "place_of_pub", "publisher"]);
+    propertiesForType.set(T.Audio, ["authors", "year", "title", "place_of_pub"]);
+    propertiesForType.set(T.Video, ["authors", "year", "title", "place_of_pub"]);
+    propertiesForType.set(T.Patent, ["authors", "year", "title", "patent_id"]);
+    _.each([T.Performance, T.Exhibition], function(type) {
+        propertiesForType.set(type, ["authors", "year", "title", "event_location"]);
+    });
+    propertiesForType.set(T.Thesis, ["authors", "year", "title", "type", "institution", "department"]);
+    O.serviceMaybe("hres_bibliographic_reference:extend_reference_formats", properties, propertiesForType, Values);
 };
 
 var DEFAULT_PROPERTIES = ["authors", "year", "title", "place_of_pub", "publisher", "doi"];
-var PROPERTIES_FOR_TYPE = O.refdictHierarchical();
-PROPERTIES_FOR_TYPE.set(T.Book, ["authors", "editors", "year", "title", "place_of_pub", "publisher"]);
-PROPERTIES_FOR_TYPE.set(T.BookChapter, ["authors", "year", "chapter_title", "editors", "book_title",
-    "place_of_pub", "publisher", "pagerange"]);
-PROPERTIES_FOR_TYPE.set(T.JournalArticle, ["authors", "year", "titleNoItalic", "journal",
-    "publicationDate", "journalCitation"]);
-PROPERTIES_FOR_TYPE.set(T.ConferenceItem, ["authors", "year", "titleNoItalic", "editors",
-    "event_title", "event_location", "event_dates", "place_of_pub", "publisher", "publicationDate",
-    "pagerange", "doi"]);
-PROPERTIES_FOR_TYPE.set(T.Report, ["authors", "year", "title", "place_of_pub", "publisher", "doi"]);
-PROPERTIES_FOR_TYPE.set(T.Artefact, ["authors", "year", "title", "place_of_pub", "publisher"]);
-PROPERTIES_FOR_TYPE.set(T.Audio, ["authors", "year", "title", "place_of_pub"]);
-PROPERTIES_FOR_TYPE.set(T.Video, ["authors", "year", "title", "place_of_pub"]);
-PROPERTIES_FOR_TYPE.set(T.Patent, ["authors", "year", "title", "patentId"]);
-_.each([T.Performance, T.Exhibition], function(type) {
-    PROPERTIES_FOR_TYPE.set(type, ["authors", "year", "title", "event_location"]);
-});
-PROPERTIES_FOR_TYPE.set(T.Thesis, ["authors", "year", "title", "type", "institution", "department"]);
 
 // ---------------------------------------------------------------------------------------------------------------------
 
@@ -109,6 +117,14 @@ Values.prototype.__defineGetter__("event_dates", function() {
         return d.toString();
     }
 });
+Values.prototype.__defineGetter__("doi", function() {
+    if("DOI" in A) {
+        var v  = this.object.first(A.DOI);
+        if(!v) { return null; }
+        return v.toString();
+    }
+});
+
 var dateRangeAsCitationString = function(start, end, precision) {
     // Don't repeat same information. eg. "27 - 29 Jun 2017", not "27 Jun 2017 - 29 Jun 2017"
     var formatString = precisionFormatString(precision);
@@ -148,11 +164,12 @@ var precisionFormatString = function(precision) {
 // ---------------------------------------------------------------------------------------------------------------------
 
  var bibRefHtml = function(object) {
+    ensureProperties();
     var values = new Values(object);
     var html = [];
-    var fields = PROPERTIES_FOR_TYPE.get(object.firstType()) || DEFAULT_PROPERTIES;
+    var fields = propertiesForType.get(object.firstType()) || DEFAULT_PROPERTIES;
     _.each(fields, function(f) {
-        var instruction = PROPERTIES[f];
+        var instruction = properties[f];
         var value, desc = instruction.desc;
         if(desc) {
             var v = object.first(desc);

@@ -4,7 +4,6 @@
   "pluginVersion": 1,
   "displayName": "Haplo RM Repository Impact",
   "displayDescription": "Reporting on impact & impact evidence",
-  "installSecret": "3d73d93bfa4aabc532834ff44d8b175197a8a845",
   "apiVersion": 4,
   "depend": [
       "hres_repository"

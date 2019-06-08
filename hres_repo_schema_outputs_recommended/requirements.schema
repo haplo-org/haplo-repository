@@ -3,6 +3,8 @@ schema-template hres:template-type:repository:output
     attribute hres:attribute:research-or-scholarly [sort=12100]
     attribute hres:attribute:output-status [sort=15000]
     attribute hres:attribute:publication-process-dates [sort=15101]
+    FORCE-REMOVE attribute std:attribute:file [sort=14100]
+    attribute hres:attribute:output-file [sort=14100]
 
 schema-template hres:template-type:repository:practice-based-research
     annotation hres:annotation:repository:practice-based-research
@@ -19,10 +21,20 @@ schema-template hres:template-type:repository:practice-based-research
     attribute dc:attribute:date [sort=10700]
     REMOVE attribute dc:attribute:publisher
     attribute hres:aliased-attribute:publisher-or-commissioning-body [sort=13500]
-    attribute hres:attribute:media-type [sort=14200]
-    attribute hres:attribute:image-credit [sort=14300]
-    attribute hres:attribute:measurements [sort=15500]
-    attribute hres:attribute:rights [sort=16100]
+    FORCE-REMOVE attribute std:attribute:file [sort=14100]
+    FORCE-REMOVE attribute hres:attribute:output-file [sort=14100]
+    attribute hres:attribute:practice-based-output-file [sort=14100]
+    REMOVE attribute hres:attribute:media-type [sort=14200]
+    REMOVE attribute hres:attribute:image-credit [sort=14300]
+    REMOVE attribute hres:attribute:measurements [sort=15500]
+    REMOVE attribute hres:attribute:rights [sort=16100]
+    REMOVE element: std:group:everyone right std:action_panel {"panel":"practice_based_research"} [sort=100]
+    element: std:group:everyone right std:action_panel {"panel":"practice_based_research", "category":"hres:repository_item"} [sort=100]
+
+# TODO: We would like to not have to add this in systems where the root schema plugins aren't installed
+schema-template hres:template-type:repository:collection
+    FORCE-REMOVE attribute hres:attribute:abstract
+    attribute hres:aliased-attribute:description [sort=10500]
 
 # -------- Aliased attributes -------------------------------------
 
@@ -41,41 +53,41 @@ aliased-attribute hres:aliased-attribute:creators-citation
     search-name: creators
     alias-of hres:attribute:authors-citation
     on-qualifier std:qualifier:null
-    on-qualifier hres:qualifier:actor
-    on-qualifier hres:qualifier:animator
-    on-qualifier hres:qualifier:author-of-screenplay
-    on-qualifier hres:qualifier:calligrapher
-    on-qualifier hres:qualifier:choreographer
-    on-qualifier hres:qualifier:cinematographer
-    on-qualifier hres:qualifier:composer
-    on-qualifier hres:qualifier:conductor
-    on-qualifier hres:qualifier:conference-organizer
-    on-qualifier hres:qualifier:costume-designer
-    on-qualifier hres:qualifier:curator
-    on-qualifier hres:qualifier:dancer
-    on-qualifier hres:qualifier:designer
-    on-qualifier hres:qualifier:director
-    on-qualifier hres:qualifier:exhibitor
-    on-qualifier hres:qualifier:film-editor
-    on-qualifier hres:qualifier:illustrator
-    on-qualifier hres:qualifier:instrumentallist
-    on-qualifier hres:qualifier:librettist
-    on-qualifier hres:qualifier:lighting-designer
-    on-qualifier hres:qualifier:lyricist
-    on-qualifier hres:qualifier:musician
-    on-qualifier hres:qualifier:performer
-    on-qualifier hres:qualifier:photographer
-    on-qualifier hres:qualifier:printmaker
-    on-qualifier hres:qualifier:producer
-    on-qualifier hres:qualifier:production-personnel
-    on-qualifier hres:qualifier:programmer
-    on-qualifier hres:qualifier:recording-engineer
-    on-qualifier hres:qualifier:researcher
-    on-qualifier hres:qualifier:set-designer
-    on-qualifier hres:qualifier:singer
-    on-qualifier hres:qualifier:translator
-    on-qualifier hres:qualifier:videographer
-    on-qualifier hres:qualifier:vocalist
+    REMOVE on-qualifier hres:qualifier:actor
+    REMOVE on-qualifier hres:qualifier:animator
+    REMOVE on-qualifier hres:qualifier:author-of-screenplay
+    REMOVE on-qualifier hres:qualifier:calligrapher
+    REMOVE on-qualifier hres:qualifier:choreographer
+    REMOVE on-qualifier hres:qualifier:cinematographer
+    REMOVE on-qualifier hres:qualifier:composer
+    REMOVE on-qualifier hres:qualifier:conductor
+    REMOVE on-qualifier hres:qualifier:conference-organizer
+    REMOVE on-qualifier hres:qualifier:costume-designer
+    REMOVE on-qualifier hres:qualifier:curator
+    REMOVE on-qualifier hres:qualifier:dancer
+    REMOVE on-qualifier hres:qualifier:designer
+    REMOVE on-qualifier hres:qualifier:director
+    REMOVE on-qualifier hres:qualifier:exhibitor
+    REMOVE on-qualifier hres:qualifier:film-editor
+    REMOVE on-qualifier hres:qualifier:illustrator
+    REMOVE on-qualifier hres:qualifier:instrumentallist
+    REMOVE on-qualifier hres:qualifier:librettist
+    REMOVE on-qualifier hres:qualifier:lighting-designer
+    REMOVE on-qualifier hres:qualifier:lyricist
+    REMOVE on-qualifier hres:qualifier:musician
+    REMOVE on-qualifier hres:qualifier:performer
+    REMOVE on-qualifier hres:qualifier:photographer
+    REMOVE on-qualifier hres:qualifier:printmaker
+    REMOVE on-qualifier hres:qualifier:producer
+    REMOVE on-qualifier hres:qualifier:production-personnel
+    REMOVE on-qualifier hres:qualifier:programmer
+    REMOVE on-qualifier hres:qualifier:recording-engineer
+    REMOVE on-qualifier hres:qualifier:researcher
+    REMOVE on-qualifier hres:qualifier:set-designer
+    REMOVE on-qualifier hres:qualifier:singer
+    REMOVE on-qualifier hres:qualifier:translator
+    REMOVE on-qualifier hres:qualifier:videographer
+    REMOVE on-qualifier hres:qualifier:vocalist
 
 # -------- Attributes --------------------------------------------
 
@@ -115,13 +127,52 @@ attribute hres:attribute:media-type
     ui-options dropdown
     linked-type hres:type:media-type
 
-# TODO: Will this need shadowing configuration?
-attribute hres:attribute:contributors as Contributors
-    REMOVE title Contributors
-    REMOVE search-name contributors
-    title Collaborators
-    search-name collaborators
+attribute hres:attribute:contributor-shadowed as ContributorShadowed
+    title: Contributor
+    search-name contributor
     qualifier std:qualifier:null
+    data-type link
+    linked-type std:type:person
+
+attribute hres:attribute:contributors as Contributors
+    title Contributors
+    search-name contributors
+    qualifier std:qualifier:null
+    qualifier hres:qualifier:actor
+    qualifier hres:qualifier:animator
+    qualifier hres:qualifier:author-of-screenplay
+    qualifier hres:qualifier:calligrapher
+    qualifier hres:qualifier:choreographer
+    qualifier hres:qualifier:cinematographer
+    qualifier hres:qualifier:composer
+    qualifier hres:qualifier:conductor
+    qualifier hres:qualifier:conference-organizer
+    qualifier hres:qualifier:costume-designer
+    qualifier hres:qualifier:curator
+    qualifier hres:qualifier:dancer
+    qualifier hres:qualifier:designer
+    qualifier hres:qualifier:director
+    qualifier hres:qualifier:exhibitor
+    qualifier hres:qualifier:film-editor
+    qualifier hres:qualifier:illustrator
+    qualifier hres:qualifier:instrumentallist
+    qualifier hres:qualifier:librettist
+    qualifier hres:qualifier:lighting-designer
+    qualifier hres:qualifier:lyricist
+    qualifier hres:qualifier:musician
+    qualifier hres:qualifier:performer
+    qualifier hres:qualifier:photographer
+    qualifier hres:qualifier:printmaker
+    qualifier hres:qualifier:producer
+    qualifier hres:qualifier:production-personnel
+    qualifier hres:qualifier:programmer
+    qualifier hres:qualifier:recording-engineer
+    qualifier hres:qualifier:researcher
+    qualifier hres:qualifier:set-designer
+    qualifier hres:qualifier:singer
+    qualifier hres:qualifier:translator
+    qualifier hres:qualifier:videographer
+    qualifier hres:qualifier:vocalist
     data-type plugin
     data-type-options hres:author_citation
 
@@ -131,12 +182,68 @@ attribute hres:attribute:qualification-name
     qualifier std:qualifier:null
     data-type text
 
-attribute hres:attribute:book-author as BookAuthor
+attribute hres:attribute:book-author-shadowed as BookAuthorShadowed
     title: Book author
+    search-name book-author
+    qualifier std:qualifier:null
+    data-type link
+    linked-type std:type:person
+
+attribute hres:attribute:book-author as BookAuthor
+    REMOVE title: Book author
+    title: Book authors
     search-name book-author
     qualifier std:qualifier:null
     data-type plugin
     data-type-options hres:author_citation
+
+attribute hres:attribute:pages as Pages
+    title: Pages
+    search-name: pages
+    qualifier std:qualifier:null
+    data-type text
+
+# -------- File types ---------------------------------------------
+
+attribute hres:attribute:published-file
+    FORCE-REMOVE data-type file
+    data-type attribute-group
+    group-type hres:type:text-output-file
+attribute hres:attribute:accepted-author-manuscript
+    FORCE-REMOVE data-type file
+    data-type attribute-group
+    group-type hres:type:text-output-file
+attribute hres:attribute:output-file
+    title File
+    search-name file
+    qualifier std:qualifier:null
+    data-type attribute-group
+    group-type hres:type:text-output-file
+attribute hres:attribute:supplemental-file
+    title Supplemental file
+    search-name supplemental-file
+    qualifier std:qualifier:null
+    data-type attribute-group
+    group-type hres:type:text-output-file
+
+type hres:type:text-output-file
+    apply-schema-template hres:template-type:repository-file
+    title Text-based output file
+
+attribute hres:attribute:practice-based-output-file
+    title Files
+    search-name file
+    qualifier std:qualifier:null
+    data-type attribute-group
+    REMOVE group-type hres:type:text-output-file
+    group-type hres:type:practice-based-output-file
+type hres:type:practice-based-output-file
+    apply-schema-template hres:template-type:repository-file
+    title Practice-based output file
+    attribute hres:attribute:image-credit
+    attribute hres:attribute:measurements
+    attribute hres:attribute:rights
+    attribute hres:attribute:media-type
 
 # -------- Types --------------------------------------------------
 
@@ -146,11 +253,13 @@ type hres:type:artefact as Artefact
 
 type std:type:book as Book
     attribute hres:attribute:place-of-publication [sort=10850]
+    attribute hres:attribute:pages [sort=10900]
     attribute hres:attribute:peer-review [sort=12000]
 
 type hres:type:book-chapter as BookChapter
     attribute hres:attribute:book-author [sort=10770]
     attribute hres:attribute:place-of-publication [sort=10850]
+    attribute hres:attribute:pages [sort=10900]
     attribute hres:attribute:peer-review [sort=12000]
 
 type hres:type:composition as Composition
@@ -207,6 +316,12 @@ type hres:type:thesis:masters
     search-name masters-thesis
     render-icon: E209,4,f E1FF,0,c
     render-category 5
+type hres:type:thesis:prof-doc
+    title: Prof Doc Thesis
+    parent-type hres:type:thesis
+    search-name prof-doc-thesis
+    render-icon: E209,6,f E1FF,0,c
+    render-category 6
 
 # ----- Lists -----------------------------------------------------
 

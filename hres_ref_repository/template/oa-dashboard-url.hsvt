@@ -1,3 +1,4 @@
+#option:disable-debug-comments
 url(
     "/do/hres-repo-open-access/repository-items/"
     oaType

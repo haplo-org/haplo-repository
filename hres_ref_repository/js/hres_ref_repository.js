@@ -23,6 +23,11 @@ P.db.table("firstFileDeposit", {
     fileVersion: {type: "text"}
 });
 
+P.db.table("firstOpenAccess", {
+    output: {type: "ref"},
+    date: {type: "date"}
+});
+
 var getFirstFileDeposit = P.getFirstFileDeposit = function(output) {
     let q = P.db.firstFileDeposit.select().where("output", "=", output.ref);
     if(q.length) {
@@ -38,6 +43,21 @@ P.implementService("hres_ref_repository:set_first_file_deposit", function(row) {
     }
 });
 
+var getFirstOpenAccess = P.getFirstOpenAccess = function(output) {
+    let q = P.db.firstOpenAccess.select().where("output", "=", output.ref);
+    if(q.length) {
+        return q[0];
+    }
+};
+
+P.implementService("hres_ref_repository:get_first_open_access", getFirstOpenAccess);
+
+P.implementService("hres_ref_repository:set_first_open_access", function(row) {
+    if(row.output && row.date) {
+        P.db.firstOpenAccess.create(row).save();
+    }
+});
+
 P.hook("hPostObjectChange", function(response, object, operation, previous) {
     if(!O.service("hres:repository:is_repository_item", object)) { return; }
     
@@ -47,7 +67,9 @@ P.hook("hPostObjectChange", function(response, object, operation, previous) {
         // "more authoritative", so use that if present, but fall back to the Author's Manuscript if available
         let desc;
         [A.PublishersVersion, A.AcceptedAuthorManuscript].forEach((d) => {
-            if(!desc && object.first(d)) { desc = d; }
+            if(!desc && object.getAttributeGroupIds(d).length) {
+                desc = d;
+            }
         });
         if(desc) {
             P.db.firstFileDeposit.create({
@@ -113,7 +135,7 @@ var passesREFOAChecks = P.passesREFOAChecks = function(output) {
 
 P.implementService("std:action_panel_priorities", function(priorities) {
     _.extend(priorities, {
-        "hres:ref:repo": 15000
+        "hres:ref:repo": 550
     });
 });
 
@@ -148,8 +170,9 @@ P.implementService("std:action_panel:output", function(display, builder) {
         if(isGoldOA(output)) {
             panel.element("default", {label:"Gold Open Access"});
         } else if(REFOAPolicyApplies) {
-            _.each(P.REFChecks, (c) => {
-                panel.element("default", { label: (c.check(output) ? "Passed: " : "Failed: ")+c.label });
+            _.each(P.REFChecks, (c, kind) => {
+                panel.link("default", "/do/hres-ref-repo/check/detail/"+kind+"/"+output.ref,
+                    (c.check(output) ? "Passed: " : "Failed: ")+c.label);
             });
         }
     }

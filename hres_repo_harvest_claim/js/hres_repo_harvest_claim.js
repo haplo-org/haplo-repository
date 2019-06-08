@@ -9,6 +9,7 @@ P.workUnit({
     workType: "claim_item",
     description: "Claim harvested repository item",
     render(W) {
+        if(W.workUnit.closed && (W.context === "object")) { return; }
         W.render({
             fullInfo: (W.context === "list") ? W.workUnit.ref.load().url() : null,
             list: (W.context === "list"),
@@ -18,68 +19,48 @@ P.workUnit({
     }
 });
 
-P.implementService("hres_repo_harvest_sources:notify:source_object_saved", function(harvested) {
-    harvested.object.every(A.Author, (v,d,q) => {
+P.implementService("hres_repo_harvest_sources:notify:harvested_object_saved", function(object) {
+    let existingWu = O.work.query("hres_repo_harvest_claim:claim_item").ref(object.ref)[0];
+    if(existingWu) { return; }
+    object.every(A.Author, (v,d,q) => {
         let user = O.user(v);
         if(user && user.isActive) {
             O.work.create({
                 workType: "hres_repo_harvest_claim:claim_item",
                 actionableBy: user,
-                ref: harvested.object.ref,
-                data: {
-                    source: harvested.source,
-                    sourceIdentifier: harvested.identifier
-                }
+                ref: object.ref
             }).save();
-            // TODO: email?
         }
     });
 });
 
 // -------- Object page UI -----------------------------------
 
-var changedAttributes = function(source, authority) {
-    let changed = [],
-        sourceDescs = [];
-    source.every((v,d,q) => sourceDescs.push(d));
-    sourceDescs = _.uniq(sourceDescs);
-    _.each(sourceDescs, (d) => {
-        if(!authority.valuesEqual(source, d) && (d !== A.AuthoritativeVersion)) {
-            changed.push(d);
-        }
-    });
-    return changed;
-};
+var CanViewClaimForm = P.CanViewClaimForm = O.action("hres_repo_harvest_claim:view_claim").
+    title("View harvested object claim form").
+    allow("group", Group.RepositoryEditors);
 
-P.implementService("std:action_panel:repository_item", function(display, builder) {
-    if(display.object.labels.includes(Label.SourceItem)) {
-        let claimPanel = builder.panel(10);
-        let wus = O.work.query("hres_repo_harvest_claim:claim_item").
+P.implementService("std:action_panel:alternative_versions", function(display, builder) {
+    let claimPanel = builder.panel(10);
+    let openWu = O.work.query("hres_repo_harvest_claim:claim_item").
+        ref(display.object.ref).
+        actionableBy(O.currentUser)[0];
+    if(openWu) {
+        claimPanel.
+            link(10, "/do/hres-repo-harvest-claim/claim/"+openWu.id, "Claim", "primary").
+            link(20, "/do/hres-repo-harvest-claim/disclaim/"+openWu.id, "Disclaim", "secondary");
+    } else {
+        let closedWu = O.work.query("hres_repo_harvest_claim:claim_item").
             ref(display.object.ref).
-            actionableBy(O.currentUser).
-            isEitherOpenOrClosed();
-        if(wus[0]) {
-            if(wus[0].closed) {
+            isClosed()[0];
+        if(closedWu) {
+            claimPanel.
+                status(5, "Record accepted by "+closedWu.closedBy.name);
+            if(O.currentUser.allowed(CanViewClaimForm)) {
                 claimPanel.
-                    status(5, "Record accepted by "+wus[0].closedBy.name);
-            } else {
-                claimPanel.
-                    link(10, "/do/hres-repo-harvest-claim/claim/"+wus[0].id, "Claim", "primary").
-                    link(15, "/do/hres-repo-harvest-claim/claim-edit/"+wus[0].id, "Claim with edits", "primary").
-                    link(20, "/do/hres-repo-harvest-claim/disclaim/"+wus[0].id, "Disclaim", "secondary");
-                // Show atrributes that will be updated for open workUnits, if there's already an
-                // authority version
-                if(display.object.first(A.AuthoritativeVersion)) {
-                    let changedAttrs = changedAttributes(display.object, display.object.first(A.AuthoritativeVersion).load());
-                    let changePanel = builder.panel(25);
-                    changePanel.element(5, {title:"Fields to update on authoritative record"});
-                    _.each(changedAttrs, (d) => {
-                        changePanel.element(25, {label: SCHEMA.getAttributeInfo(d).name});
-                    });
-                }
+                    link(30, "/do/hres-repo-harvest-claim/admin-view-claim/"+closedWu.id, "View claim form");
             }
         }
-        return false;
     }
 });
 

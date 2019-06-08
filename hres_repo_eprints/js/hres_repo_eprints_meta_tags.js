@@ -65,10 +65,17 @@ P.implementService("hres:repository:common:gather-meta-tags", function(specifica
     // File URLs -- note that meta tags do things differently to the XML version
     output.every((v,d,q) => {
         if(O.typecode(v) === O.T_IDENTIFIER_FILE) {
-            tags.push({
-                name: "eprints.document_url",
-                content: specification.context.publication.urlForFileDownload(v)
-            });
+            if(specification.context.publication) {
+                tags.push({
+                    name: "eprints.document_url",
+                    content: specification.context.publication.urlForFileDownload(v)
+                });
+            } else {
+                tags.push({
+                    name: "eprints.document_url",
+                    content: "(set by publisher in public interface)" // placeholder text for tags handler view
+                });
+            }
         }
     });
 
@@ -90,19 +97,28 @@ P.implementService("hres:repository:common:gather-meta-tags", function(specifica
             content: "show"
         }
     ]);
-    // TODO: Tidy this
     _.each(tags, (tag) => {
         specification.tags.push(tag);
     });
 });
 
 P.respond("GET", "/do/hres-repo-eprints/tags", [
-    {pathElement:0, as:"ref"}
+    {parameter:"lookup", as:"ref"}
 ], function(E, output) {
     if(!O.currentUser.isMemberOf(Group.Administrators)) { O.stop("Not permitted"); }
-
-    let specification = { context: {object: output.load()}, tags: [] };
-    O.service("hres:repository:common:gather-meta-tags", specification);
-    E.response.body = JSON.stringify(specification.tags, undefined, 2);
-    E.response.kind = "json";
+    let specification, tags, eprintId;
+    const object = output.load();
+    if(object && object.isKindOfTypeAnnotated("hres:annotation:repository-item")) {
+        specification = { context: {}, tags: [], object: object };
+        O.service("hres:repository:common:gather-meta-tags", specification);
+        tags = _.sortBy(specification.tags, "name");
+        eprintId = _.find(tags, t => t.name === "eprints.eprintid");
+        eprintId = (eprintId || {}).content;
+    }
+    E.render({
+        tags: tags,
+        eprintId: eprintId,
+        output: object,
+        refString: output.toString()
+    });
 });

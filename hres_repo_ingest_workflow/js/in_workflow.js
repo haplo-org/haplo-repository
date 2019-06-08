@@ -7,10 +7,7 @@
 
 var Ingest = P.Ingest = P.workflow.
     implement("in", "Ingest").
-    // On individual panels as these are above the repository_item panel
-    objectElementActionPanelName("output").
-    objectElementActionPanelName("collection").
-    objectElementActionPanelName("research_data");
+    objectElementActionPanelName("category:hres:repository_item");
 
 if(P.workflow.workflowFeatureImplemented("hres:ref_compliance")) {
     Ingest.use("hres:ref_compliance");

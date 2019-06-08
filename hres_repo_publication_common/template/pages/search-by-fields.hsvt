@@ -1,6 +1,17 @@
+
+// WARNING: REPLACEABLE =====================================================
+
 pageTitle("Search by fields")
 
-<form method="POST" class="haplo-repo-search-by-fields">
-  std:form(form)
-  <div class="haplo-repo-search-by-fields-button"> <input type="submit" value="Search"> </div>
-</form>
+<div class="card border-0 bg-light">
+  <form method="POST" class="needs-validation" id="haplo-sbf">
+    <div class="card-body">
+      std:form(form)
+    </div>
+    <div class="card-footer text-right border-0 bg-light pt-0">
+      <div class="oform-buttons">
+        <button class="btn btn-primary" type="submit">"Search"</button>
+      </div>
+    </div>
+  </form>
+</div>

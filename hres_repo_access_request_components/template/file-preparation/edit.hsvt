@@ -1,16 +1,16 @@
 pageTitle("Prepare files for release")
 
 if(previouslyPreparedMaybe) {
-    <p> "Select files for release from those that have been previously prepared, and/or upload newly prepared files appropriate for this application's audience." </p>
+  <p> "Select files for release from those that have been previously prepared, and/or upload newly prepared files appropriate for this application's audience." </p>
 } else {
-    <p> "Please upload files that have been prepared for release, and information about the preparation carried out and the suitable audience for this version of the files." </p>
+  <p> "Please upload files that have been prepared for release, and information about the preparation carried out and the suitable audience for this version of the files." </p>
 }
 
 <form method="POST"> std:form:token()
-    if(previouslyPreparedMaybe) {
-        render(previouslyPreparedMaybe)
-    }
+  if(previouslyPreparedMaybe) {
+    render(previouslyPreparedMaybe)
+  }
 
-    std:form(form)
-    <p><input type="submit" value="Submit"></p>
+  std:form(form)
+  <p><input type="submit" value="Submit"></p>
 </form>

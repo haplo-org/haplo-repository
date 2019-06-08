@@ -1,6 +1,5 @@
 
 group hres:group:repository-editors as RepositoryEditors
-group hres:group:data-preparers as DataPreparers
 
 attribute dc:attribute:author as Author
 attribute hres:attribute:prepared-file as PreparedFile

@@ -4,7 +4,6 @@
   "pluginVersion": 1,
   "displayName": "Haplo RM REF Repository",
   "displayDescription": "Research Excellence Framework support for repository applications",
-  "installSecret": "428fc63085c54d5a7fadd7af90bde82d8eb6099e",
   "apiVersion": 4,
   "loadPriority": 10000,
   "privilegesRequired": [

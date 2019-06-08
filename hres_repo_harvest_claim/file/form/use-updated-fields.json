@@ -1,0 +1,15 @@
+{
+    "specificationVersion": 0,
+    "formId": "useUpdatedFields",
+    "formTitle": "Update fields on authoritative record?",
+    "elements": [
+        {
+            "type": "boolean",
+            "path": "update",
+            "required": true,
+            "label": "Update changed attributes with harvested data?",
+            "trueLabel": "Yes, use the data on the harvested record for these fields",
+            "falseLabel": "No, continue to use the data already on the authoritative record"
+        }
+    ]
+}

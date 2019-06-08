@@ -1,0 +1,21 @@
+pageTitle("All logs")
+backLink("/do/hres-repo-eprints/admin") { "Admin" }
+
+<table>
+    <tr>
+        <th>"Log id"</th>
+        <th>"Log"</th>
+        <th>"Tags and values"</th>
+        <th>"Filename"</th>
+        <th>"Started"</th>
+    </tr>
+    each(logs) {
+        <tr>
+            <td>id</td>
+            <td><a href=["/do/hres-repo-eprints/log/" id]>"View"</a></td>
+            <td><a href=["/do/hres-repo-eprints/tags-and-values/" id]>"View"</a></td>
+            <td>filename</td>
+            <td>date</td>
+        </tr>
+    }
+</table>

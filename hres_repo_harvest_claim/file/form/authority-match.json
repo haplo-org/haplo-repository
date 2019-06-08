@@ -1,0 +1,18 @@
+{
+    "specificationVersion": 0,
+    "formId": "authorityMatch",
+    "formTitle": "Publication matched correctly",
+    "elements": [
+        {
+            "type": "display-value",
+            "path": "authority",
+            "as": "html"
+        },
+        {
+            "type": "boolean",
+            "path": "correctMatchFound",
+            "label": "Has the system correctly identified this harvested item as a version of the record above?",
+            "required": true
+        }
+    ]
+}

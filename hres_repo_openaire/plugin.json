@@ -1,0 +1,19 @@
+{
+  "pluginName": "hres_repo_openaire",
+  "pluginAuthor": "Haplo Services",
+  "pluginVersion": 1,
+  "displayName": "HRES Repo OpenAIRE",
+  "displayDescription": "Adds ability to export information about outputs in OpenAIRE metadata format",
+  "apiVersion": 4,
+  "use": ["hres:doi", "hres:orcid"],
+  "depend": [
+    "hres_repository",
+    "hres_repo_schema_outputs_recommended",
+    "hres_repo_metadata_dc",
+    "hres_digital_object_identifier",
+    "hres_orcid"
+  ],
+  "load": [
+      "js/hres_repo_openaire.js"
+    ]
+}

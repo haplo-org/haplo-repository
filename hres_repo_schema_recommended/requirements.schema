@@ -6,6 +6,18 @@ schema-template hres:template-type:repository-item
     attribute hres:attribute:research-group [sort=13100]
     REMOVE attribute hres:attribute:output-status [sort=15000]
     REMOVE attribute hres:attribute:publication-process-dates [sort=15101]
+    FORCE-REMOVE attribute hres:attribute:license
+
+# For use with "contained file objects"
+schema-template hres:template-type:repository-file
+    annotation hres:annotation:repository:file
+    behaviour hide-from-browse
+    search-name file
+    attribute std:attribute:file [sort=50]
+    attribute hres:attribute:license
+    label-applicable std:label:common
+    label-default std:label:common
+    create-position normal
 
 # ---------------------------------------------------------------------------
 
@@ -91,11 +103,15 @@ attribute hres:attribute:prepared-file as PreparedFile
 attribute hres:attribute:publication-process-dates as PublicationProcessDates
     title: Publication process dates
     search-name: publication-process-dates
+    qualifier hres:qualifier:submitted
     qualifier hres:qualifier:accepted
     qualifier hres:qualifier:deposited
     qualifier hres:qualifier:completed
     data-type datetime
     ui-options d,y,n,n,n
+
+attribute hres:attribute:accepted-author-manuscript as AcceptedAuthorManuscript
+attribute hres:attribute:published-file as PublishersVersion
 
 # ---------------------------------------------------------------------------
 
@@ -110,7 +126,11 @@ qualifier hres:qualifier:completed as Completed
 qualifier hres:qualifier:deposited as Deposited
     title: Deposited
     search-name: deposited
-        
+
+qualifier hres:qualifier:submitted as Submitted
+    title: Submitted
+    search-name: submitted
+
 # ---------------------------------------------------------------------------
 
 type hres:type:peer-review as PeerReview
@@ -148,6 +168,9 @@ object hres:list:output-status:published
 object hres:list:output-status:unpublished
     type hres:type:output-status
     title: Unpublished
+object hres:list:output-status:submitted
+    type hres:type:output-status
+    title: Submitted
 
 # ---------------------------------------------------------------------------
 

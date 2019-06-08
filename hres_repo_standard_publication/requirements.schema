@@ -1,0 +1,37 @@
+
+feature std:configuration-data
+    property: {"repo_standard_publication:hostname":""}
+    property: {"repo_standard_publication:name":""}
+    property: {"repo_standard_publication:text":{}}
+    property: {"repo_standard_publication:admin_email":""}
+    property: {"repo_standard_publication:logo:src":""}
+    property: {"repo_standard_publication:logo:width":""}
+    property: {"repo_standard_publication:logo:height":""}
+    property: {"repo_standard_publication:logo:name_in_header":false}
+    property: {"repo_standard_publication:carousel":[]}
+    property: {"repo_standard_publication:research_institute_browse_images":[]}
+    property: {"repo_standard_publication:home_images":[]}
+    property: {"repo_standard_publication:footer_links":[]}
+
+# ---------------------------------------------------------------------------
+
+label hres:label:repository-item as RepositoryItem
+
+OPTIONAL attribute hres:attribute:ref-unit-of-assessment as REFUnitOfAssessment
+
+type hres:type:person:researcher as Researcher
+type hres:type:external-event as ExternalEvent
+OPTIONAL type hres:type:impact as Impact
+OPTIONAL type hres:type:impact-evidence as ImpactEvidence
+
+# ---------------------------------------------------------------------------
+
+group hres:group:repository-publisher-service
+    title: Repository Publication Service
+
+group hres:group:public-repository-access
+    member hres:group:repository-publisher-service
+
+service-user hres:service-user:repository-publisher
+    title: Repository Publication
+    group hres:group:repository-publisher-service

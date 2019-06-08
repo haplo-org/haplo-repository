@@ -1,0 +1,20 @@
+
+// WARNING: REPLACEABLE =====================================================
+
+if(spec.title) {
+  pageTitle(spec.title)
+}
+
+each(objects.results) {
+  <div class="media my-4 pt-4">
+    // <img src="..." class="mr-3" alt="...">
+
+    <div class="media-body">
+      <h5 class="mt-0 mb-1">
+        std:web-publisher:object:link(.) {
+          std:web-publisher:utils:title:name(.)
+        }
+      </h5>
+    </div>
+  </div>
+}

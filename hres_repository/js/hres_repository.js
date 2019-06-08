@@ -63,7 +63,8 @@ P.implementService("hres:repository:earliest_publication_date", function(output)
 // --------------------------------------------------------------------------
 
 P.hresWorkflowEntities.add({
-    "author": ["object", A.Author]
+    "author": ["object", A.Author],
+    "editor": ["object", A.Editor]
 });
 
 // --------------------------------------------------------------------------
@@ -111,3 +112,35 @@ var objectRender = function(response, object) {
 };
 P.hook('hObjectRender', objectRender);
 P.hook('hObjectRenderPublisher', objectRender);
+
+// --------------------------------------------------------------------------
+// Setup for License hierarchy
+
+var LICENSE_URLS = {
+    "hres:list:license:cc-by": "https://creativecommons.org/licenses/by",
+    "hres:list:license:cc-by:3": "https://creativecommons.org/licenses/by/3.0",
+    "hres:list:license:cc-by:4": "https://creativecommons.org/licenses/by/4.0",
+    "hres:list:license:cc-by-sa": "https://creativecommons.org/licenses/by-sa",
+    "hres:list:license:cc-by-sa:3": "https://creativecommons.org/licenses/by-sa/3.0",
+    "hres:list:license:cc-by-sa:4": "https://creativecommons.org/licenses/by-sa/4.0",
+    "hres:list:license:cc-by-nc": "https://creativecommons.org/licenses/by-nc",
+    "hres:list:license:cc-by-nc:3": "https://creativecommons.org/licenses/by-nc/3.0",
+    "hres:list:license:cc-by-nc:4": "https://creativecommons.org/licenses/by-nc/4.0",
+    "hres:list:license:cc-by-nd": "https://creativecommons.org/licenses/by-nd",
+    "hres:list:license:cc-by-nd:3": "https://creativecommons.org/licenses/by-nd/3.0",
+    "hres:list:license:cc-by-nd:4": "https://creativecommons.org/licenses/by-nd/4.0",
+    "hres:list:license:cc-by-nc-sa": "https://creativecommons.org/licenses/by-nc-sa",
+    "hres:list:license:cc-by-nc-sa:3": "https://creativecommons.org/licenses/by-nc-sa/3.0",
+    "hres:list:license:cc-by-nc-sa:4": "https://creativecommons.org/licenses/by-nc-sa/4.0",
+    "hres:list:license:cc-by-nc-nd": "https://creativecommons.org/licenses/by-nc-nd",
+    "hres:list:license:cc-by-nc-nd:3": "https://creativecommons.org/licenses/by-nc-nd/3.0",
+    "hres:list:license:cc-by-nc-nd:4": "https://creativecommons.org/licenses/by-nc-nd/4.0",
+    "hres:list:license:cc-0": "https://creativecommons.org/publicdomain/zero/1.0"
+};
+P.onInstall = function() {
+    _.each(LICENSE_URLS, (url, behaviour) => {
+        var license = O.behaviourRef(behaviour).load().mutableCopy();
+        license.append(O.text(O.T_IDENTIFIER_URL, url), A.Url);
+        license.save();
+    });
+};

@@ -119,7 +119,7 @@ P.respond("GET", "/do/hres-repo-apc/view_apc_form",[
     });
 });
 
-P.implementService("std:action_panel:repository_item", function(display, builder) {
+P.implementService("std:action_panel:category:hres:repository_item", function(display, builder) {
     if(canViewAPCForm(display.object)&&
         display.object.first(A.OpenAccess) &&
         display.object.first(A.OpenAccess).behaviour === "hres:list:open-access:gold") {

@@ -26,9 +26,8 @@
                 " routine analysis of materials, components and processes such as for the maintenance of national standards, as "+
                 "distinct from the development of new analytical techniques. It also excludes the development of teaching "+
                 "materials that do not embody original research.",
-                // TODO: From 1 April 2017 this needs to be within three months of acceptance
-        "pubdt": "From 1 April 2016, Hefce requires the deposit of the accepted author manuscript (AAM) "+
-                "into an institutional repository within three months of publication.",
+        "pubdt": "From 1 April 2018 the deposit of the accepted author manuscript (AAM) "+
+                "into an institutional repository within three months of acceptance is required for the REF.",
         "aam": "Please upload your accepted manuscript. This is the final version that has been accepted "+
                 "for publication. This may not always include the publisher's copy-editing, type-setting,"+
                 " formatting and/or pagination. Repository staff will add any headers or disclaimers"+
@@ -38,13 +37,11 @@
         // TODO: Unconmment when Open Access schema exists
         // "opena": "Is this item made available through paid (gold) open access?",
         "license": "The canonical url for the license that will apply after any embargo period has ended.",
-        "file": "Please upload your accepted output. This is the final version that has been accepted "+
-                "for publication. This may not always include the publisher's copy-editing, type-setting,"+
-                " formatting and/or pagination. Repository staff will add any headers or disclaimers"+
-                " required by the publisher on your behalf. Please email the University repository team if you are "+
-                'unsure about which version to upload.',
         "issn": "The International Standard Serial Number for this journal.",
-        "isbn": "The International Standard Book Number for this book or volume."
+        "isbn": "The International Standard Book Number for this book or volume.",
+        "keywords": "Please enter each keyword in a separate field.",
+        "processdates": "Enter the acceptance date of the item.",
+        "pagerange": "Please enter in the preferred format '123-456'."
     };
 
     // Capture values as focus lost, which is a MASSIVE HACK but will have to do for now
@@ -91,51 +88,6 @@
             }
         };
         
-    });
-
-    // -------------------------------------------------------------------------------------------------------------
-
-    var citationComponent = function(value, key, placeholder, prefix, suffix) {
-        return [
-            prefix,
-            '<input type="text" data-key="', key, '" placeholder="', placeholder,
-            '" value="', _.escape(value[key] || ''), '" size="10">',
-            suffix].join('');
-    };
-
-    var RepositoryJournalCitationEditorValue = function(value) {
-        this.value = value;
-    };
-    _.extend(RepositoryJournalCitationEditorValue.prototype, {
-        generateHTML: function() {
-            return [
-                    citationComponent(this.value, "volume", "Volume", '', ''),
-                    citationComponent(this.value, "number", "Number", '(', ')'),
-                    citationComponent(this.value, "pageRange", "Page range", '', '')
-                ].join(' ');
-        },
-        attach: function(container) {
-        },
-        getValue: function(container) {
-            var value = {}, have;
-            $('input', container).each(function() {
-                var x = $.trim(this.value || '');
-                if(x) { have = true; value[this.getAttribute('data-key')] = x; }
-            });
-            return have ? value : null;
-        },
-        undoableDeletedText: function(container) {
-            var value = this.getValue(container);
-            return _.compact([
-                    value.volume,
-                    value.number ? '('+value.number+')' : undefined,
-                    value.pageRange
-                ]).join(' ');
-        }
-    });
-
-    Haplo.editor.registerTextType("hres:journal_citation", function(value) {
-        return new RepositoryJournalCitationEditorValue(value);
     });
 
 })(jQuery);

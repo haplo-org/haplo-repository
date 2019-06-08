@@ -25,7 +25,7 @@ P.implementService("hres_repo_navigation:repository_item_page", function(object,
 P.implementService("hres:repository:new_repository_item_url", function(person, type) {
     return P.template("new-for-edit-url").render({
         type: type,
-        person: person
+        person: person.ref
     });
 });
 
@@ -65,8 +65,7 @@ P.respond("GET", "/do/repository-ingest-start-ui/admin-order", [
         dividerText: "Types below this point will be hidden"
     };
 
-    var allTypes = types.primaryTypes.concat(types.secondaryTypes);
-
+    var allTypes = types.primaryTypes.concat(types.secondaryTypes).concat(types.hiddenTypes);
     var typesAndDividers = [];
     var previousCategory;
     _.each(allTypes, function(type) {
@@ -188,20 +187,30 @@ var getTypes = function() {
 
     var primaryTypes = [];
     var secondaryTypes = [];
+    var hiddenTypes = [];
     _.each(infos , function(info) {
-        if(info.category === "hidden") { return; }
-        var types =  info.category === "primary" ? primaryTypes : secondaryTypes;
-        types.push(info);
+        var typesList;
+        if(info.category === "hidden") {
+            typesList = hiddenTypes;
+        } else if(info.category === "primary") {
+            typesList = primaryTypes;
+        } else {
+            typesList = secondaryTypes;
+        }
+        typesList.push(info);
     });
 
     return {
         primaryTypes: primaryTypes,
-        secondaryTypes: secondaryTypes
+        secondaryTypes: secondaryTypes,
+        hiddenTypes: hiddenTypes
     };
 };
 
 P.implementService("hres:repository:ingest_ui:types", function() {
-    return getTypes();
+    var allTypes = getTypes();
+    delete allTypes.hiddenTypes;
+    return allTypes;
 });
 
 // --------------------------------------------------------------------------

@@ -1,0 +1,7 @@
+<p><strong>"Total views: " views</strong><br>
+<strong>"Total downloads: " downloads</strong><br>
+<strong>"Views this month: " monthlyViews</strong><br>
+<strong>"Downloads this month: " monthlyDownloads</strong><br>
+
+if(canSeeMoreDetails) {<a href=url>"More details..."</a>}
+</p> 

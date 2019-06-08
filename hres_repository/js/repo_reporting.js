@@ -97,8 +97,6 @@ P.implementService("std:reporting:collection:repository_items:setup", function(c
         fact("publishedDate",   "date",     "Published").
         fact("onlinePublicationDate", "date", "Published online").
         fact("hasAnyFile",      "boolean",  "Has file").
-        fact("hasPublishersVersion",       "boolean",  "Has Publisher's version").
-        fact("hasAuthorAcceptedManuscript", "boolean", "Has AAM").
         fact("isPublished",         "boolean",      "Published").
         fact("isRejected",          "boolean",      "Rejected");
 
@@ -153,14 +151,6 @@ P.implementService("std:reporting:collection:repository_items:get_facts_for_obje
             row.hasAnyFile = true;
         }
     });
-    var aam = object.first(A.AcceptedAuthorManuscript);
-    if(aam) {
-        row.hasAuthorAcceptedManuscript = true;
-    }
-    var vor = object.first(A.PublishedVersionOfRecord);
-    if(vor) {
-        row.hasPublishersVersion = true;
-    }
 
     row.isPublished = object.labels.includes(Label.AcceptedIntoRepository);
     row.isRejected = object.labels.includes(Label.RejectedFromRepository);
@@ -188,6 +178,10 @@ var getSortedTypeFilterSpec = function() {
     return _.sortBy(typeFilterSpec, 'title');
 };
 
+P.implementService("hres:repository:sorted_type_filter_spec", function() {
+    return getSortedTypeFilterSpec;
+});
+
 var getOverviewDashboard = function(E, title) {
     return P.reporting.dashboard(E, {
             kind:"list",
@@ -212,6 +206,7 @@ P.implementService("std:reporting:dashboard:repository_overview:setup_export", f
     dashboard.columns(150, [
         "journal",
         "publisher",
+        "license",
         "year"
     ]);
 });
@@ -256,6 +251,7 @@ P.respond("GET,POST", "/do/hres-repository/publishers-overview", [
     }).
         summaryStatistic(0, "count").
         use("std:row_text_filter", {facts:["ref"], placeholder:"Search"}).
+        order(["itemsCount", true]).
         columns(1, [
             {fact:"ref", heading:"Publisher", link:true}
         ]).

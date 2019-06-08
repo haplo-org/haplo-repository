@@ -5,6 +5,10 @@
   "displayName": "Repository Dublin Core metadata",
   "displayDescription": "Dublin Core metadata management and conversions",
   "apiVersion": 4,
+  "depend": [
+        "hres_repository",
+        "hres_author_citation_value"
+    ],
   "load": [
       "js/hres_repo_metadata_dc.js"
     ]

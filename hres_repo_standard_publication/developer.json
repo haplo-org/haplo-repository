@@ -1,0 +1,6 @@
+{
+  "excludeFromSyntaxCheck": [
+    "static/vendor/bootstrap/js/bootstrap-min.js",
+    "static/jquery.js"
+  ]
+}

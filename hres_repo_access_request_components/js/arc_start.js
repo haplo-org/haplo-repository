@@ -43,7 +43,7 @@ P.workflow.registerWorkflowFeature("hres:repository:access_requests:internal_sub
     P.WORKFLOW_DEFINITION_LOOKUP[workflow.fullName] = workflow;
     INTERNAL_SUBMISSION_SPEC[workflow.fullName] = spec;
 
-    workflow.plugin.implementService("std:action_panel:repository_item", function(display, builder) {
+    workflow.plugin.implementService("std:action_panel:category:hres:repository_item", function(display, builder) {
         if(spec.canStart(O.currentUser, display.object)) {
             builder.panel(spec.panel || 125).
                 link("default", P.template("start/start-url").render({

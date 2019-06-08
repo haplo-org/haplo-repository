@@ -4,7 +4,6 @@
   "pluginVersion": 1,
   "displayName": "Haplo RM Repository Demo Application",
   "displayDescription": "Demo version of Haplo Research Manager Repository",
-  "installSecret": "5913152fb01fc9f092bf9492d891479095ac5999",
   "apiVersion": 4,
   "use": [
       "haplo:activity_guidance_notes"
@@ -38,17 +37,20 @@
       "hres_repo_oa_green_stored",
       "hres_repo_open_access",
       "hres_repo_rioxx",
+      "hres_repo_openaire",
       "hres_repo_schema_collections",
       "hres_repo_schema_data_recommended",
       "hres_repo_schema_outputs_recommended",      
+      "hres_repo_usage_statistics",
       "hres_researcher_profile",
       "hres_researcher_profile_biography",
       "hres_researcher_profile_photo",
       "hres_researcher_profile_extended",
       "hresrepodemo_access_request",
       "hresrepodemo_request_a_copy",
-      "hresrepodemo_repository_publication",
-      "hresrepodemo_test_harvest_source"
+      "hres_repo_standard_publication",
+      "hresrepodemo_test_harvest_source",
+      "hres_repo_web_profiles"
     ],
   "load": [
       "js/hresrepodemo_application.js"

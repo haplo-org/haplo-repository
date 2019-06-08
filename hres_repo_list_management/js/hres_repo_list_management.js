@@ -38,7 +38,7 @@ P.respond("GET", "/do/repository-list-management/list", [
         type: type,
         name: SCHEMA.getTypeInfo(type).name,
         search: {
-            query: "#L"+type+"#",
+            query: "#L"+type+"# ~A",
             sort: "title",
             miniDisplay: true,
             showResultCount: true,

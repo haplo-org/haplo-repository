@@ -3,8 +3,7 @@
   "pluginAuthor": "Haplo Services",
   "pluginVersion": 1,
   "displayName": "Haplo RM Repository File Access Level Policy",
-  "displayDescription": "Access level policy supoort for Haplo RM Repository applications",
-  "installSecret": "d288f49502ffb557a39018f9c99d79176214bf97",
+  "displayDescription": "Access level policy support for Haplo RM Repository applications",
   "apiVersion": 4,
   "privilegesRequired": ["pBackgroundProcessing"],
   "depend": [

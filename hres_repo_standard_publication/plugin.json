@@ -1,0 +1,20 @@
+{
+  "pluginName": "hres_repo_standard_publication",
+  "pluginAuthor": "Haplo Services",
+  "pluginVersion": 1,
+  "displayName": "Standard Repository Publication",
+  "displayDescription": "Standard public interface to academic repository.",
+  "apiVersion": 4,
+  "depend": [
+      "std_web_publisher",
+      "hres_oai_pmh",
+      "hres_repo_publication_common",
+      "hres_repo_publication_page_parts",
+      "hres_repo_access_request_components"
+    ],
+  "use": ["std:web-publisher"],
+  "load": [
+      "js/hres_repo_standard_publication.js"
+    ],
+  "allowAnonymousRequests": true
+}

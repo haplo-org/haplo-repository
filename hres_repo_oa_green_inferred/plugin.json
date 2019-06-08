@@ -4,7 +4,6 @@
   "pluginVersion": 1,
   "displayName": "Haplo RM OA - Green status inferred",
   "displayDescription": "Implementation of Green Open Access status being inferred from Accepted Author Manuscript",
-  "installSecret": "b506a9c9ee02292450a962abfc4e9e0261818a84",
   "apiVersion": 4,
   "depend": [
       "hres_repo_open_access",

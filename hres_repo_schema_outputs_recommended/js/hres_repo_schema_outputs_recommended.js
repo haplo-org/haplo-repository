@@ -12,3 +12,6 @@ P.implementService("hres:repository:earliest_publication_date", function(object)
         }
     }
 });
+
+P.hresAuthorCitation.shadowAttribute(A.BookAuthor, A.BookAuthorShadowed);
+P.hresAuthorCitation.shadowAttribute(A.Contributors, A.ContributorShadowed);

@@ -106,6 +106,30 @@ P.implementService("hres_repo_navigation:repository_item_page", function(object,
     }
 });
 
+P.respond("GET,POST", "/do/hres-repo-web-profiles/migrate-preferred-orders", [
+], function(E) {
+    if(!O.currentUser.isSuperUser) { O.stop("Not permitted"); }
+    let existingEntries = O.serviceMaybe("hres:repo_web_profiles:get_existing_ordered_outputs_entries");
+    if(E.request.method === "POST") {
+        _.each(existingEntries, (entry) => {
+            if(entry.order) {
+                P.db.outputsOrder.create(entry).save();
+            }
+        });
+    }
+    E.render({
+        pageTitle: "Migration: Move preferred outputs from old to new version",
+        text: "There are "+existingEntries.length+" users who have existing preferred orders for their outputs."+
+            " Please confirm you would like to migrate these entries?",
+        options: [
+            {
+                action: "/do/hres-repo-web-profiles/migrate-preferred-orders",
+                label: "Migrate now"
+            }
+        ]
+    }, "std:ui:confirm");
+});
+
 // --------------------------------------------------------------------------
 
 P.implementService("hres_researcher_profile:export:additional_sections",

@@ -43,6 +43,27 @@ P.implementService("std:reporting:collection:repository_items:setup", function(c
             },
             aggregate: "COUNT"
         }).
+        statistic({
+            name: "countREFOAEmbargoFail", description: "Embargo too long",
+            filter(select) {
+                select.where("refEmbargoCheck", "=", false);
+            },
+            aggregate: "COUNT"
+        }).
+        statistic({
+            name: "countREFOADepositFail", description: "Deposited too late",
+            filter(select) {
+                select.where("refDepositCheck", "=", false);
+            },
+            aggregate: "COUNT"
+        }).
+        statistic({
+            name: "countREFOAMetadataFail", description: "Missing metadata",
+            filter(select) {
+                select.where("refMetadataCheck", "=", false);
+            },
+            aggregate: "COUNT"
+        }).
         filter("withinREFOAPolicyScope", (select) => {
             select.where("refPublishedInOAPeriod", "=", true).
                 where("oaIsConfItemOrArticle", "=", true);
@@ -225,6 +246,9 @@ P.respond("GET,POST", "/do/hres-ref-repo/non-compliant-items", [
         }).
         use("std:row_text_filter", {facts:["title","author"], placeholder:"Search"}).
         summaryStatistic(0, "count").
+        summaryStatistic(2, "countREFOADepositFail").
+        summaryStatistic(4, "countREFOAEmbargoFail").
+        summaryStatistic(5, "countREFOAMetadataFail").
         columns(10, [
             {type:"linked", style:"wide", column:{fact:"title"}}
         ]).

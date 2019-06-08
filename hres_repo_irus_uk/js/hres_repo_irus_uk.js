@@ -5,8 +5,8 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.         */
 
 
-// var LIVE_ENDPOINT = "https://jusp.jisc.ac.uk/counter/";
-// var TEST_ENDPOINT = "http://jusp.jisc.ac.uk/counter/test/";
+// var LIVE_ENDPOINT = "https://irus.jisc.ac.uk/counter/";
+// var TEST_ENDPOINT = "https://irus.jisc.ac.uk/counter/test/";
 
 P.implementService("haplo_usage_tracking:notify:event", function(event) {
     if(!(event.object && event.file)) { return; }
@@ -31,7 +31,7 @@ P.implementService("haplo_usage_tracking:notify:event", function(event) {
     }
 
     if(O.application.hostname === O.application.config["hres_repo_irus_uk:enabled_application"]) {
-        let client = O.httpClient("https://jusp.jisc.ac.uk/counter/").
+        let client = O.httpClient("https://irus.jisc.ac.uk/counter/").
             queryParameter("url_ver", "Z39.88-2004").
             queryParameter("url_tim", new XDate(event.datetime).toISOString()).
             queryParameter("req_id", event.remoteAddress).

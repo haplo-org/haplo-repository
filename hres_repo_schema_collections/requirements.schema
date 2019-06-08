@@ -5,7 +5,8 @@ schema-template hres:template-type:repository:collection
     search-name portfolio
     attribute hres:attribute:contributors [sort=10220]
     attribute hres:attribute:collection-item [sort=13500]
-    element: std:group:everyone right std:action_panel {"panel":"collection"} [sort=100]
+    REMOVE element: std:group:everyone right std:action_panel {"panel":"collection"} [sort=100]
+    element: std:group:everyone right std:action_panel {"panel":"collection", "category":"hres:repository_item"} [sort=100]
 
 # ---------------------------------------------------------------------------
 
@@ -51,7 +52,7 @@ attribute hres:attribute:collection-item as CollectionItem
     qualifier std:qualifier:null
     data-type link
     ui-options lookup
-    # TODO: 
+    # TODO: Uncomment this line when platfform support is added
     # linked-annotated-types hres:annotation:repository-item
     linked-type hres:type:website
     linked-type hres:type:software
@@ -61,7 +62,6 @@ attribute hres:attribute:collection-item as CollectionItem
     linked-type hres:type:devices-and-products
     linked-type hres:type:design
     linked-type hres:type:composition
-    linked-type hres:type:dataset
     linked-type hres:type:thesis
     linked-type hres:type:report
     linked-type hres:type:performance
@@ -74,4 +74,5 @@ attribute hres:attribute:collection-item as CollectionItem
     linked-type hres:type:conference-item
     linked-type std:type:book
 
-
+attribute hres:attribute:output as Output
+    linked-type hres:type:collection

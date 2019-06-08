@@ -1,0 +1,12 @@
+
+<p><i> "Embargo periods should not exceed the following maxima:"
+    <li> "12 months for REF Main Panel A and REF Main Panel B" </li>
+    <li> "24 months for REF Main Panel C and REF Main Panel D" </li>
+</i></p>
+<br>
+
+<p><b>"Maximum embargo length (months): "</b> maxLength </p>
+<p><b>"REF Panel: "</b> if(panel) { std:object:title(panel) } else { "Unknown" } </p>
+<br>
+
+std:object(displayObject)

@@ -20,5 +20,12 @@ type hres:type:dataset as Dataset
     render-icon: E226,1,f
     render-category 6
     default-subtype hres:type:dataset
-    REMOVE element: std:group:everyone right std:action_panel {"panel":"research_data"}
-    element: std:group:everyone right std:action_panel {"panel":"research_data"} [sort=100]
+    REMOVE element: std:group:everyone right std:action_panel {"panel":"research_data"} [sort=100]
+    element: std:group:everyone right std:action_panel {"panel":"research_data", "category":"hres:repository_item"} [sort=100]
+# ---------------------------------------------------------------------------
+
+OPTIONAL attribute hres:attribute:collection-item as CollectionItem
+    linked-type hres:type:dataset
+
+attribute hres:attribute:output as Output
+    linked-type hres:type:dataset

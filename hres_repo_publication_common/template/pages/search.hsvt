@@ -1,0 +1,25 @@
+
+// WARNING: REPLACEABLE =====================================================
+
+pageTitle("Search")
+
+std:web-publisher:block("pageheaderSubtitle") {
+  "Explore our internationally renowned research repository"
+}
+std:web-publisher:block("pageheaderExtra") {
+  <div class="haplo-search-form">
+    render(search.form)
+  </div>
+}
+
+<div class="search-results">
+  render(search.results)
+</div>
+
+ifAll(showingForm searchByFieldsPath) {
+  <div class="text-center">
+    <p>
+      <a href=searchByFieldsPath class="btn btn-show btn-outline-primary"> "Search by fields..." </a>
+    </p>
+  </div>
+}

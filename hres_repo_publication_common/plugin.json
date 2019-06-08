@@ -16,7 +16,9 @@
   "load": [
       "js/repo_publication_common.js",
       "js/repo_publication_templates.js",
-      "js/repo_publication_search_by_fields.js",
+      "js/repo_publication_pages_objects.js",
+      "js/repo_publication_search.js",
+      "js/repo_publication_pages_misc.js",
       "js/repo_publication_meta_tags.js"
     ]
 }

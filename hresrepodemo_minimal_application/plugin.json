@@ -1,0 +1,40 @@
+{
+  "pluginName": "hresrepodemo_minimal_application",
+  "pluginAuthor": "Haplo Services",
+  "pluginVersion": 1,
+  "displayName": "Haplo RM Repository Minimal Demo Application",
+  "displayDescription": "Demo version of a minimal installation of Haplo Research Manager Repository",
+  "installSecret": "f271405d482caef7343156d35533bb2e6ea30900",
+  "apiVersion": 4,
+  "use": [
+      "haplo:activity_guidance_notes"
+    ],
+  "depend": [
+      "haplo_activity_guidance_notes",
+      "hres_bibliographic_reference",
+      "hres_development_test_data",
+      "hres_orcid_repository",
+      "hres_repo_datacite",
+      "hres_repo_doi_minting",
+      "hres_repo_duplicate",
+      "hres_repo_embargoes",
+      "hres_repo_ethos",
+      "hres_repo_list_management",
+      "hres_repo_metadata_dc",
+      "hres_repo_navigation",
+      "hres_repo_oa_green_stored",
+      "hres_repo_open_access",
+      "hres_repo_rioxx",
+      "hres_repo_schema_outputs_recommended",
+      "hres_repo_usage_statistics",
+      "hresrepodemo_request_a_copy",
+      "hres_repo_ingest_start_ui",
+      "hres_repo_ingest_workflow",
+      "hres_researcher_profile_photo",
+      "hres_repo_standard_publication"
+    ],
+  "load": [
+      "js/hresrepodemo_minimal_application.js"
+    ],
+  "respond": []
+}

@@ -4,12 +4,13 @@
   "pluginVersion": 1,
   "displayName": "Haplo RM Test Harvest Source",
   "displayDescription": "Test source for a harvested repository item",
-  "installSecret": "a012e1da45d97d39089461abd3147b0c3b8da775",
   "apiVersion": 4,
   "depend": [
       "hres_repo_harvest_sources",
       "hres_repo_harvest_claim",
-      "hres_repo_datacite"
+      "hres_repo_datacite",
+      "hres_digital_object_identifier",
+      "hres_repo_embargoes"
     ],
   "load": [
       "js/hresrepodemo_test_harvest_source.js"

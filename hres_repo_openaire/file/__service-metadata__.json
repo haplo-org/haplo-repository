@@ -1,0 +1,14 @@
+{
+    "hres:repository:oaire:write-store-object-below-xml-cursor": {
+        "statements": [
+            "conforms-to hres:write-store-object-below-xml-cursor",
+            "hres:oai-pmh:exposed-metadata-format"
+        ],
+        "metadata": {
+            "hres:oai-pmh:metadata-prefix":     "oaire",
+            "hres:oai-pmh:schema":              "https://www.openaire.eu/schema/repo-lit/4.0/openaire.xsd",
+            "hres:oai-pmh:metadata-namespace":  "http://namespace.openaire.eu/schema/oaire/",
+            "hres:oai-pmh:root-element":        "resource" 
+        }
+    }
+}

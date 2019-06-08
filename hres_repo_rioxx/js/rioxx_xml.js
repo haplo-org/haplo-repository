@@ -36,6 +36,11 @@ P.implementService("hres:repository:rioxx:write-store-object-below-xml-cursor", 
         }
     };
 
+    // This service is passed a restricted copy of the item. This should be used where we don't explicitly need to
+    // know about possibly restricted attributes, such as publisher's versions of files, where there may be embargoes. 
+    // In those cases, use the urestricted item.
+    let unrestrictedItem = item.ref.load();
+
     // rioxxterms elements
     let rioxxterms = cursor.
         addNamespace("http://www.rioxx.net/schema/v2.0/rioxxterms/", "rioxxterms", "http://www.rioxx.net/schema/v2.0/rioxx/rioxxterms.xsd").
@@ -50,9 +55,9 @@ P.implementService("hres:repository:rioxx:write-store-object-below-xml-cursor", 
         text(rioxxTypeList.get(item.firstType()) || "Other").
         up();
     let version = "NA";
-    if(item.first(A.PublishersVersion)) {
+    if(!!unrestrictedItem.getAttributeGroupIds(A.PublishersVersion).length) {
         version = "VoR";
-    } else if(item.first(A.AcceptedAuthorManuscript)) {
+    } else if(!!unrestrictedItem.getAttributeGroupIds(A.AcceptedAuthorManuscript).length) {
         version = "AM";
     }
     rioxxterms.element("version").text(version).up();

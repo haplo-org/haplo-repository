@@ -1,0 +1,12 @@
+
+<p><i> "The output must have been deposited as soon after the point of acceptance as possible, and no later than three months after this date (as given in the acceptance letter or email from the publication to the author)." </i></p>
+<p><i> "During the first two years of the policy (1 April 2016 – 1 April 2018), outputs can be deposited up to three months after the date of publication." </i></p>
+<br>
+
+if(fileDeposit) {
+    <p><b>"First file deposited: "</b> std:date(fileDeposit) </p>
+    <p><b>"Version deposited: "</b> version </p>
+    <br>
+}
+
+std:object(displayObject)

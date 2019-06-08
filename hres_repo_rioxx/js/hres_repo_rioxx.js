@@ -16,7 +16,7 @@ var RIOXX_MANDATORY_FIELDS = {
                 return !!l.load().first(A.WebAddressUrl);
             }
         },
-        title: "License",
+        title: "License with URL",
         passIfAnyExists: [[A.License]]
     },
     "identifier": {
@@ -107,12 +107,13 @@ var getMissingRequirements = function(item) {
     return missing;
 };
 
-P.implementService("std:action_panel:outpu", function(display, builder) {
+P.implementService("std:action_panel:output", function(display, builder) {
     if(O.currentUser.allowed(CanViewRIOXX)) {
         var missing = getMissingRequirements(display.object);
-        builder.panel(120).element(0, {title: "RIOXX", label: (_.isEmpty(missing)) ? "Compliant" : "Missing mandatory metadata"});
+        var panel = builder.panel(450);
+        panel.element(0, {title: "RIOXX", label: (_.isEmpty(missing)) ? "Compliant" : "Missing mandatory metadata"});
         _.each(missing, function(requirement, key) {
-            builder.panel(120).element(10, {
+            panel.element(10, {
                 label: requirement.title, href: "/do/hres-repo-rioxx/missing-metadata/"+display.object.ref+"/"+key
             });
         });

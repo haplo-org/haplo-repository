@@ -8,17 +8,28 @@ which is provided in the LICENSE file.
 This repository contains software by other authors, licensed to you as follows:
 
 jQuery
-hresrepodemo_repository_publication/static/jquery.js
+hres_repo_standard_publication/static/jquery.js
   http://jquery.com/
   MIT License
 
 Bootstrap
-hresrepodemo_repository_publication/static/bootstrap.css
-hresrepodemo_repository_publication/static/bootstrap.js
+hres_repo_standard_publication/static/vendor/bootstrap/*
   http://getbootstrap.com/
   MIT License
 
-Bootstrap Lumen theme
-hresrepodemo_repository_publication/static/bootstrap-lumen.css
-  https://github.com/thomaspark/bootswatch
+Font Awesome
+hres_repo_standard_publication/static/vendor/fontawesome
+  https://fontawesome.com/
+  https://github.com/FortAwesome/Font-Awesome/blob/master/LICENSE.txt
+  Font Awesome Free, MIT License, SIL OFL 1.1, CC BY 4.0
+
+Images
+hres_repo_standard_publication/static/vendor/pixabay/
+  Pixabay
+  https://pixabay.com/service/license/
+  Images have been processed to match theme.
+
+Featherlight
+hres_repo_publication_common/static/lightbox
+  http://noelboss.github.io/featherlight/
   MIT License

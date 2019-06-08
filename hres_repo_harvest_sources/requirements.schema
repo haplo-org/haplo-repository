@@ -1,27 +1,15 @@
 
-label std:label:archived as ARCHIVED
 label std:label:deleted as DELETED
 
-label hres:label:source-item as SourceItem
-    title: Source Item
-    category: Repository
+label haplo:label:alternative-version as AlternativeVersion
 
-# ------ Groups ------------------------
-
-group std:group:administrators as Administrators
-
-group hres:group:repository-editors as RepositoryEditors
-
-# ------ Attributes --------------------
-
-# Do not add to any object type, should never be editable
-attribute hres:attribute:authoritative-version as AuthoritativeVersion
-    title: Authoritative version
-    search-name authoritative-version
-    qualifier std:qualifier:null
-    data-type link
-
-# ------ Attributes --------------------
+# Saving objects with this label adds the alternative/authoritative version features in this plugin
+label hres:label:harvested-object as Harvested
+    title: Harvested record
+    category: Version
 
 schema-template hres:template-type:repository-item
-    element std:group:everyone top hres_repo_harvest_sources:source_objects
+    element: std:group:everyone top haplo_alternative_versions:alternative_versions
+    element: std:group:everyone right std:action_panel {"panel":"alternative_versions"}
+
+attribute haplo:attribute:authoritative-version as AuthoritativeVersion

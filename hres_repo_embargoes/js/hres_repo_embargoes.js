@@ -11,19 +11,71 @@ var CanEditEmbargoes = P.CanEditEmbargoes = O.action("hres_repo_embargoes:can_ed
 
 // -------------------------------------------------------------------
 
+/*HaploDoc
+node: /hres_repo_embargoes
+title: Embargoes
+sort: 1
+--
+
+This plugin provides the functionality to apply publisher-mandated embargoes to files \
+in the repository. These can be applied on a per-attribute basis (not yet per-file, sadly) \
+which restricts them from public view.
+
+The services which allow other plugins to query or set embargoes are:
+
+
+h3(service). ("hres_repo_embargoes:get_embargo", output)
+
+Performs a database query for any embargo entries for this output. Returns the databaseQuery result, \
+or @undefined@ if no embargoes are found. 
+
+Database rows contain:
+
+|*Field*|*Type*||*Nullable*|
+|@object@|@ref@|The ref of the output||
+|@desc@|@int@|The attribute that this embargo applies to (applies to all if null)|Yes|
+|@licenseURL@|@text@|The license that applies to this file when under embargo|Yes|
+|@start@|@date@|The start date of this embargo||
+|@end@|@date@|The end date of this embargo|Yes|
+*/
 P.implementService("hres_repo_embargoes:get_embargo", function(output) {
     return getEmbargoData(output);
 });
 
+/*HaploDoc
+node: /hres_repo_embargoes
+sort: 7
+--
+
+h3(service). ("hres_repo_embargoes:has_embargoed_files_for_user", user, output)
+
+Returns @true@ if any files are embargoed on this output for this user.
+*/
 P.implementService("hres_repo_embargoes:has_embargoed_files_for_user", function(user, output) {
     return hasEmbargoedFilesForUser(user, output);
 });
 
+/*HaploDoc
+node: /hres_repo_embargoes
+sort: 4
+--
+
+h3(service). ("hres_repo_embargoes:set_embargo", specification)
+
+Allows other plugins to set embargoes one at a time (ie. for one file/just the whole embargo) without affecting \
+other embargoes saved for @specification.object@. Specification should contain:
+
+| object | Ref of the object to save the embargo for | required |
+| extensionGroup | The extension group number the embargo applies to, or empty to set a whole embargo | optional |
+| desc | The attribute the embargo applies to (currently used for the sake of displaying on the record) | optional |
+| customStart | Date string as YYYY-MM-DD for a custom embargo start* | optional |
+| embargoLength | The length in integer months the embargo should last for, or "Indefinite" | required if end not set |
+| end | Date string for a custom embargo end date | required if embargoLength not set |
+| licenseURL | String URL for the license that applies during the embargo | optional |
+
+*/
 P.implementService("hres_repo_embargoes:set_embargo", function(spec) {
-    if(!spec.object) {
-        throw new Error("Spec passed to hres_repo_embargoes:set_embargo must contain an object");
-    }
-    setEmbargo(spec);
+    setSingleEmbargo(spec);
 });
 
 // -------------------------------------------------------------------
@@ -56,15 +108,40 @@ P.hook('hScheduleDailyEarly', function(response, year, month, dayOfMonth, hour, 
     P.data['lastLiftedEmbargoes'] = (new Date()).toString();
 });
 
+P.implementService("haplo_alternative_versions:update_database_information", function(fromObject, toObject) {
+    var needsRelabel = false;
+    var oldEmbargoes = getEmbargoData(toObject);
+    if(oldEmbargoes) {
+        oldEmbargoes.deleteAll();
+        needsRelabel = true;
+    }
+    var newEmbargoes = getEmbargoData(fromObject);
+    if(newEmbargoes) {
+        _.each(newEmbargoes, (em) => {
+            P.db.embargoes.create({
+                object: toObject.ref,
+                desc: em.desc,
+                licenseURL: em.licenseURL,
+                start: em.start,
+                end: em.end
+            }).save();
+        });
+        needsRelabel = true;
+    }
+    if(needsRelabel) {
+        relabelForEmbargoes(toObject);
+    }
+});
+
 // -------------------------------------------------------------------
 
 P.implementService("std:action_panel_priorities", function(priorities) {
     _.extend(priorities, {
-        "hres:repository_item:embargo": 101,
+        "hres:repository_item:embargo": 150,
     });
 });
 
-var fillPanel = function(display, builder) {
+var fillPanel = function(display, builder, preventEdit) {
     var embargoes = getEmbargoData(display.object);
     if(embargoes) {
         var anyIsActive = _.some(embargoes, (e) => { return e.isActive(); });
@@ -73,11 +150,13 @@ var fillPanel = function(display, builder) {
             var text = embargo.getDatesForDisplay();
             if(embargo.desc) {
                 text = text+" ("+SCHEMA.getAttributeInfo(embargo.desc).name+")";
+            } else {
+                text = text+" (Whole record)";
             }
             builder.panel("hres:repository_item:embargo").link(1, embargo.licenseURL, text);
         });
     }
-    if(O.currentUser.allowed(CanEditEmbargoes)) {
+    if(O.currentUser.allowed(CanEditEmbargoes) && !preventEdit) {
         builder.panel("hres:repository_item:embargo").link("default", "/do/hres-repo-embargoes/edit/"+display.object.ref,
             (!!embargoes ? "Edit" : "Set")+" embargo");
     }
@@ -88,21 +167,26 @@ P.implementService("std:action_panel:output", function(display, builder) {
 P.implementService("std:action_panel:research_data", function(display, builder) {
     fillPanel(display, builder);
 });
+P.implementService("std:action_panel:alternative_versions", function(display, builder) {
+    fillPanel(display, builder, true);
+});
 
 P.implementService("std:action_panel:output", function(display, builder) {
     var output = display.object;
-    var panel = builder.panel("hres:ref:repo");
-    builder.panel(112).element(0, { title: "Archiving guidance" });
+    if(O.application.config["hres_repo_embargoes:sherpa_romeo_enable_for_articles_only"] &&
+        !output.isKindOf(T.JournalArticle)) { return; }
+    var panel = builder.panel(155);
+    panel.element(0, { title: "Archiving guidance" });
     var q = P.db.sherpaArchivingData.select().where('object', '=', output.ref);
     if(q.length) {
         _.each(q[0].data.publishers, (p) => {
-            builder.panel(112).element(10, { label: p.name });
+            panel.element(10, { label: p.name });
             _.each(p.archiving, (a) => {
-                builder.panel(112).element(10, { label: _.capitalize(a) });
+                panel.element(10, { label: _.capitalize(a) });
             });
         });
     }
-    builder.panel(112).link(20,
+    panel.link(20,
         "/do/hres-repo-embargoes/sherpa-information/"+output.ref,
         (q.length ? "More" : "Get")+" information",
         "default");
@@ -112,7 +196,8 @@ P.implementService("std:action_panel:output", function(display, builder) {
 
 P.db.table('embargoes', {
     object: { type: 'ref' },
-    // Null --> Applies to all descs
+    // Null --> Applies to all files
+    extensionGroup: { type: 'int', nullable: true },
     desc: { type: 'int', nullable: true },
     licenseURL: { type: 'text', nullable: true },
     start: {type: 'date' },
@@ -135,7 +220,7 @@ P.db.table('embargoes', {
 });
 
 var getEmbargoData = P.getEmbargoData = function(output) {
-    var q = P.db.embargoes.select().where("object", "=", output.ref).order("desc", true);
+    var q = P.db.embargoes.select().where("object", "=", output.ref).order("extensionGroup", true);
     if(q.count()) {
         return q;
     }
@@ -144,11 +229,22 @@ var getEmbargoData = P.getEmbargoData = function(output) {
 var hasEmbargoedFilesForUser = function(user, object) {
     var embargoes = getEmbargoData(object);
     var anyFilesEmbargoedForUser = false;
+    var objectGroups = object.extractAllAttributeGroups();
     _.each(embargoes, function(embargo) {
         if(embargo.isActive()) {
-            if(embargo.desc) {
-                if(!object.canReadAttribute(embargo.desc, user)) {
-                    anyFilesEmbargoedForUser = true;
+            if(embargo.extensionGroup) {
+                var group = _.find(objectGroups.groups, function(g) {
+                    return (g.extension.groupId === embargo.extensionGroup);
+                });
+                // The group may not be on the object, if an attribute that is embargoed is later deleted
+                if(group) {
+                    group.object.every(function(v,d,q) {
+                        if(O.typecode(v) === O.T_IDENTIFIER_FILE) {
+                            if(!group.object.canReadAttribute(d, user)) { 
+                                anyFilesEmbargoedForUser = true;
+                            }
+                        }
+                    });
                 }
             } else {
                 object.every(function(v,d,q) {
@@ -164,77 +260,99 @@ var hasEmbargoedFilesForUser = function(user, object) {
     return anyFilesEmbargoedForUser;
 };
 
-var setEmbargo = function(spec) {
-    var object = spec.object.load();
-    var existingEmbargo = getEmbargoData(object);
-    if(existingEmbargo) { return; } // do something more interesting?
-    var start;
-    if(!!spec.start) {
-        start = new Date(spec.start);
-    } else if(object.first(A.PublicationDate)) {
-        start = O.service("hres:repository:earliest_publication_date", object);
-    } else {
-        // Fallback to today
-        start = new Date();
+var setSingleEmbargo = function(spec) {
+    if(!spec.object) {
+        throw new Error("Must specify object to embargo");
     }
-    var end;
-    if(spec.end) {
-        end = new Date(spec.end);
+    var object = O.isRef(spec.object) ? spec.object.load() : spec.object;
+    var document = {};
+    // assume the id only ever goes up, so ordering by id descending will get the latest row first
+    var existingDocumentQuery = P.db.embargoDocuments.select().where("object", "=", object.ref).order("id", true);
+    if(existingDocumentQuery.length) {
+        document = JSON.parse(existingDocumentQuery[0].document);
+        existingDocumentQuery.deleteAll();
     }
-    var row = P.db.embargoes.create({
-        object: object.ref,
-        desc: spec.desc,
-        licenseURL: spec.licenseURL || null,
-        start: start,
-        end: end || null
-    });
-    row.save();
-    // need to also save a document so can see this info in UI
-    var embargoLength = Math.floor(row.getLengthInMonths());
-    var document = {
-        embargoes: [{
-            customStart: (new XDate(start)).toString("yyyy-MM-dd"),
-            appliesTo: row.desc || "all",
-            embargoLength: embargoLength ? embargoLength.toString() : "Indefinite",
-            licenseURL: spec.licenseURL || ''
-        }]
+    // if neither end nor length are specified, then set indefinite embargo,
+    // else save the passed in embargoLength to document
+    var embargoLength = spec.embargoLength;
+    if(!spec.end && !spec.embargoLength) {
+        embargoLength = "Indefinite";
+    }
+    var updated = {
+        customStart: spec.customStart,
+        embargoLength: embargoLength,
+        end: spec.end,
+        licenseURL: spec.licenseURL
     };
+    if(spec.extensionGroup) {
+        updated.groupId = spec.extensionGroup;
+        updated.desc = spec.desc;
+        var updatedExisting = false;
+        _.each(document.embargoes, function(em) {
+            if(updatedExisting) { return; }
+            if(em.groupId === spec.extensionGroup) {
+                em = updated;
+                updatedExisting = true;
+            }
+        });
+        if(!updatedExisting) {
+            if(!document.embargoes) { document.embargoes = []; }
+            document.embargoes.push(updated);
+        }
+    } else {
+        document.all = updated;
+    }
+    if(!document.all) { document.all = {}; }
     P.db.embargoDocuments.create({
         object: object.ref,
         document: JSON.stringify(document)
     }).save();
+    P.saveEmbargoData(object, document);
     relabelForEmbargoes(object);
 };
 
 // -------------------------------------------------------------------
 
-var ATTR_TO_LABEL = {
-    "hres:attribute:accepted-author-manuscript": Label.EmbargoAcceptedAuthorManuscript,
-    "hres:attribute:published-file": Label.EmbargoPublishersVersion,
-    "std:attribute:file": Label.EmbargoFile
-};
+P.hook("hLabelAttributeGroupObject", function(response, container, object, desc, groupId) {
+    // This will be removed from the 'remove' list if it is later 'added'
+    response.changes.remove(Label.EmbargoAllFiles);
+    if(container.ref) {
+        var q = getEmbargoData(container);
+        if(q) {
+            q.or(function(sq) {
+                sq.where("extensionGroup", "=", groupId).
+                    where("extensionGroup", "=", null);
+            }).each(function(embargo) {
+                if(embargo.isActive()) {
+                    response.changes.add(Label.EmbargoAllFiles);
+                }
+            });
+        }
+    }
+});
 
 var relabelForEmbargoes = P.relabelForEmbargoes = function(object) {
-    // These are removed from the 'remove' list when they are later 'added'
-    var changes = O.labelChanges().remove([
-        Label.EmbargoAcceptedAuthorManuscript,
-        Label.EmbargoPublishersVersion,
-        Label.EmbargoFile,
-        Label.EmbargoAllFiles
-    ]);
-    var embargoes = getEmbargoData(object);
-    if(embargoes) {
-        _.each(embargoes, function(embargo) {
+    // This is removed from the 'remove' list if it is later 'added'
+    var changes = O.labelChanges().remove([Label.EmbargoAllFiles]);
+    var q = getEmbargoData(object);
+    if(q) {
+        // Per-file embargoes are dealt with by indexing and the hLabelAttributeGroupObject hook above
+        q.where("extensionGroup", "=", null).each(function(embargo) {
             if(embargo.isActive()) {
-                if(embargo.desc) {
-                    var code = SCHEMA.getAttributeInfo(embargo.desc).code;
-                    changes.add(ATTR_TO_LABEL[code]);
-                } else {
-                    changes.add(Label.EmbargoAllFiles);
-                }
+                changes.add(Label.EmbargoAllFiles);
             }
         });
     }
     object.relabel(changes);
+    object.reindex();   // to trigger hLabelAttributeGroupObject hook
     O.service("std:reporting:update_required", "repository_items", [object.ref]);
 };
+
+// --------------------------------------------------------------------------
+// Testing
+
+P.respond("GET", "/do/hres-repo-embargoes/embargo-count", [
+], function(E) {
+    O.action("std:action:administrator_override").enforce();
+    E.response.body = P.db.embargoes.select().count().toString();
+});

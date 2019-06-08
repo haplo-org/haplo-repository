@@ -4,11 +4,12 @@
   "pluginVersion": 1,
   "displayName": "Repository Eprints",
   "displayDescription": "Support for EPrints",
-  "installSecret": "56612314495b58eb2c6d37a78c4f94b8df203bfd",
   "apiVersion": 4,
   "privilegesRequired": [
     "pBackgroundProcessing",
-    "pDatabase"
+    "pDatabase",
+    "pHTTPClient",
+    "pKeychainRead"
   ],
   "depend": [
     "hres_author_citation_value",
@@ -17,7 +18,10 @@
     "hres_digital_object_identifier",
     "hres_schema",
     "hres_repository",
-    "hres_repo_object_editor"
+    "hres_repo_object_editor",
+    "haplo_service_registry",
+    "hres_journal_citation_value",
+    "hres_repo_data_monitoring"
   ],
   "use": [
     "hres:doi",
@@ -27,7 +31,8 @@
       "js/hres_repo_eprints_export.js",
       "js/hres_repo_eprints_import.js",
       "js/hres_repo_eprints_meta_tags.js",
-      "js/hres_repo_eprints.js"
+      "js/hres_repo_eprints.js",
+      "js/hres_repo_eprints_file_import.js"
     ],
   "respond": ["/do/hres-repo-eprints"]
 }

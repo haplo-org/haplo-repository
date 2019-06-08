@@ -4,7 +4,6 @@
   "pluginVersion": 1,
   "displayName": "Hres Repo Duplicate",
   "displayDescription": "Enable creation of new repository items from existing item to avoid re-entry of data",
-  "installSecret": "7a74d562d84adba6d496340d4879337cf7b37acc",
   "apiVersion": 4,
   "depend": [
     "hres_repository"

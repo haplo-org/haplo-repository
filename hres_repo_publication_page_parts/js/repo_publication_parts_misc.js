@@ -7,6 +7,11 @@
 
 // Misc parts do not have a category, alias or add to categories.
 
+P.webPublication.registerReplaceableTemplate(
+    "hres:repo-publication-parts:misc:recent-additions",
+    "misc/recent-additions"
+);
+
 P.webPublication.pagePart({
     name: "hres:repository:misc:recent-additions",
     sort: 1000000,
@@ -25,6 +30,7 @@ P.webPublication.pagePart({
                 }
             )
         };
-        return P.template("misc/recent-additions").deferredRender(view);
+        var template = context.publication.getReplaceableTemplate("hres:repo-publication-parts:misc:recent-additions");
+        return template.deferredRender(view);
     }
 });

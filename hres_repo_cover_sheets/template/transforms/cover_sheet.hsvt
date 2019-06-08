@@ -1,0 +1,25 @@
+
+<h1>heading</h1>
+<h3>subheading</h3>
+
+<br>
+
+<div class="details">
+<table cellpadding="20">
+  <tr>
+    <td>
+      <h2>title</h2>
+      <h2>authors</h2>
+      <h3>faculty</h3>
+    </td>
+  </tr>
+</table>
+</div>
+
+if(statement) {
+    std:text:document(statement)
+}
+
+if(archiveStatement) {
+    std:text:paragraph(archiveStatement)
+}

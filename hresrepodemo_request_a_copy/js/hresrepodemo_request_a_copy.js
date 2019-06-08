@@ -7,5 +7,4 @@
 
 P.CanViewRequest = O.action("hresrepodemo_request_a_copy:view_request").
     title("View Request a Copy").
-    allow("group", Group.RepositoryEditors).
-    allow("group", Group.DataPreparers);
+    allow("group", Group.RepositoryEditors);

@@ -36,6 +36,10 @@ P.implementService("haplo:descriptive_object_labelling:setup", function(type) {
         labels: [Label.ActivityRepository],
         labelWithCreator: true
     });
+
+    type(T.License, {
+        labels: [Label.ActivityRepository]
+    });
 });
 
 P.implementService("haplo:user_roles_permissions:setup", function(setup) {
@@ -44,6 +48,7 @@ P.implementService("haplo:user_roles_permissions:setup", function(setup) {
     setup.groupPermission(Group.Everyone, "read", T.Journal);
     setup.groupPermission(Group.Everyone, "create", T.ExternalEvent);
     setup.groupPermission(Group.Everyone, "read", T.ExternalEvent);
+    setup.groupPermission(Group.RepositoryEditors, "read-write", T.License);
     setup.groupPermission(Group.RepositoryEditors, "read-write", T.ExternalEvent);
     // Outputs editors can read and write at all times
     setup.groupPermission(Group.RepositoryEditors, "read-write", Label.RepositoryItem);

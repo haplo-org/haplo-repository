@@ -4,10 +4,12 @@
   "pluginVersion": 1,
   "displayName": "Haplo Repository Harvest Claim",
   "displayDescription": "Policy and task management for claiming harvested items",
-  "installSecret": "fb6582dbb44c1b381eb0a3590404b4e7bcc96648",
   "apiVersion": 4,
   "loadPriority": 5000,
+  "privilegesRequired": ["pDatabase"],
+  "use": ["std:document_store"],
   "depend": [
+      "std_document_store",
       "hres_repo_harvest_sources",
       "hres_repository",
       "hres_author_citation_value",

@@ -4,7 +4,6 @@
   "pluginVersion": 1,
   "displayName": "Haplo RM Recommended Schema - Research Data",
   "displayDescription": "Recommended additional schema for Haplo Research Data Repositories",
-  "installSecret": "5c7d3f02bf25e2108b1941d29124ef05d9aa2e25",
   "apiVersion": 4,
   "depend": [
       "hres_repo_schema_recommended",

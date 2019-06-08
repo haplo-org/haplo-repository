@@ -1,0 +1,9 @@
+
+attribute hres:attribute:nlm-id as NLMID
+    title National Library of Medicine ID
+    search-name nlm-id
+    qualifier std:qualifier:null
+    data-type text
+
+type std:type:journal as Journal
+    attribute hres:attribute:nlm-id [sort=19000]

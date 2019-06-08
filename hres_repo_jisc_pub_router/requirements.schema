@@ -1,0 +1,57 @@
+
+# -------- Types -----------------------------------
+
+type hres:type:journal-article as JournalArticle
+type std:type:person as Person
+type hres:type:person:researcher as Researcher
+type hres:type:person:researcher-past as ResearcherPast
+type hres:type:person:external-researcher as ExternalResearcher
+type std:type:journal as Journal
+type hres:type:organisation:publisher as Publisher
+type hres:type:organisation:funder as Funder
+type hres:type:project:past as ProjectPast
+
+# -------- Attributes ------------------------------
+
+attribute dc:attribute:type as Type
+attribute dc:attribute:author as Author
+attribute hres:attribute:editor as Editor
+attribute hres:attribute:authors-citation as AuthorsCitation
+attribute hres:attribute:journal-citation as JournalCitation
+attribute hres:attribute:researcher as Researcher
+attribute hres:attribute:publication-process-dates as PublicationProcessDates
+attribute hres:attribute:publication-dates as PublicationDates
+attribute hres:attribute:abstract as Abstract
+attribute hres:attribute:digital-object-identifier-doi as DOI
+attribute hres:attribute:keywords as Keywords
+attribute hres:attribute:page-range as PageRange
+attribute std:attribute:email as Email
+attribute hres:attribute:orcid as ORCID
+attribute hres:attribute:issn as ISSN
+attribute hres:attribute:journal as Journal
+attribute dc:attribute:publisher as Publisher
+attribute hres:attribute:funder as Funder
+attribute hres:attribute:output-status as OutputStatus
+attribute hres:attribute:license as License
+attribute hres:attribute:institution-name as InstitutionName
+attribute hres:attribute:output-file as OutputFile
+attribute std:attribute:file as File
+attribute hres:attribute:accepted-author-manuscript as AcceptedAuthorManuscript
+attribute hres:attribute:published-file as PublishedFile
+attribute std:attribute:project as Project
+attribute dc:attribute:date as Date
+attribute hres:attribute:pages as Pages
+OPTIONAL attribute hres:attribute:pubmed-id as PubmedId
+OPTIONAL attribute hres:attribute:pubmedcentral-id as PubMedCentralID
+OPTIONAL attribute hres:attribute:nlm-id as NLMID
+
+# -------- Qualifiers ------------------------------
+
+qualifier dc:qualifier:alternative as Alternative
+qualifier hres:qualifier:accepted as Accepted
+qualifier hres:qualifier:completed as Completed
+qualifier hres:qualifier:deposited as Deposited
+qualifier hres:qualifier:submitted as Submitted
+
+qualifier hres:qualifier:online as Online
+qualifier hres:qualifier:print as Print

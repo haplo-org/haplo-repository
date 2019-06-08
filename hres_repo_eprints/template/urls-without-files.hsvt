@@ -1,0 +1,9 @@
+pageTitle("URLs not downloaded")
+backLink("/do/hres-repo-eprints/admin")
+
+<div>
+each(rows) {
+    <p>url</p>
+    <p>error</p>
+}
+</div>

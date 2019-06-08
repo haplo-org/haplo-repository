@@ -1,0 +1,19 @@
+
+group hres:group:repository-editors as RepositoryEditors
+
+
+label std:label:deleted as DELETED
+
+label haplo:label:alternative-version as AlternativeVersion
+label hres:label:accepted-into-repository as AcceptedIntoRepository
+
+label hres:label:requires-approval as RequiresApproval
+    title: Requires approval
+    category: Version
+
+
+attribute haplo:attribute:authoritative-version as AuthoritativeVersion
+
+schema-template hres:template-type:repository-item
+    element: std:group:everyone top haplo_alternative_versions:alternative_versions
+    element: std:group:everyone right std:action_panel {"panel":"alternative_versions"}

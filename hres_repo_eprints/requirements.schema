@@ -6,6 +6,7 @@ attribute dc:attribute:publisher as Publisher
 attribute dc:attribute:author as Author
 attribute hres:attribute:editor as Editor
 attribute hres:attribute:edition as Edition
+attribute std:attribute:file as File
 OPTIONAL attribute hres:attribute:research-institute as ResearchInstitute
 OPTIONAL attribute hres:attribute:authors-citation as AuthorsCitation
 OPTIONAL attribute hres:attribute:editors-citation as EditorsCitation
@@ -20,18 +21,23 @@ OPTIONAL attribute hres:attribute:journal-citation as JournalCitation
 OPTIONAL attribute hres:attribute:place-of-publication as PlaceOfPublication
 OPTIONAL attribute hres:attribute:series as Series
 OPTIONAL attribute hres:attribute:book-title as BookTitle
+OPTIONAL attribute hres:attribute:book-author-shadowed as BookAuthorShadowed
+OPTIONAL attribute hres:attribute:contributor-shadowed as ContributorShadowed
 OPTIONAL attribute hres:attribute:book-author as BookAuthor
+OPTIONAL attribute hres:attribute:contributors as Contributors
 OPTIONAL attribute hres:attribute:pages as Pages
 attribute std:attribute:isbn as Isbn
 OPTIONAL attribute hres:attribute:issn as Issn
 attribute std:attribute:notes as Notes
 attribute std:attribute:event as Event
+attribute hres:attribute:license as License
 OPTIONAL attribute hres:attribute:event-location as EventLocation
 OPTIONAL attribute hres:attribute:event-title as EventTitle
 OPTIONAL attribute hres:attribute:output-media as OutputMedia
 OPTIONAL attribute hres:attribute:event-date as EventDate
 OPTIONAL attribute hres:attribute:accepted-author-manuscript as OpenAccessFile
 OPTIONAL attribute hres:attribute:published-file as PublishedFile
+OPTIONAL attribute hres:attribute:supplemental-file as SupplementalFile
 OPTIONAL attribute hres:attribute:keywords as Keywords
 OPTIONAL attribute hres:attribute:digital-object-identifier-doi as DOI
 OPTIONAL attribute hres:attribute:output-status as OutputStatus
@@ -40,23 +46,38 @@ OPTIONAL attribute std:attribute:url as WebAddressUrl
 OPTIONAL attribute hres:attribute:ref-unit-of-assessment as REFUnitOfAssessment
 OPTIONAL attribute hres:attribute:ref-panel as REFPanel
 OPTIONAL attribute hres:attribute:media-type as MediaType
+OPTIONAL attribute hres:attribute:funder as Funder
+OPTIONAL attribute hres:attribute:file-access-level as AccessLevel
+OPTIONAL attribute hres:attribute:retention-review-date as RetentionReviewDate
+OPTIONAL attribute hres:attribute:retention-review-action as RetentionReviewAction
+OPTIONAL attribute hres:attribute:data-collection-method as DataCollectionMethod
+attribute hres:attribute:collaborating-institution as CollaboratingInstitution
+OPTIONAL attribute hres:attribute:grant-id as GrantID
+OPTIONAL attribute hres:attribute:orcid as ORCID
 
 attribute hres:attribute:event-date as EventDate
 attribute haplo:attribute:location as Location
 
+# -------- Qualifiers -------------------------
+
+OPTIONAL qualifier hres:qualifier:exhibitor as Exhibitor
+
 # -------- Dates (potentially should be optional) -----------------------------------
 
 attribute hres:attribute:publication-dates as PublicationDates
-qualifier hres:qualifier:published as Published
+qualifier hres:qualifier:print as Print
+qualifier hres:qualifier:online as Online
 
 attribute hres:attribute:publication-process-dates as PublicationProcessDates
 qualifier hres:qualifier:accepted as Accepted
 qualifier hres:qualifier:completed as Completed
 qualifier hres:qualifier:deposited as Deposited
+qualifier hres:qualifier:submitted as Submitted
 
 # -------- Types -----------------------------------
 
 type std:type:person as Person
+type hres:type:person:researcher-past as ResearcherPast
 type std:type:book as Book
 OPTIONAL type hres:type:book-chapter as BookChapter
 OPTIONAL type hres:type:report as Report
@@ -78,13 +99,19 @@ OPTIONAL type hres:type:thesis as Thesis
 OPTIONAL type hres:type:thesis:phd as PhdThesis
 OPTIONAL type hres:type:thesis:mphil as MPhilThesis
 OPTIONAL type hres:type:thesis:masters as MastersThesis
+OPTIONAL type hres:type:thesis:prof-doc as ProfDocThesis
 OPTIONAL type hres:type:digital-or-visual-media as DigitalOrVisualMedia
 OPTIONAL type hres:type:website as Website
+OPTIONAL type hres:type:design as Design
 type hres:type:other as Other
 type hres:type:organisation:publisher as Publisher
 OPTIONAL type std:type:journal as Journal
+type hres:type:organisation:funder as Funder
 
 type hres:type:external-event as ExternalEvent
+type hres:type:external-event:conference as Conference
+type hres:type:external-event:exhibition as ExhibitionEvent
+type hres:type:external-event:workshop as Workshop
 
 # -------- Groups -----------------------------------
 

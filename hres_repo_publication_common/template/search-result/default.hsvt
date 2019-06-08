@@ -1,3 +1,6 @@
+
+// WARNING: REPLACEABLE =====================================================
+
 <div class="media">
     <div class="media-body">
         std:web-publisher:object:link(object) {

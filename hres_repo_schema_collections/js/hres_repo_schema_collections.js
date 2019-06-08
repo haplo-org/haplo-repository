@@ -7,7 +7,7 @@
 
 var addCreators = function(collection, creators, seenVQs) {
     _.each(creators, (vq) => {
-        // Don't add duplicate creators
+        // Don't add duplicate creators, unless they have different qualifiers
         let f = vq[0].toFields();
         let keyStart = !!f.value.ref ? f.value.ref.toString() : f.value.cite;
         let key = keyStart+vq[1];
@@ -23,7 +23,7 @@ var recalculateCreators = function(collection) {
     // Citation values are removed and rewritten for display, into a special purpose display text type.
     // hComputeAttributes is called on display to deal with restrictions, but this implementation has no
     // effect other than to overwrite the hres:author_citation_list_display text type. So instead we 
-    // block it from recalculating on displaying, by checkin if that text type is present.
+    // block it from recalculating on displaying, by checking if that text type is present.
     if(citationValue && O.isPluginTextValue(citationValue, "hres:author_citation_list_display")) { return; }
     let firstCreators = []; // put first authors listed on outputs at start of Collections list
     let otherCreators = [];
@@ -66,7 +66,6 @@ P.backgroundCallback("recompute_collection_creators", function(data) {
             execute().each((obj) => {
                 let mObj = obj.mutableCopy();
                 mObj.computeAttributesForced();
-                mObj.remove(20);
                 if(!obj.valuesEqual(mObj)) {
                     mObj.save();
                 }
@@ -91,7 +90,7 @@ P.implementService("hres_repo_ingest_start_ui:custom_guidance_for_output", funct
 
 P.hook("hTrayPage", function(response) {
     let buttons = response.buttons || {};
-    buttons["*HRES-COLLECTION-ITEMS"] = [["/do/hres-repo-collections/collect-items", "Create Collection"]];
+    buttons["*HRES-COLLECTION-ITEMS"] = [["/do/hres-repo-collections/collect-items", "Create portfolio"]];
     response.buttons = buttons;
 });
 

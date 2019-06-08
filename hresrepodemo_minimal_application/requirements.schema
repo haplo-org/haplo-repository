@@ -1,0 +1,22 @@
+
+feature std:configuration-data
+    property: {"applicationRootPlugin":"hresrepodemo_minimal_application"}
+    property: {"haplo_activity_navigation:disable_built_in_guides":true}
+    property: {"hres:researcher_profile:prevent_cv_download": true}
+
+feature std:page:home
+    REMOVE element std:group:everyone right std:recent
+    REMOVE element std:group:everyone left std:noticeboard
+    element std:group:everyone left hresrepodemo_minimal_application:home
+
+# --- Turn on web profiles for researchers
+type hres:type:person:researcher as Researcher
+    annotation hres:annotation:researcher-profile:active
+
+# --------- Attributes --------------------------
+
+attribute dc:attribute:author as Author
+
+# ---------- Groups ------------------------------------
+
+group hres:group:repository-editors as RepositoryEditors

@@ -67,5 +67,8 @@ P.implementService("hres:repository:dc:write-store-object-below-xml-cursor", fun
             dc.element("identifier").text(P.DOI.url(v)).up();
         });
     }
-    // TODO: EPrints also puts a text only version of the citation in the identifier
+    item.every(A.ISSN, (v,d,q) => {
+        dc.element("relation").text("ISSN:"+v.toString()).up();
+    });
+    // TODO: Should we also put the citation in the identifier?
 });

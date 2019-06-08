@@ -36,7 +36,7 @@ type hres:type:book-chapter as BookChapter
 type hres:type:conference-item as ConferenceItem
 type hres:type:conference-item:conference-paper as ConferencePaper
 type hres:type:composition as Composition
-type hres:type:dataset as Dataset
+OPTIONAL type hres:type:dataset as Dataset
 type hres:type:design as Design
 type hres:type:devices-and-products as DevicesAndProducts
 type hres:type:digital-or-visual-media as DigitalOrVisualMedia
@@ -51,3 +51,12 @@ type hres:type:software as Software
 type hres:type:thesis as Thesis
 type hres:type:video as Video
 type hres:type:website as Website
+
+object hres:list:license:rioxx-all-rights-reserved
+    title All rights reserved
+    type hres:type:license
+    parent hres:list:license:root
+object hres:list:license:rioxx-under-embargo-all-rights-reserved
+    title All rights reserved (under embargo)
+    type hres:type:license
+    parent hres:list:license:root

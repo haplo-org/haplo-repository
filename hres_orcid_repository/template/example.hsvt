@@ -1,0 +1,5 @@
+// HSVT documentation: http://docs.haplo.org/dev/plugin/templates
+
+pageTitle("Example page")
+
+<p class="example"> "This is an example template." </p>

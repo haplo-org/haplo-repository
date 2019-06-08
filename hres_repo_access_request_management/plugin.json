@@ -4,7 +4,6 @@
   "pluginVersion": 1,
   "displayName": "Haplo RM Repository Access Request Management",
   "displayDescription": "Management UI for access requests",
-  "installSecret": "766f85582cd74a04b0172495256b9a8e2dbbaaa9",
   "apiVersion": 4,
   "depend": [
       "std_workflow"

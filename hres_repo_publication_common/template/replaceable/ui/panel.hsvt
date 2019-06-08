@@ -1,9 +1,13 @@
 
-<div class="panel panel-default">
-  <div class="panel-heading">
-    yield:heading()
-  </div>
-  <div class="panel-body">
+// WARNING: REPLACEABLE =====================================================
+
+<div class="card p-0 border-0 mb-4 rounded-0">
+  if(heading) {
+    <div class="card-header bg-transparent border-0">
+      yield:heading()
+    </div>
+  }
+  <div class="card-body">
     yield()
   </div>
 </div>

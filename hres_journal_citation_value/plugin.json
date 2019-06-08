@@ -1,0 +1,11 @@
+{
+  "pluginName": "hres_journal_citation_value",
+  "pluginAuthor": "Haplo Services",
+  "pluginVersion": 1,
+  "displayName": "Journal Citation Value",
+  "displayDescription": "Implementation of journal citation value data type",
+  "apiVersion": 4,
+  "load": [
+      "js/hres_journal_citation_value.js"
+    ]
+}

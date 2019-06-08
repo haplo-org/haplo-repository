@@ -4,7 +4,6 @@
   "pluginVersion": 1,
   "displayName": "Haplo RM Repository Access Request Components",
   "displayDescription": "Reusable components for client implementations of access requests",
-  "installSecret": "c1a92490b98d131a375f866a03501722a2e28e71",
   "apiVersion": 4,
   "loadPriority": 5000,
   "privilegesRequired": ["pDatabase"],

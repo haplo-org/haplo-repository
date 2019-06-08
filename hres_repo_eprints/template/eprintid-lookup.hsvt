@@ -1,0 +1,16 @@
+
+pageTitle("Imported eprint: " eprintId)
+backLink("/do/hres-repo-eprints/admin")
+
+<form method="GET" action="/do/hres-repo-eprints/admin/eprintid-lookup">
+    <p> <input type="text" name="lookup" placeholder="Eprint Id" style="width:200px">
+    <input type="submit" value="Find object"> </p>
+</form>
+
+unless(refs) {
+    <p> "No object found for "<tt>eprintId</tt> "." </p>
+} else {
+    each(refs) {
+        std:object(. "searchresult")
+    }
+}

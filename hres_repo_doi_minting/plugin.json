@@ -3,7 +3,7 @@
   "pluginAuthor": "Haplo Services",
   "pluginVersion": 1,
   "displayName": "Repository DOI Minting",
-  "displayDescription": "Minding of DOIs",
+  "displayDescription": "Minting of DOIs",
   "apiVersion": 4,
   "privilegesRequired": [
       "pBackgroundProcessing",

@@ -20,7 +20,6 @@ P.implementService("haplo:descriptive_object_labelling:setup", function(type) {
 });
 
 P.implementService("haplo:user_roles_permissions:setup", function(setup) {
-    // TODO: better permissions
     setup.groupPersonalRole(Group.Everyone, "Is: Repository Impact Editor");
     
     setup.groupPermission(Group.Everyone, "create", T.Impact);
@@ -46,7 +45,7 @@ P.hook("hOperationAllowOnObject", function(response, user, object, operation) {
 
 P.hook('hUserPermissionRules', function(response, user) {
     if(user.isMemberOf(Group.PublicRepositoryAccess)) {
-        // TODO: Label AcceptedIntoRepository?
         response.rules.rule(T.Impact, O.STATEMENT_ALLOW, O.PERM_READ);
+        response.rules.rule(T.ImpactEvidence, O.STATEMENT_ALLOW, O.PERM_READ);
     }
 });

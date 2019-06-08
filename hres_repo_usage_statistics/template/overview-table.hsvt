@@ -1,0 +1,20 @@
+thirdparty:client_side_ui:resources("tablesort" "0")
+
+<p>std:ui:button-link(baseUrl if(object) { "/" object.ref } ? download="1" breakdowntype=breakdownTypeUrl) { "Download summary" }</p>
+
+if(tabs) { template:std:ui:tabs:links() }
+
+<table class="tablesort">
+    <thead>
+        <th>breakdownType</th>
+        <th>"Total views"</th>
+        <th>"Total downloads"</th>
+    </thead>
+    each(rows) {
+        <tr>
+            <td>if(url) {<a href=url>name</a>} else { name }</td>
+            <td>views</td>
+            <td>downloads</td>
+        </tr>
+    }
+</table>

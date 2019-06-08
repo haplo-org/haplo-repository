@@ -4,7 +4,6 @@
   "pluginVersion": 1,
   "displayName": "Haplo RM OA - green status stored directly",
   "displayDescription": "Implementation of Green Open Access status being stored directly on repository item records",
-  "installSecret": "eb034274620411b6b1faee6d8fd237732601d8d2",
   "apiVersion": 4,
   "depend": [
       "hres_repo_open_access",

@@ -4,7 +4,6 @@
   "pluginVersion": 1,
   "displayName": "Haplo RM Embargoes",
   "displayDescription": "Support for embargoes and associated licensing",
-  "installSecret": "3c3dabcea50a35cfa0d63735717868c1143b8734",
   "apiVersion": 4,
   "privilegesRequired": ["pDatabase", "pHTTPClient"],
   "use": [
@@ -16,6 +15,7 @@
       "std_action_panel",
       "haplo_respond_after_http_request",
       "hres_repository",
+      "hres_repo_schema_outputs",
       "hres_thirdparty_libs"
     ],
   "load": [

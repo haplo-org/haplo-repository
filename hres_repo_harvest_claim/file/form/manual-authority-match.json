@@ -1,0 +1,13 @@
+{
+    "specificationVersion": 0,
+    "formId": "manualAuthorityMatch",
+    "formTitle": "Find match manually",
+    "elements": [
+        {
+            "type": "lookup",
+            "dataSource": "repositoryItems",
+            "path": "manualAuthorityMatch",
+            "label": "If you believe there is an existing record of this harvested publication in the system, please look it up here, so that the two can be linked correctly. If not, leave this field blank."
+        }
+    ]
+}

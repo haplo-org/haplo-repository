@@ -16,7 +16,9 @@ attribute haplo:attribute:location as Location
 attribute hres:attribute:page-range as PageRange
 attribute hres:attribute:place-of-publication as PlaceOfPublication
 attribute dc:attribute:publisher as Publisher
+attribute hres:attribute:patent-id as PatentId
 
+OPTIONAL attribute hres:attribute:digital-object-identifier-doi as DOI
 
 # ------ Types -----------------------------
 

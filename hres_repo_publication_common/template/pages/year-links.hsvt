@@ -1,5 +1,8 @@
+
+// WARNING: REPLACEABLE =====================================================
+
 pageTitle("Browse by year")
 
 each(years) {
-  <p> <a href=["/year/" .]> . </a> </p>
+  <p> <a href=[^{path} "/" .]> . </a> </p>
 }

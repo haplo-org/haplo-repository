@@ -1,0 +1,34 @@
+
+// WARNING: REPLACEABLE =====================================================
+
+std:web-publisher:template("hres:repository:common:ui:panel") {
+  each(files) {
+    <div class="card border-0 bg-light">
+      <div class="card-body">
+        unless(first) { <hr> }
+        
+        if(printableName) {
+          <div class="media">
+            <i class="fas fa-lock mr-2"></i>
+            <div class="media-body">
+              <h3 class="media-heading h6">
+                  if(only) {
+                      if(printableNameOnlyFileAttribute) {
+                          printableNameOnlyFileAttribute
+                      } else {
+                          printableName
+                      }
+                  } else {
+                      printableName
+                  }
+              </h3>
+            </div>
+          </div>
+          <div class="alert alert-danger mb-0" role="alert">
+            render(display) 
+          </div>
+        }
+      </div>
+    </div>
+  }
+} heading { "Restricted files" }

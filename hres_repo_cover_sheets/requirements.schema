@@ -1,0 +1,52 @@
+
+# -------- Attributes ------------------------------
+
+attribute hres:attribute:accepted-author-manuscript as AcceptedAuthorManuscript
+attribute hres:attribute:published-file as PublishersVersion
+attribute std:attribute:file as File
+attribute dc:attribute:author as Author
+attribute hres:attribute:authors-citation as AuthorsCitation
+attribute dc:attribute:type as Type
+attribute hres:attribute:journal as Journal
+attribute dc:attribute:publisher as Publisher
+attribute hres:attribute:journal-citation as JournalCitation
+attribute dc:attribute:date as Date
+attribute hres:attribute:publication-dates as PublicationDates
+attribute hres:attribute:issn as Issn
+attribute std:attribute:isbn as Isbn
+
+attribute hres:attribute:author-manuscript-statement as AuthorManuscriptStatement
+    title: Author manuscript statement
+    search-name: author-manuscript-statement
+    qualifier std:qualifier:null
+    data-type text-paragraph
+
+attribute hres:attribute:publishers-version-statement as PublishersVersionStatement
+    title: Publisher's version statement
+    search-name: publishers-version-statement
+    qualifier std:qualifier:null
+    data-type text-paragraph
+
+# -------- Qualifiers ------------------------------
+
+qualifier hres:qualifier:published as Published
+
+# --------- Groups ---------------------------------
+
+group std:group:administrators as Administrators
+
+# -------- Types -----------------------------------
+
+type std:type:organisation as Organisation
+    attribute hres:attribute:author-manuscript-statement [sort=7500]
+    attribute hres:attribute:publishers-version-statement [sort=7600]
+
+type hres:type:organisation:funder
+    attribute-hide hres:attribute:author-manuscript-statement
+    attribute-hide hres:attribute:publishers-version-statement
+
+type std:type:organisation:this-organisation
+    attribute-hide hres:attribute:author-manuscript-statement
+    attribute-hide hres:attribute:publishers-version-statement
+
+type hres:type:organisation:publisher as Publisher

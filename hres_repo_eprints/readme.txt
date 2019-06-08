@@ -1,6 +1,8 @@
-title: Eprints liberation kit
+title: Eprints import module
 module_owner: Helen
 --
+
+If you are just starting out with Eprints, please check out the Eprints developer guide in the company manual, it'll be more useful than this page for now.
 
 A plugin to allow the import and export of eprints XML.
 
@@ -8,7 +10,7 @@ h2. Background
 
 To help with import and export, the two operations go through an intermediate state before they take their final form.
 
-The intermediate data stucture looks as follows:
+The intermediate data structure looks as follows:
 
 | eprintId | string | eprint id |
 | attributes | array | attributes that relate to the eprint |

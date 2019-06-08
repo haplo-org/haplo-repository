@@ -40,6 +40,7 @@ type hres:type:ref-unit-of-assessment as REFUnitOfAssessment
 # ---------------------------------------------------------------------------
 
 attribute dc:attribute:author as Author
+attribute std:attribute:file as File
 attribute hres:attribute:accepted-author-manuscript as AcceptedAuthorManuscript
 attribute hres:attribute:output-status as OutputStatus
 attribute hres:attribute:open-access as OpenAccess

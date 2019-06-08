@@ -67,8 +67,15 @@ var generateMetaTagsForObject = function(context) {
         attribute(A.Contributors, "DC.contributor");
     }
     attribute(A.Date, "DC.date");
+    attribute(A.PublicationProcessDates, "DC.date");
+    attribute(A.PublicationDates, "DC.date");
     attribute(A.Publisher, "DC.publisher");
     attribute(A.Type, "DC.type");
+    attribute(A.Abstract, "DC.description");
+    attribute(A.License, "DC.rights");
+    if("DataType" in A) {
+        attribute(A.DataType, "DC.format");
+    }
     object.every((v,d,q) => {
         if(O.typecode(v) === O.T_IDENTIFIER_FILE) {
             tags.push({

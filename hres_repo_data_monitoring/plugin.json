@@ -1,0 +1,17 @@
+{
+  "pluginName": "hres_repo_data_monitoring",
+  "pluginAuthor": "Haplo Services",
+  "pluginVersion": 1,
+  "displayName": "HRES Repo Data Monitoring",
+  "displayDescription": "Data monitoring plugin for data managed by the Haplo Repository",
+  "apiVersion": 4,
+  "depend": [
+      "std_reporting",
+      "hres_repository"
+    ],
+  "use": ["std:reporting"],
+  "load": [
+      "js/hres_repo_data_monitoring.js"
+    ],
+  "respond": ["/do/hres-repo-data-monitoring"]
+}

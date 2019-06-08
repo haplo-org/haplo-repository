@@ -4,7 +4,6 @@
   "pluginVersion": 1,
   "displayName": "Haplo RM Repository Demo Access Request",
   "displayDescription": "Demonstration implementaiton of access request workflow",
-  "installSecret": "0980b842fea940c6d7d70d13cac267c7b0b92730",
   "apiVersion": 4,
   "loadPriority": 10000,
   "privilegesRequired": ["pDatabase"],

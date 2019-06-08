@@ -1,0 +1,13 @@
+{
+  "pluginName": "hres_repo_nlm",
+  "pluginAuthor": "Haplo Services",
+  "pluginVersion": 1,
+  "displayName": "Haplo RM Repository PubMed",
+  "displayDescription": "Support for National Library of Medicine in repositories",
+  "installSecret": "b89bc8c31da35a94bb9d8bc3e61ed7a1d97f1464",
+  "apiVersion": 4,
+  "load": [
+      "js/hres_repo_nlm.js"
+    ],
+  "respond": ["/do/hres-repo-nlm"]
+}

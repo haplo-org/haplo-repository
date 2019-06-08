@@ -99,7 +99,7 @@ var HaveSetMetadata = P.callback("have-set-metadata", function(data, client, res
         // Step 2: Set the URL for the DOI.
         var doi = data.doi,
             object = O.ref(data.ref).load();
-        var url = O.serviceMaybe("hres:doi:minting:public-url-for-object", object) || object.url(true);
+        var url = O.serviceMaybe("hres:repository:common:public-url-for-object", object) || object.url(true);
         O.httpClient(O.application.config["hres:doi:minting:service-url"]+"/doi").
             method("POST").
             body("text/plain;charset=UTF-8", "doi="+doi+"\nurl="+url).

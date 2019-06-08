@@ -4,7 +4,6 @@
   "pluginVersion": 1,
   "displayName": "Haplo RM Rioxx",
   "displayDescription": "Support for Rioxx metadata guidelines in Haplo repositories",
-  "installSecret": "86b322dbc7a7b79c3396ba4f7b905f7e7c907ec2",
   "apiVersion": 4,
   "use": ["hres:doi", "hres:orcid"],
   "depend": [

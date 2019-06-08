@@ -14,26 +14,31 @@ var REFChecks = P.REFChecks = {
             if(ffd) {
                 return depositCheck(output, ffd.date);
             }
+        },
+        detailDeferredRender(output) {
+            let ffd = P.getFirstFileDeposit(output);
+            let displayObject = O.object();
+            let displayAttrs = [A.Type, A.Title, A.PublicationDates, A.PublicationProcessDates, A.File];
+            _.each(displayAttrs, (desc) => {
+                output.every(desc, (v,d,q,x) => displayObject.append(v,d,q,x) );
+            });
+            return P.template("check-deposit-detail").deferredRender({
+                fileDeposit: ffd ? ffd.date : null,
+                version: ffd ?  SCHEMA.getAttributeInfo(ATTR[ffd.fileVersion]).name : null,
+                displayObject: displayObject
+            });
         }
     },
     "embargo": {
         label: "Embargo within allowed length",
         check(output) {
-            let embargoes = O.serviceMaybe("hres_repo_embargoes:get_embargo", output);
-            if(!embargoes) { return true; }
+            let maxLength = getLongestEmbargoLength(output);
+            if(!maxLength) { return true; }
             // TODO: How to handle if the outout has multiple possible UoAs, in a way that 
             // is clear in the UI?
             let unit = output.first(A.REFUnitOfAssessment);
             let panel = unit ? unit.load().first(A.REFPanel) : null;
             if(panel) {
-                let maxLength = 0;
-                _.each(embargoes, (embargo) => {
-                    if(!embargo.end) {
-                        maxLength = 999999999; // Indefinite embargo period
-                    } else {
-                        if(embargo.getLengthInMonths() > maxLength) { maxLength = embargo.getLengthInMonths(); }
-                    }
-                });
                 if(panel.behaviour === "hres:list:ref-panel-a" ||
                     panel.behaviour === "hres:list:ref-panel-b") {
                     return (maxLength <= 12);
@@ -41,14 +46,58 @@ var REFChecks = P.REFChecks = {
                     return (maxLength <= 24);
                 }
             }
-        }
+        },
+        detailDeferredRender(output) {
+            let maxLength = getLongestEmbargoLength(output);
+            let displayObject = O.object();
+            _.each([A.Type, A.Title, A.REFUnitOfAssessment], (desc) => {
+                output.every(desc, (v,d,q) => displayObject.append(v,d,q));
+            });
+            let unit = output.first(A.REFUnitOfAssessment);
+            return P.template("check-embargo-detail").deferredRender({
+                maxLength: (maxLength === INDEFINITE_EMBARGO_LENGTH) ? "Indefinite" : maxLength,
+                panel: unit ? unit.load().first(A.REFPanel) : null,
+                displayObject: displayObject
+            });
+        },
     },
     "metadata": {
         label: "Record contains required metadata",
         check(output) {
             return (missingREFData(output, true).length === 0);
+        },
+        detailDeferredRender(output) {
+            let view = {};
+            _.each(REFAttributeLookup, (fn, name) => {
+                let data = {
+                    value: fn(output),
+                };
+                if(name === "deposited") {
+                    data.expected = output.labels.includes(Label.AcceptedIntoRepository);
+                } else if(name === "published") {
+                    let status = output.first(A.OutputStatus);
+                    data.expected = !(status && status.behaviour === "hres:list:output-status:in-press");
+                }
+                view[name] = data;
+            });
+            return P.template("check-metadata-detail").deferredRender(view);
         }
     }
+};
+
+var INDEFINITE_EMBARGO_LENGTH = 999999999;
+var getLongestEmbargoLength = function(output) {
+    let embargoes = O.serviceMaybe("hres_repo_embargoes:get_embargo", output);
+    if(!embargoes) { return 0; }
+    let maxLength = 0;
+    _.each(embargoes, (embargo) => {
+        if(!embargo.end) {
+            maxLength = INDEFINITE_EMBARGO_LENGTH;
+        } else {
+            if(embargo.getLengthInMonths() > maxLength) { maxLength = embargo.getLengthInMonths(); }
+        }
+    });
+    return maxLength;
 };
 
 P.willPassOnPublication = function(output) {
@@ -65,15 +114,20 @@ P.willPassOnPublication = function(output) {
 
 const REF_ATTR_REQUIREMENTS = ["published", "deposited", "refunit", "author", "accepted", "aam"];
 const REFAttributeLookup = {
-    "accepted": [A.PublicationProcessDates, Q.Accepted],
-    "author": [A.Author, undefined],
-    "published": [A.PublicationDates, undefined],
-    "deposited": [A.PublicationProcessDates, Q.Deposited],
-    "refunit": [A.REFUnitOfAssessment, undefined],
-    "aam": [A.AcceptedAuthorManuscript, undefined]
+    accepted(object) { return object.first(A.PublicationProcessDates, Q.Accepted); },
+    author(object) { return object.first(A.Author); },
+    published(object) { return object.first(A.PublicationDates); },
+    deposited(object) { return object.first(A.PublicationProcessDates, Q.Deposited); },
+    refunit(object) { return object.first(A.REFUnitOfAssessment); },
+    aam(object) {
+        let groups = object.getAttributeGroupIds(A.AcceptedAuthorManuscript);
+        if(groups.length) {
+            return object.extractSingleAttributeGroup(groups[0]).first(A.File);
+        }
+    }
 };
 
-var missingREFData = P.missingREFData = function(output, checkFullRequirements) {
+var missingREFData = function(output, checkFullRequirements) {
     let missData = [];
     let required = _.clone(REF_ATTR_REQUIREMENTS);
     // Check if it will pass in future, when it has been deposited and published
@@ -87,8 +141,8 @@ var missingREFData = P.missingREFData = function(output, checkFullRequirements) 
         }
     }
     _.each(required, function(r) {
-        let attrQual = REFAttributeLookup[r];
-        if(!output.first(attrQual[0], attrQual[1])) {
+        let fn = REFAttributeLookup[r];
+        if(!fn(output)) {
             missData.push(r);
         }
     });
@@ -110,4 +164,21 @@ var depositCheck = function(output, depositDate) {
         return (new XDate(relevantDate).diffMonths(depositDate) < 3);
     }
 };
+
+
+// --------------------------------------------------------------------------
+// Admin detail pages
+
+P.respond("GET", "/do/hres-ref-repo/check/detail", [
+    {pathElement:0, as:"string"},
+    {pathElement:1, as:"object"}
+], function(E, kind, output) {
+    P.CanManageREF.enforce();
+    let check = REFChecks[kind];
+    E.render({
+        pageTitle: (check.check(output) ? "Passed: " : "Failed: ")+check.label,
+        backLink: output.url(),
+        detail: check.detailDeferredRender(output)
+    }, "check-requirements");
+});
 

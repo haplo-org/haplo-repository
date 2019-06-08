@@ -1,3 +1,137 @@
 
 type hres:type:dataset as Dataset
+    REMOVE attribute dc:attribute:type [sort=100]
     attribute hres:attribute:peer-review [sort=12000]
+    REMOVE attribute hres:attribute:data-type [sort=14000]
+    FORCE-REMOVE attribute std:attribute:file [sort=14100]
+    attribute hres:attribute:dataset-file [sort=14100]
+    attribute hres:attribute:data-collection-period [sort=14150]
+    attribute hres:attribute:geographic-coverage [sort=14200]
+    attribute hres:attribute:data-collection-method [sort=14400]
+    attribute hres:attribute:data-processing [sort=14600]
+    attribute hres:attribute:retention-review-date [sort=14800]
+    attribute hres:attribute:retention-review-action [sort=14850]
+
+# -------- File types ---------------------------------------------
+
+attribute hres:attribute:dataset-file
+    title Data files
+    search-name data-file
+    qualifier std:qualifier:null
+    data-type attribute-group
+    group-type hres:type:dataset-file
+
+type hres:type:dataset-file
+    apply-schema-template hres:template-type:repository-file
+    title Data file
+    attribute hres:attribute:data-type [sort=13900]
+    attribute hres:attribute:data-file-contents [sort=14000]
+
+
+# ------ Attributes -----------------------------------------------
+
+attribute hres:attribute:data-collection-period
+    title Data collection period
+    search-name data-collection-period
+    qualifier std:qualifier:null
+    data-type datetime
+    ui-options d,n,y,n,n
+
+attribute hres:attribute:geographic-coverage
+    title Geographic coverage
+    search-name geographic-coverage
+    qualifier std:qualifier:null
+    data-type text
+
+attribute hres:attribute:data-collection-method
+    title Data collection method
+    search-name data-collection-method
+    qualifier std:qualifier:null
+    data-type text-paragraph
+
+attribute hres:attribute:data-processing
+    title Data preparation and processing activities
+    search-name data-preparation
+    search-name data-preparation-and-processing-activities
+    qualifier std:qualifier:null
+    data-type text-paragraph
+
+attribute hres:attribute:retention-review-date
+    title Retention review date
+    search-name retention-review-date
+    qualifier std:qualifier:null
+    data-type datetime
+    ui-options d,n,n,n,n
+
+attribute hres:attribute:retention-review-action
+    title Retention review action
+    search-name retention-review-action
+    qualifier std:qualifier:null
+    data-type text-paragraph
+
+# --------- Lists --------------------------------------------
+
+attribute hres:attribute:data-file-contents
+    title Contents
+    search-name contents
+    qualifier std:qualifier:null
+    data-type link
+    linked-type hres:type:data-file-contents
+    ui-options dropdown
+    
+type hres:type:data-file-contents
+    title Data file contents
+    search-name data-file-contents
+    apply-schema-template hres:template-type:list
+
+object hres:list:data-file-contents:readme
+    title README
+    type hres:type:data-file-contents
+object hres:list:data-file-contents:documentation
+    title Documentation
+    type hres:type:data-file-contents
+object hres:list:data-file-contents:metadata
+    title Additional metadata
+    type hres:type:data-file-contents
+object hres:list:data-file-contents:data
+    title Data
+    type hres:type:data-file-contents
+object hres:list:data-file-contents:archive
+    title Full archive
+    type hres:type:data-file-contents
+
+
+attribute hres:attribute:data-type
+    title Data type
+    search-name data-type
+    qualifier std:qualifier:null
+    data-type link
+    linked-type hres:type:data-type
+    ui-options dropdown
+type hres:type:data-type
+    title Data type
+    search-name data-type
+    apply-schema-template hres:template-type:list
+
+object hres:list:data-type:text
+    title Text
+    type hres:type:data-type
+object hres:list:data-type:spreadsheet
+    title Spreadsheet
+    type hres:type:data-type
+object hres:list:data-type:slideshow
+    title Slideshow
+    type hres:type:data-type
+object hres:list:data-type:image
+    title Image
+    type hres:type:data-type
+object hres:list:data-type:audio
+    title Audio
+    type hres:type:data-type
+object hres:list:data-type:video
+    title Video
+    type hres:type:data-type
+object hres:list:data-type:archive
+    title Archive
+    type hres:type:data-type
+

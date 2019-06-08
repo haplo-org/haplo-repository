@@ -1,0 +1,7 @@
+{
+    "hres:repository:harvest-source:jisc-pub-router": {
+        "statements": [
+            "hres:repository:harvest-source"
+        ]
+    }
+}

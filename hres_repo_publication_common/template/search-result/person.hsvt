@@ -1,16 +1,30 @@
-<div class="media">
-    <div class="media-body">
-        if(researchInstitute) {
-            <p style="float:right"> std:object:title(researchInstitute) </p>
-        }
-        std:web-publisher:object:link(object.object) {
-            <h4 class="media-heading"> object.title </h4>
-        }
-        if(jobTitle) {
-            <p> jobTitle </p>
-        }
-        if(orcid) {
-            <span class="orcid-id"> orcid </span>
-        }
-    </div>
+
+// WARNING: REPLACEABLE =====================================================
+
+<div class="media my-4 pt-4">
+  if(file) {
+    std:web-publisher:object:link(object) { 
+      std:web-publisher:file:thumbnail(file)
+    } 
+  } else {
+    <i class="fas fa-user fa-5x mr-3"></i>
+  }
+
+  <div class="media-body">
+    <h5 class="mt-0 mb-1"> 
+      std:web-publisher:object:link(object.object) {
+        object.title 
+      }
+    </h5>
+    
+    if(jobTitle) {
+      <p> jobTitle </p>
+    }
+    if(orcid) {
+      <span class="orcid-id"> orcid </span>
+    }
+    if(researchInstitute) {
+      <p><span class="badge badge-pill badge-light text-muted">std:object:title(researchInstitute)</span></p>
+    }
+  </div>
 </div>

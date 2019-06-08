@@ -1,6 +1,6 @@
 
 pageTitle("Eprints import/export mapping")
-backLink("/")
+backLink("/do/hres-repo-eprints/admin")
 
 std:ui:notice("Where more complex logic is required, a different tag and/or attribute may be used, and the below mapping does not reflect these exceptions.")
 

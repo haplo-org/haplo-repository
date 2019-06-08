@@ -10,7 +10,7 @@ title: File release
 sort: 1
 --
 
-This feature integrates access requests with [node:/hres_file_mediated_access] to email prepared file download links for successful requests.
+This feature integrates access requests with [node:hres/hres_file_mediated_access] to email prepared file download links for successful requests.
 
 Download links are emailed to the requestor, pointing to a publication or internal URL depending on the @audience@ workUnit tag.
 
@@ -128,7 +128,7 @@ sort: 1
 
 This feature provides functionality to manage the preparation of file versions suitable for release.
 
-Released files are tagged with their intended [node:hres_repo_access_request_components#Audience] and [node:hres_repo_access_request_components#Action], as well as any additional preparation notes.
+Released files are tagged with their intended [node:repository/hres_repo_access_request_components#Audience] and [node:repository/hres_repo_access_request_components#Action], as well as any additional preparation notes.
 
 Files are copied into the @hres:attribute:prepared-files@ attribute on release, and previously released files are suggested for subsequent access requests.
 

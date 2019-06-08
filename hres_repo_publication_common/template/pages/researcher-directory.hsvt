@@ -1,0 +1,66 @@
+
+// WARNING: REPLACEABLE =====================================================
+
+if(spec.title) {
+  pageTitle(spec.title)
+} else {
+  pageTitle("Staff directory")
+}
+
+if(spec.subtitle) {
+  std:web-publisher:block("pageheaderSubtitle") { spec.subtitle }
+}
+
+<nav aria-label="Page navigation" class="mb-4 pb-4">
+  <ul class="pagination flex-wrap flex-lg-nowrap justify-content-center">
+    hres:repository:letter-navigation(letter)
+  </ul>
+</nav>
+
+unless(researchers.results.length) {
+  <div class="card border-0 bg-light">
+    <div class="card-body text-center">
+      <p class="text-muted mb-0">"No researchers found."</p>
+    </div>
+  </div>
+}
+
+<div class="row">
+  each(researchers.results) {
+    <div class="col-md-6 col-lg-4 mb-3">
+      <div class="card border-0 bg-light">
+        <div class="card-body">
+
+      <div class="media media-researcher">
+
+        if(photo) {
+          render(photo)
+        } else {
+          <i class="fas fa-user fa-3x mr-3"></i>
+        }
+        <div class="media-body pl-3">
+          <h3 class="mb-0 h5" data-filter-by="text">
+            std:web-publisher:object:link(researcher) {
+              std:web-publisher:utils:title:name(researcher)
+            }
+          </h3>
+
+          <span data-filter-by="text" class="text-body SPAN-filter-by-text">
+            if(jobTitle) {
+              <h4 class="h6 mb-0">jobTitle</h4>
+            }
+            if(faculty) {
+              <p class="mb-0 text-muted">" &mdash; "
+              if(department) { 
+                department.title ", "
+              } faculty.title</p>
+            }
+          </span>
+        </div>
+
+      </div>
+    </div>
+  </div>
+    </div>
+  }
+</div>

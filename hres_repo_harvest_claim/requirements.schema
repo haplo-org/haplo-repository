@@ -1,10 +1,12 @@
 
+group hres:group:repository-editors as RepositoryEditors
+
 label std:label:deleted as DELETED
 
-label hres:label:source-item as SourceItem
+type std:type:person as Person
 
 attribute dc:attribute:author as Author
 
+attribute haplo:attribute:authoritative-version as AuthoritativeVersion
 attribute hres:attribute:researcher as Researcher
-attribute hres:attribute:authoritative-version as AuthoritativeVersion
 attribute hres:attribute:authors-citation as AuthorsCitation

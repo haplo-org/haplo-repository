@@ -14,7 +14,7 @@ if(publicationDate) {
     <p><i> "No publication date entered. Embargoes will be set to start today unless a custom start date is chosen." </i></p>
 }
 
-<form method="POST" data-used-attributes=usedAttributes class="edit-embargoes-form"> std:form:token()
+<form method="POST"> std:form:token()
     std:form(form)
     <p><input type="submit" value="Apply embargoes"></p>
 </form>

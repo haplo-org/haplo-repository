@@ -1,0 +1,31 @@
+{
+  "pluginName": "hres_repo_usage_statistics",
+  "pluginAuthor": "Haplo Services",
+  "pluginVersion": 1,
+  "displayName": "Haplo Repository Usage Statistics",
+  "displayDescription": "Usage statistics reporting, specifically for repository items",
+  "apiVersion": 4,
+  "privilegesRequired": ["pDatabase"],
+  "use": [
+    "haplo:usage_tracking_statistics",
+    "std:reporting",
+    "std:web-publisher",
+    "hres:schema:entities",
+    "hres:schema:institute_depth"
+  ],
+  "depend": [
+    "std_reporting",
+    "std_web_publisher",
+    "thirdparty_client_side_ui",
+    "haplo_usage_tracking",
+    "hres_schema",
+    "thirdparty_client_side_ui"
+  ],
+  "load": [
+      "js/hres_repo_usage_statistics.js",
+      "js/usage_stats_web_publisher.js",
+      "js/usage_stats_reporting.js",
+      "js/usage_stats_internal_pages.js"
+    ],
+  "respond": ["/do/hres-repo-usage-statistics"]
+}

@@ -3,6 +3,9 @@ group std:group:administrators as Administrators
 
 attribute dc:attribute:author as Author
 attribute hres:attribute:abstract as Abstract
+attribute hres:attribute:accepted-author-manuscript as AcceptedAuthorManuscript
 attribute hres:attribute:authors-citation as AuthorsCitation
+attribute hres:attribute:digital-object-identifier-doi as DOI
+attribute std:attribute:file as File
 
 type hres:type:person:researcher as Researcher

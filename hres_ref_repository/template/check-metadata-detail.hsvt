@@ -1,0 +1,41 @@
+
+
+<p><i> "The following data are required in order to meet the Discovery requirements, or for calculation of compliance with the Embargo or Access requirements." </i></p>
+<br>
+
+<table>
+    <thead><th> "Field" </th><th> "Required" </th> <th> "Value" </th></thead>
+    <tbody>
+    within(author) {
+        <tr><td> "Author" </td> <td> "&#10003;" </td> <td> if(value) { std:object:title(value) } </td></tr>
+    }
+    within(accepted) {
+        <tr><td> "Acceptance date" </td> <td> "&#10003;" </td> <td> value </td></tr>
+    }
+    within(published) {
+        <tr>
+            <td> "Publication date" </td>
+            <td> if(expected) { "&#10003;" } else { "(&#10003;)" } </td>
+            <td> value </td>
+        </tr>
+    }
+    within(deposited) {
+        <tr>
+            <td> "Deposit date" </td>
+            <td> if(expected) { "&#10003;" } else { "(&#10003;)" } </td>
+            <td> value </td>
+        </tr>
+    }
+    within(refunit) {
+        <tr><td> "REF Unit of Assessment" </td> <td> "&#10003;" </td> <td> if(value) { std:object:title(value) } </td></tr>
+    }
+    within(aam) {
+        <tr><td> "Accepted manuscript" </td> <td> "&#10003;" </td> <td> if(value) { std:file(value) } </td></tr>
+    }
+    </tbody>
+</table>
+
+<p><i> "Please note: "
+    <li> "a deposit date is only expected for items that have been deposited into the public repository"</li>
+    <li> "a publication date is not expected for an 'In press' item" </li>
+</i></p>

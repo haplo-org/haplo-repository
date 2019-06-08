@@ -4,6 +4,13 @@
     "formTitle": "Upload XML for EPrints import",
     "elements": [
         {
+            "type": "choice",
+            "style": "select",
+            "path": "previousFile",
+            "label": "Choose a previously uploaded XML file, or upload a new file below.",
+            "choices": "previousXmlFiles"
+        },
+        {
             "type": "file-repeating-section",
             "path": "xmlFile",
             "label": "Upload XML file",
@@ -13,7 +20,8 @@
                 {"type":"file", "path":"."}
             ],
             "minimumCount": 1,
-            "maximumCount": 1
+            "maximumCount": 1,
+            "required": {"path": "previousFile", "operation": "not-defined"}
         }
     ]
 }

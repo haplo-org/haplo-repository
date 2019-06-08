@@ -5,7 +5,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.         */
 
 
-P.implementService("std:action_panel:repository_item", function(display, builder) {
+P.implementService("std:action_panel:category:hres:repository_item", function(display, builder) {
     var wus = O.work.query().
         tag("hres:repository:is_ar_workflow", "1").
         tag("ref", display.object.ref.toString()).

@@ -3,8 +3,7 @@
   "pluginAuthor": "Haplo Services",
   "pluginVersion": 1,
   "displayName": "Haplo RM Repository Impact Factors",
-  "displayDescription": "Reporting on impact factors",
-  "installSecret": "d29d1c771a0f74e7a4aa0ea75b26cdf81a5804e9",
+  "displayDescription": "Reporting on journal impact factors",
   "apiVersion": 4,
   "use": [
       "std:reporting"

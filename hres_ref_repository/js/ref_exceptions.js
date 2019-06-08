@@ -77,8 +77,13 @@ var EXCEPTIONS = P.EXCEPTIONS = {
     },
     "other": {
         title: "Other exception",
-        details: "Free text field.",
+        details: "‘Other exception’ should be used where an output is unable to meet the criteria due to circumstances beyond the control of the HEI, including extenuating personal circumstances of the author (such as periods of extended leave), industrial action, closure days, and software problems beyond those listed in the technical exceptions. If ‘other’ exception is selected, the output will not need to meet the open access criteria (deposit, discovery or access requirements).",
         evidence: "Evidence of difficulties encountered."
+    },
+    "other-b": {
+        title: "Deposited within three months of publication",
+        details: "The output was not deposited within three months of acceptance date, but was deposited within three months of the earliest date of publication. In this instance, the output will need to meet all other policy requirements. This exception does not need to be applied retrospectively to outputs compliant with the policy from 1 April 2016 to 1 April 2018 which fulfilled the policy requirements within three months of publication.",
+        evidence: ""
     }
 };
 

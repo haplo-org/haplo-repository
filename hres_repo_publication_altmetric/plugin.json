@@ -1,0 +1,13 @@
+{
+  "pluginName": "hres_repo_publication_altmetric",
+  "pluginAuthor": "Haplo Services",
+  "pluginVersion": 1,
+  "displayName": "Repository: Altmetric",
+  "displayDescription": "Display Altmetric information in repository publication",
+  "apiVersion": 4,
+  "depend": ["std_web_publisher"],
+  "use": ["std:web-publisher"],
+  "load": [
+      "js/hres_repo_publication_altmetric.js"
+    ]
+}

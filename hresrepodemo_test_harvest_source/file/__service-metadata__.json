@@ -2,6 +2,10 @@
     "hres:repository:harvest-source:test-example": {
         "statements": [
             "hres:repository:harvest-source"
-        ]
+        ],
+        "metadata": {
+            "source": "test_source",
+            "name": "An example source (eg. Datacite)"
+        }
     }
 }

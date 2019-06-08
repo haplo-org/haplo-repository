@@ -1,3 +1,6 @@
+
+// WARNING: REPLACEABLE =====================================================
+
 pageTitle(year)
 
 each(items) {

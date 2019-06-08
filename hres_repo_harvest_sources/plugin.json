@@ -3,17 +3,17 @@
   "pluginAuthor": "Haplo Services",
   "pluginVersion": 1,
   "displayName": "Haplo Repository Harvest Sources",
-  "displayDescription": "Manasgement ofharvesting data for the Haplo repository from external sources",
+  "displayDescription": "Management of harvesting of data for the Haplo Repository from external sources",
   "installSecret": "ecbf615ddf7bde1a118a2e77ed4a52df28a5a235",
   "apiVersion": 4,
   "privilegesRequired": ["pDatabase"],
   "depend": [
       "hres_repository",
-      "haplo_service_registry"
+      "haplo_service_registry",
+      "haplo_alternative_versions"
     ],
   "load": [
-      "js/hres_repo_harvest_sources.js",
-      "js/hs_admin_ui.js"
+      "js/hres_repo_harvest_sources.js"
     ],
   "respond": ["/do/hres-repo-harvest-sources"]
 }

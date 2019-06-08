@@ -1,0 +1,6 @@
+
+// WARNING: REPLACEABLE =====================================================
+
+pageTitle("Latest Additions")
+
+std:web-publisher:widget:query:list:search-result(latestResults)

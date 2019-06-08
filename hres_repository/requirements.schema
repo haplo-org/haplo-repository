@@ -23,6 +23,11 @@ label hres:label:rejected-from-repository as RejectedFromRepository
     title: Rejected from Repository
     category: Repository
 
+# For items that are accepted as correct and complete, but should not be made publically available
+label hres:label:accepted-as-closed-deposit as AcceptedClosedDeposit
+    title: Accepted closed deposit
+    category: Repository
+
 restriction hres:restriction:citation-attribute:calculated
     # TODO: Uncomment when this is added to the platform
     # restrict-if-type-annotated hres:annotation:repository-item
@@ -44,10 +49,14 @@ group hres:group:admin-staff as AdminStaff
 
 attribute dc:attribute:author as Author
 attribute dc:attribute:date as Date
+
 attribute dc:attribute:publisher as Publisher
+    REMOVE linked-type std:type:organisation
+    linked-type hres:type:organisation:publisher
 
 attribute std:attribute:configured-behaviour as ConfiguredBehaviour
 attribute std:attribute:project as Project
+attribute std:attribute:url as Url
 
 type std:type:intranet-page as IntranetPage
 type std:type:person as Person
@@ -98,7 +107,7 @@ schema-template hres:template-type:repository-item
     attribute hres:attribute:license [sort=16000]
     REMOVE attribute std:attribute:notes
     attribute hres:aliased-attribute:additional-information [sort=18000]
-    element: std:group:everyone right std:action_panel {"panel":"repository_item"} [sort=250]
+    REMOVE element: std:group:everyone right std:action_panel {"panel":"repository_item"} [sort=250]
     create-position never
 
 # ---------------------------------------------------------------------------
@@ -149,6 +158,18 @@ type hres:type:external-event as ExternalEvent
     render-icon E517,7,f E207,c
     render-category 4
     create-position never
+type hres:type:external-event:conference as Conference
+    title Conference
+    search-name conference
+    parent-type hres:type:external-event
+type hres:type:external-event:exhibition as Exhibition
+    title Exhibition
+    search-name exhibition
+    parent-type hres:type:external-event
+type hres:type:external-event:workshop as Workshop
+    title Workshop
+    search-name workshop
+    parent-type hres:type:external-event
 
 # ---------------------------------------------------------------------------
 #   Qualifiers required for Outputs
@@ -227,13 +248,6 @@ attribute hres:attribute:department-name as DepartmentName
     qualifier std:qualifier:null
     data-type text
 
-attribute hres:attribute:digital-object-identifier-doi as DigitalObjectIdentifierDOI
-    title: Digital Object Identifier (DOI)
-    search-name: doi
-    qualifier std:qualifier:null
-    data-type plugin
-    data-type-options hres:doi
-
 attribute hres:attribute:edition as Edition
     title: Edition
     search-name: edition
@@ -250,7 +264,7 @@ attribute hres:attribute:issn as ISSN
     title: ISSN
     search-name: issn
     qualifier std:qualifier:null
-    data-type idsn
+    data-type isbn
 
 attribute hres:attribute:journal as Journal
     title: Journal
@@ -345,6 +359,17 @@ attribute hres:attribute:event-date as EventDate
     data-type datetime
     ui-options d,y,y,n,n
 
+attribute hres:attribute:output as Output
+    title: Output
+    search-name: output
+    qualifier std:qualifier:null
+    data-type link
+    ui-options lookup
+    # TODO: Uncomment this line when platform support is added
+    # linked-annotated-types hres:annotation:repository-item
+    linked-type std:type:book
+    linked-type std:type:journal
+
 # ---------------------------------------------------------------------------
 #   Lists (types + objects)
 # ---------------------------------------------------------------------------
@@ -365,21 +390,83 @@ type hres:type:license as License
     search-name license
     apply-schema-template hres:template-type:list
     attribute std:attribute:url
+    behaviour hierarchical
+object hres:list:license:root
+    title Licenses
+    type hres:type:license
 object hres:list:license:cc-by
     title CC BY
+    parent hres:list:license:root
+    type hres:type:license
+object hres:list:license:cc-by:3
+    title CC BY 3.0
+    parent hres:list:license:cc-by
+    type hres:type:license
+object hres:list:license:cc-by:4
+    title CC BY 4.0
+    parent hres:list:license:cc-by
     type hres:type:license
 object hres:list:license:cc-by-sa
     title CC BY-SA
+    parent hres:list:license:root
+    type hres:type:license
+object hres:list:license:cc-by-sa:3
+    title CC BY-SA 3.0
+    parent hres:list:license:cc-by-sa
+    type hres:type:license
+object hres:list:license:cc-by-sa:4
+    title CC BY-SA 4.0
+    parent hres:list:license:cc-by-sa
     type hres:type:license
 object hres:list:license:cc-by-nc
     title CC BY-NC
+    parent hres:list:license:root
+    type hres:type:license
+object hres:list:license:cc-by-nc:3
+    title CC BY-NC 3.0
+    parent hres:list:license:cc-by-nc
+    type hres:type:license
+object hres:list:license:cc-by-nc:4
+    title CC BY-NC 4.0
+    parent hres:list:license:cc-by-nc
     type hres:type:license
 object hres:list:license:cc-by-nd
     title CC BY-ND
+    parent hres:list:license:root
+    type hres:type:license
+object hres:list:license:cc-by-nd:3
+    title CC BY-ND 3.0
+    parent hres:list:license:cc-by-nd
+    type hres:type:license
+object hres:list:license:cc-by-nd:4
+    title CC BY-ND 4.0
+    parent hres:list:license:cc-by-nd
     type hres:type:license
 object hres:list:license:cc-by-nc-sa
     title CC BY-NC-SA
+    parent hres:list:license:root
+    type hres:type:license
+object hres:list:license:cc-by-nc-sa:3
+    title CC BY-NC-SA 3.0
+    parent hres:list:license:cc-by-nc-sa
+    type hres:type:license
+object hres:list:license:cc-by-nc-sa:4
+    title CC BY-NC-SA 4.0
+    parent hres:list:license:cc-by-nc-sa
     type hres:type:license
 object hres:list:license:cc-by-nc-nd
     title CC BY-NC-ND
+    parent hres:list:license:root
+    type hres:type:license
+object hres:list:license:cc-by-nc-nd:3
+    title CC BY-NC-ND 3.0
+    parent hres:list:license:cc-by-nc-nd
+    type hres:type:license
+object hres:list:license:cc-by-nc-nd:4
+    title CC BY-NC-ND 4.0
+    parent hres:list:license:cc-by-nc-nd
+    type hres:type:license
+object hres:list:license:cc-0
+    title CC0
+    parent hres:list:license:root
     type hres:type:license

@@ -4,7 +4,6 @@
   "pluginVersion": 1,
   "displayName": "Haplo RM Repository Web Profiles",
   "displayDescription": "Web profiles functionality for repository",
-  "installSecret": "74c1e3f86715e9b6585bb19149f8e7ebc2aacd95",
   "apiVersion": 4,
   "privilegesRequired": ["pDatabase"],
   "depend": [

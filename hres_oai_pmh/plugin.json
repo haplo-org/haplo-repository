@@ -13,6 +13,10 @@
     ],
   "load": [
       "js/hres_oai_pmh.js",
-      "js/hres_oai_pmh_web_publisher.js"
+      "js/hres_oai_pmh_web_publisher.js",
+      "js/hres_oai_pmh_admin.js"
+    ],
+  "respond": [
+      "/do/hres-oai-pmh"
     ]
 }

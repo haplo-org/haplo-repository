@@ -27,7 +27,11 @@ P.implementService("hres_repository:test_data:pre_item_save", function(generator
 // -------- Reporting ---------------------------------
 
 P.implementService("std:reporting:collection:repository_items:setup", function(collection) {
-    collection.fact("publicationAcceptanceDate", "date", "Accepted");
+    collection.
+        fact("publicationAcceptanceDate", "date", "Accepted").
+        fact("publicationDepositedDate", "date", "Deposited").
+        fact("hasPublishersVersion",       "boolean",  "Has Publisher's version").
+        fact("hasAuthorAcceptedManuscript", "boolean", "Has AAM");
 });
 
 P.implementService("std:reporting:collection:repository_items:get_facts_for_object", function(object, row) {
@@ -35,17 +39,29 @@ P.implementService("std:reporting:collection:repository_items:get_facts_for_obje
     if(publicationAcceptance) {
         row.publicationAcceptanceDate = publicationAcceptance.start;
     }
+    var publicationDeposited = object.first(A.PublicationProcessDates, Q.Deposited);
+    if(publicationDeposited) {
+        row.publicationDepositedDate = publicationDeposited.start;
+    }
+    var aam = !!object.getAttributeGroupIds(A.AcceptedAuthorManuscript).length;
+    if(aam) {
+        row.hasAuthorAcceptedManuscript = true;
+    }
+    var vor = !!object.getAttributeGroupIds(A.PublishersVersion).length;
+    if(vor) {
+        row.hasPublishersVersion = true;
+    }
 });
 
 P.implementService("std:reporting:dashboard:ref_non_compliance:setup", function(dashboard) {
-    dashboard.columns(15, ["publicationAcceptanceDate"]);
+    dashboard.columns(15, ["publicationAcceptanceDate", "publicationDepositedDate"]);
 });
 
 P.implementService("std:reporting:dashboard:repository_overview:setup_export", function(dashboard) {
-    dashboard.columns(95, ["publicationAcceptanceDate"]);
+    dashboard.columns(95, ["publicationAcceptanceDate", "publicationDepositedDate"]);
 });
 P.implementService("std:reporting:dashboard:outputs_in_progress:setup_export", function(dashboard) {
-    dashboard.columns(160, ["publicationAcceptanceDate"]);
+    dashboard.columns(160, ["publicationAcceptanceDate", "publicationDepositedDate"]);
 });
 
 // ---------- Permissions ------------------------------

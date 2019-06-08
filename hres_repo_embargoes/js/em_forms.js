@@ -10,43 +10,50 @@ P.db.table('embargoDocuments', {
     document: { type: 'text' }
 });
 
-var saveEmbargoToDb = function(object, desc, data) {
+var saveEmbargoToDb = function(object, extensionGroup, data) {
     var start;
+    var earliestPublicationDate = O.service("hres:repository:earliest_publication_date", object);
     if(!!data.customStart) {
         start = new Date(data.customStart);
-    } else if(object.first(A.PublicationDate)) {
-        start = O.service("hres:repository:earliest_publication_date", object);
+    } else if(earliestPublicationDate) {
+        start = earliestPublicationDate;
     } else {
         // Fallback to today
         start = new Date();
     }
+    // TODO: this is to deal with bad imported data, to ensure security by default.
+    // If we need to set embargo start dates in the future review if this check is appropriate.
+    if(start.getTime() > new Date().getTime()) {
+        start = new Date();
+    }
     var end;
-    if(data.embargoLength !== "Indefinite") {
+    if(data.end) {
+        end = new Date(data.end);
+    } else if(data.embargoLength !== "Indefinite") {
         var length = parseInt(data.embargoLength, 10);
         end = new XDate(start).addMonths(length);
     }
     P.db.embargoes.create({
         object: object.ref,
-        desc: (desc === "all") ? null : parseInt(desc, 10),
+        extensionGroup: (extensionGroup === "all") ? null : parseInt(extensionGroup, 10),
+        desc: data.desc || null,
         licenseURL: data.licenseURL || null,
         start: start,
         end: end || null
     }).save();
 };
 
-var saveEmbargoData = function(object, document) {
+var saveEmbargoData = P.saveEmbargoData = function(object, document) {
     var oldData = P.getEmbargoData(object);
     if(oldData) {
         oldData.deleteAll();
     }
+    if(document.all && (document.all.embargoLength || document.all.end)) {
+        saveEmbargoToDb(object, "all", document.all);
+    }
     _.each(document.embargoes, function(data) {
-        // Save blanket embargoes as a single entry, as this makes all UI easier
-        if(data.appliesTo && data.appliesTo.indexOf("all") !== -1) {
-            saveEmbargoToDb(object, "all", data);
-        } else {
-            _.each(data.appliesTo, function(desc) {
-                saveEmbargoToDb(object, desc, data);
-            });
+        if(data.embargoLength || data.end) {
+            saveEmbargoToDb(object, data.groupId, data);
         }
     });
 };
@@ -61,23 +68,7 @@ var DISPLAY_ATTRIBUTES = [
     A.Journal
 ];
 
-var RESTRICTED_ATTRIBUTES = [
-    A.AcceptedAuthorManuscript, A.PublishersVersion, A.File
-];
-
-var getFileChoices = function() {
-    var choices = [["all", "All"]];
-    _.each(RESTRICTED_ATTRIBUTES, function(desc) {
-        choices.push([desc.toString(), SCHEMA.getAttributeInfo(desc).name]);
-    });
-    return choices;
-};
-
-// Load and modify embargo form; can't use instance choices for multiple files
-var embargoFormJSON = JSON.parse(P.loadFile('form/embargo.json').readAsString());
-var attributesChoiceElement = _.find(embargoFormJSON.elements[0].elements, function(f) { return f.choices === "attributes"; });
-attributesChoiceElement.choices = getFileChoices();
-var embargoForm = P.form(embargoFormJSON);
+var embargoForm = P.form('embargo', 'form/embargo.json');
 
 P.respond("GET,POST", "/do/hres-repo-embargoes/edit", [
     {pathElement:0, as:"object"}
@@ -92,18 +83,73 @@ P.respond("GET,POST", "/do/hres-repo-embargoes/edit", [
     });
     var publicationDate = O.service("hres:repository:earliest_publication_date", output);
 
-    var document = {};
+    var document = {
+        all: {},
+        embargoes: []
+    };
     var existingDocumentQuery = P.db.embargoDocuments.select().where("object", "=", output.ref);
     if(existingDocumentQuery.length) {
         document = JSON.parse(existingDocumentQuery[0].document);
     }
+    // if a whole embargo has since been applied automatically, use that info instead
+    var wholeEmbargoQuery = P.db.embargoes.select().
+        where("object", "=", output.ref).
+        where("extensionGroup", "=", null).
+        where("desc", "=", null);
+    if(wholeEmbargoQuery.length) {
+        var wholeEmbargo = wholeEmbargoQuery[0];
+        var wholeEmbargoLength = "Indefinite";
+        if(wholeEmbargo.end) {
+            wholeEmbargoLength = Math.round(new XDate(wholeEmbargo.start).diffMonths(new XDate(wholeEmbargo.end)));
+        }
+        var allEmbargo = {
+            customStart: wholeEmbargo.start, // not strictly correct but easier
+            embargoLength: wholeEmbargoLength.toString()
+        };
+        if(wholeEmbargo.licenseURL) { allEmbargo.licenseURL = wholeEmbargo.licenseURL; }
+        if(!_.isEqual(document.all, allEmbargo)) {
+            document.all = allEmbargo;
+        }
+    }
+    var groups = output.extractAllAttributeGroups();
+    _.each(groups.groups, function(group) {
+        if(!group.object.isKindOfTypeAnnotated("hres:annotation:repository:file")) { return; }
+        var existing = _.find(document.embargoes, function(em) {
+            return (em.groupId === group.extension.groupId);
+        });
+        var files = [];
+        group.object.every(function(v,d,q) {
+            if(O.typecode(v) === O.T_IDENTIFIER_FILE) {
+                files.push(v);
+            }
+        });
+        if(existing) {
+            existing.files = P.template("files").render({
+                files: files
+            });
+            existing.attribute = "<b>"+_.escape(SCHEMA.getAttributeInfo(group.extension.desc).name)+"</b>";
+        } else {
+            document.embargoes.push({
+                groupId: group.extension.groupId,
+                desc: group.extension.desc,
+                attribute: "<b>"+_.escape(SCHEMA.getAttributeInfo(group.extension.desc).name)+"</b>",
+                files: P.template("files").render({
+                    files: files
+                })
+            });
+        }
+    });
     var form = embargoForm.instance(document);
     form.choices("embargoLengths",
-        ["Indefinite"].concat(_.map(_.range(1,49), function(i) { return i.toString(); }))
+        ["Indefinite"].concat(_.map(_.range(1,61), function(i) { return i.toString(); }))
     );
     form.update(E.request);
 
     if(E.request.method === "POST") {
+        // Don't save rendered file html to database
+        _.each(document.embargoes, function(em) {
+            delete em.files;
+        });
         if(existingDocumentQuery.length) {
             existingDocumentQuery.deleteAll();
         }
@@ -117,9 +163,6 @@ P.respond("GET,POST", "/do/hres-repo-embargoes/edit", [
         return;
     }
 
-    // Get choices for display
-    var usedAttributes = _.select(RESTRICTED_ATTRIBUTES, function(d) { return !!output.first(d); });
-
     E.renderIntoSidebar({
         elements: [{
             label: "Delete all embargoes",
@@ -129,7 +172,6 @@ P.respond("GET,POST", "/do/hres-repo-embargoes/edit", [
     }, "std:ui:panel");
     E.render({
         output: output.ref,
-        usedAttributes: usedAttributes.join(','),
         displayObject: displayObject,
         publicationDate: publicationDate,
         form: form

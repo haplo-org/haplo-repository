@@ -10,6 +10,17 @@
 // (System Management -> Configuration -> Configuration data)
 
 // oai:results_per_page -- page size for resuilts
+/*HaploDoc
+node: /repository/hres_oai_pmh/implementation
+sort: 5
+--
+
+h2. Config data
+
+h3. @oai:results_per_page@
+
+Optional. Default is 20.
+*/
 var RESULT_PAGE_SIZE = O.application.config["oai:results_per_page"] || 20;
 
 var REQUIRED_REPO_ATTRIBUTES = {
@@ -20,8 +31,29 @@ var REQUIRED_REPO_ATTRIBUTES = {
 
 // --------------------------------------------------------------------------
 
+/*HaploDoc
+node: /repository/hres_oai_pmh/metadata_formats
+title: Mtadata formats
+sort: 1
+--
+
+New metadata formats are added using the [node:haplo-plugins/haplo_service_registry]. Each new \
+format should be added in its own plugin.
+
+h3. Service registry configuration
+
+To be picked up by the OAI-PMH service registry query, the metadata format must have the statements \
+@"conforms-to hres:write-store-object-below-xml-cursor"@ and @"hres:oai-pmh:exposed-metadata-format"@.
+
+It must also have the following service metadata:
+
+|@"hres:oai-pmh:metadata-namespace"@|The XML namespace for the schema|
+|@"hres:oai-pmh:metadata-prefix"@|The prefix for that XML namespace|
+|@"hres:oai-pmh:schema"@|The location of the XML schema|
+|@"hres:oai-pmh:root-element"@|What the root element for a record should be called|
+*/
 var _metadataServices;
-var metadataServices = function() {
+var metadataServices = P.metadataServices = function() {
     if(!_metadataServices) {
         _metadataServices = O.service("haplo:service-registry:query", [
             "conforms-to hres:write-store-object-below-xml-cursor",
@@ -32,7 +64,7 @@ var metadataServices = function() {
 };
 
 var _metadataServiceForScheme;
-var metadataServiceForScheme = function(scheme) {
+var metadataServiceForScheme = P.metadataServiceForScheme = function(scheme) {
     if(!_metadataServiceForScheme) {
         _metadataServiceForScheme = {};
         metadataServices().eachService((metadataService) => {

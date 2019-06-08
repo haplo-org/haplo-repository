@@ -1,0 +1,19 @@
+{
+  "pluginName": "hres_orcid_repository",
+  "pluginAuthor": "Haplo Services",
+  "pluginVersion": 1,
+  "displayName": "Haplo Repository ORCID",
+  "displayDescription": "ORCID data integration for Haplo RM Repository",
+  "apiVersion": 4,
+  "depend": [
+      "hres_orcid",
+      "hres_repository"
+    ],
+  "use": [
+      "hres:orcid"
+    ],
+  "load": [
+      "js/hres_orcid_repository.js"
+    ],
+  "respond": ["/do/hres-orcid-repository"]
+}

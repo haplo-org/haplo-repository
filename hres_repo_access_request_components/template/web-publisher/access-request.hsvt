@@ -1,9 +1,17 @@
 
-<h2> title ": " std:object:title(ref) </h2>
-    
-<div class="panel well">
-    <form method="POST" class="haplo-plugin-form">
-        std:form(form)
-        <p><input type="submit" value="Send request"></p>
+// WARNING: REPLACEABLE =====================================================
+
+pageTitle(title ": " object.title)
+
+<div class="card border-0 bg-light">
+    <form method="POST" class="form-group">
+        <div class="card-body">
+            std:form(form)
+        </div>
+        <div class="card-footer text-right border-0 bg-light">
+            <div class="oform-buttons">
+                <button type="submit" class="btn btn-primary">"Send request"</button>
+            </div>
+        </div>
     </form>
 </div>

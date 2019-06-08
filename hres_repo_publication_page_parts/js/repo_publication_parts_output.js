@@ -4,6 +4,10 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.         */
 
+P.webPublication.registerReplaceableTemplate(
+    "hres:repo-publication-parts:output:permalink",
+    "output/permalink"
+);
 
 P.webPublication.pagePart({
     name: "hres:repository:output:permalink",
@@ -11,7 +15,8 @@ P.webPublication.pagePart({
     sort: 9000,
     deferredRender: function(E, context, options) {
         if(context.object) {
-            return P.template("output/permalink").deferredRender({
+            var template = context.publication.getReplaceableTemplate("hres:repo-publication-parts:output:permalink");
+            return template.deferredRender({
                 permalink: context.publishedObjectUrl(context.object)
             });
         }
@@ -20,54 +25,10 @@ P.webPublication.pagePart({
 
 // --------------------------------------------------------------------------
 
-var deferredCollectionItemRenders = function(context, collection) {
-    return _.compact(_.map(collection.every(A.CollectionItem), function(o) {
-        if(O.currentUser.canRead(o)) {
-            var output = o.load();
-            return {
-                output: output,
-                href: context.publishedObjectUrlPath(output),
-                citation: O.service("hres_bibliographic_reference:for_object", output)
-            };
-        }
-    }));
-};
-
-P.webPublication.pagePart({
-    name: "hres:repository:output:collection-items",
-    deferredRender: function(E, context, options) {
-        if(context.object && context.object.isKindOf(T.Collection)) {
-            return P.template("output/collection-items").deferredRender({
-                title: "Collection items",
-                items: deferredCollectionItemRenders(context, context.object)
-            });
-        }
-    }
-});
-
-P.webPublication.pagePart({
-    name: "hres:repository:output:parent-collection-items",
-    category: "hres:repository:output:sidebar",
-    sort: 600,
-    deferredRender: function(E, context, options) {
-        if(context.object) {
-            var containingCollections = O.query().
-                link(T.Collection, A.Type).
-                link(context.object.ref, A.CollectionItem).
-                execute();
-            if(containingCollections.length) {
-                return P.template("output/collection-items").deferredRender({
-                    title: "Explore this collection",
-                    items: _.filter(deferredCollectionItemRenders(context, containingCollections[0]),
-                        (i) => (i.output.ref != context.object.ref)
-                    )
-                });
-            }
-        }
-    }
-});
-
-// --------------------------------------------------------------------------
+P.webPublication.registerReplaceableTemplate(
+    "hres:repo-publication-parts:output:related",
+    "output/related"
+);
 
 P.webPublication.pagePart({
     name: "hres:repository:output:related",
@@ -82,14 +43,23 @@ P.webPublication.pagePart({
                 link(authors, A.Author).
                 sortByDate().
                 execute(), function(output) {
+                    var file;
+                    var restricted = output.restrictedCopy(O.currentUser);
+                    restricted.every((v,d,q) => {
+                        if(!file && O.typecode(v) === O.T_IDENTIFIER_FILE) {
+                            file = v;
+                        }
+                    });
                     return {
                         output: output,
-                        href: context.publishedObjectUrlPath(output),
-                        citation: O.service("hres_bibliographic_reference:for_object", output)
+                        typeInfo: SCHEMA.getTypeInfo(output.firstType()),
+                        citation: O.service("hres_bibliographic_reference:for_object", output),
+                        file: file
                     };
                 }
             );
-            return P.template("output/related").deferredRender({
+            var template = context.publication.getReplaceableTemplate("hres:repo-publication-parts:output:related");
+            return template.deferredRender({
                 related: _.filter(alsoAuthored, (a) => (a.output.ref != context.object.ref))
             });
         }
@@ -98,15 +68,21 @@ P.webPublication.pagePart({
 
 // --------------------------------------------------------------------------
 
+P.webPublication.registerReplaceableTemplate(
+    "hres:repo-publication-parts:output:share-panel",
+    "output/share-panel"
+);
+
 P.webPublication.pagePart({
     name: "hres:repository:output:share-panel",
     category: "hres:repository:output:sidebar",
-    sort: 2900,
+    sort: 2000,
     deferredRender: function(E, context, options) {
         if(context.object) {
             var output = context.object;
             var citation = O.service("hres_bibliographic_reference:for_object", output);
-            return P.template("output/share-panel").deferredRender({
+            var template = context.publication.getReplaceableTemplate("hres:repo-publication-parts:output:share-panel");
+            return template.deferredRender({
                 email: {
                     subject: output.title,
                     body: context.publishedObjectUrl(output)

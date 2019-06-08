@@ -32,7 +32,7 @@ var objectToIntermediate = P.objectToIntermediate = function(object) {
     let intermediate = {
         attributes: []
     };
-    _.each(P.haploAttributeInfo, (attrInfo) => {
+    _.each(P.getHaploAttributeInfo(), (attrInfo) => {
         if(attrInfo.name) {
             object.every(A[attrInfo.name], (v, d, q) => {
                 let attribute = {
@@ -53,7 +53,9 @@ var objectToIntermediate = P.objectToIntermediate = function(object) {
 };
 
 // intermediate to XML
-// TODO: control character policy on text
+// TODO: Bad import data may require control character policy to be set on text
+// No XSS issue as xml generator ensures that, and any data entered in Haplo will be ok, but may need
+// to mitigate for poor data from other systems
 var intermediateToXML = function(cursor, intermediate) {
     let eprint = cursor.
         element("eprint").
@@ -117,16 +119,22 @@ var OUTPUT_TYPE_MAP = {
     "Patent": {type:"patent"},
     "Performance": {type:"performance"},
     "Thesis": {type:"thesis"},
+    "PhdThesis": {type:"thesis", subtype:"phd", subtypeKey:"thesis_type"},
+    "MastersThesis": {type:"thesis", subtype:"masters", subtypeKey:"thesis_type"},
+    "MPhilThesis": {type:"thesis", subtype:"mphil", subtypeKey:"thesis_type"},
+    "ProfDocThesis": {type:"thesis", subtype:"pro_doc", subtypeKey:"thesis_type"},
+    "Website": {type:"web_resource"},
+    "Design": {type:"design"},
     "Other": {type:"other"},
     "DigitalOrVisualMedia": {
         fn(object) {
             if("MediaType" in A) {
                 let mediaType = object.first(A.MediaType);
                 if(mediaType && mediaType.behaviour && mediaType.behaviour.split("hres:list:media-type:").length > 1) {
-                    return mediaType.behaviour.split("hres:list:media-type:")[1];
+                    return {type:mediaType.behaviour.split("hres:list:media-type:")[1]};
                 } else {
                     // this may not be an actual eprints type, but I couldn't find an equivalent
-                    return "digital_or_visual_media";
+                    return {type:"digital_or_visual_media"};
                 }
             }
         }
@@ -134,7 +142,6 @@ var OUTPUT_TYPE_MAP = {
 };
 
 var OUTPUT_TYPE = O.refdictHierarchical();
-var DEFAULT_OUTPUT_TYPE_INFO = {type:"other"};
 _.each(OUTPUT_TYPE_MAP, (value, key) => {
     if(key in T) {
         OUTPUT_TYPE.set(T[key], value);
@@ -143,8 +150,9 @@ _.each(OUTPUT_TYPE_MAP, (value, key) => {
 
 P.typeAttr = function(intermediate, object, attribute) {
     O.serviceMaybe("hres-repo-eprints:modify-export-type-map", OUTPUT_TYPE);
-    const typeInfo = OUTPUT_TYPE.get(object.firstType()) || DEFAULT_OUTPUT_TYPE_INFO;
-    attribute.text = typeInfo.type || typeInfo.fn(object);
+    let typeInfo = OUTPUT_TYPE.get(object.firstType()) || {};
+    if(typeInfo.fn) { typeInfo = typeInfo.fn(object) || {}; }
+    attribute.text = typeInfo.type || "other";
     if(attribute.text) {
         intermediate.attributes.push(attribute);
     }
@@ -155,6 +163,10 @@ P.typeAttr = function(intermediate, object, attribute) {
         intermediate.attributes.push(subtypeAttribute);
     }
 };
+
+// Is the ORCID attribute defined? If so, enable ORCID export.
+const USING_ORCID = ("ORCID" in A) && O.featureImplemented("hres:orcid");
+if(USING_ORCID) { P.use("hres:orcid"); }
 
 P.personAttr = function(intermediate, object, attribute) {
     let person = {};
@@ -175,10 +187,32 @@ P.personAttr = function(intermediate, object, attribute) {
         // figure out name if personName doesn't exist?
         let email = o.first(A.Email);
         if(email) { person.id = email.toString(); } // id isn't necessarily email
+        if(USING_ORCID) {
+            let orcid = o.first(A.ORCID);
+            if(orcid) { person.orcid = P.ORCID.asString(orcid); }
+        }
     }
     attribute.properties = person;
     if(person.id || person.name) {
         intermediate.attributes.push(attribute);
+    }
+};
+
+P.contributorsAttr = function(intermediate, object, attribute) {
+    P.personAttr(intermediate, object, attribute);
+    let contribution = attribute.qual;
+    if(contribution) {
+        let contributionInfo = SCHEMA.getQualifierInfo(contribution);
+        contribution = contributionInfo.code;
+        let contributorTypeAttribute = _.clone(attribute);
+        contributorTypeAttribute.tag = "contributors_type";
+        // Qual title: Film editor -> FilmEditor
+        contributorTypeAttribute.text = _.map(contributionInfo.name.split(" "), word => word[0].toUpperCase()+word.slice(1)).join("");
+        intermediate.attributes.push(contributorTypeAttribute);
+
+        let contributionSpecificAttribute = _.clone(attribute);
+        contributionSpecificAttribute.tag = _.last(contribution.split(":")).replace(/-/g, "_") + "s";
+        P.personAttr(intermediate, object, contributionSpecificAttribute);
     }
 };
 
@@ -355,7 +389,7 @@ P.embargoAttrs = function(intermediate, object, attribute) {
             if(!_.isEmpty(licenseAttr.properties)) {
                 intermediate.attributes.push(licenseAttr);
             }
-            // TODO set embargo end date on <document> once we export files
+            // TODO set embargo end date on <document> if we have an application for this that exports files
         } else {
             attribute.text = "public";
         }
@@ -404,6 +438,11 @@ P.refUoaAttr = function(intermediate, object, attribute) {
     intermediate.attributes.push(attribute);
 };
 
+P.simpleDateAttr = function(intermediate, object, attribute) {
+    attribute.text = new XDate(attribute.value.start).toString("yyyy-MM-dd");
+    intermediate.attributes.push(attribute);
+};
+
 P.acceptedDateAttr = function(intermediate, object, attribute) {
     if(attribute.qual == Q.Accepted) {
         attribute.text = new XDate(attribute.value.start).toString("yyyy-MM-dd");
@@ -433,29 +472,10 @@ P.firstFileDepositAttr = function(intermediate, object, attribute) {
     }
 };
 
-var REF_EXCEPTION_ATTR_LOOKUP = {
-    "technical-a": ["hoa_ex_tec", "a"],
-    "technical-b": ["hoa_ex_tec", "b"],
-    "technical-c": ["hoa_ex_tec", "c"],
-    "technical-d": ["hoa_ex_tec", "d"],
-    "deposit-a": ["hoa_ex_dep", "a"],
-    "deposit-b": ["hoa_ex_dep", "b"],
-    "deposit-c": ["hoa_ex_dep", "c"],
-    "deposit-d": ["hoa_ex_dep", "d"],
-    "deposit-e": ["hoa_ex_dep", "e"],
-    "deposit-f": ["hoa_ex_dep", "f"],
-    "access-a": ["hoa_ex_acc", "a"],
-    "access-b": ["hoa_ex_acc", "b"],
-    "access-c": ["hoa_ex_acc", "c"],
-    "other": ["hoa_ex_acc", "TRUE"]
-};
-
-P.refExceptionAttr = function(intermediate, object, attribute) {
-    let REFException = O.serviceMaybe("hres_ref_repository:get_exception", object);
-    if(REFException) {
-        let exceptionInfo = REF_EXCEPTION_ATTR_LOOKUP[REFException.kind];
-        attribute.tag = exceptionInfo[0];
-        attribute.text = exceptionInfo[1];
+P.firstOpenAccessAttr = function(intermediate, object, attribute) {
+    let firstOpenAccess = O.serviceMaybe("hres_ref_repository:get_first_open_access", object);
+    if(firstOpenAccess) {
+        attribute.text = new XDate(firstOpenAccess.date).toString("yyyy-MM-dd");
         intermediate.attributes.push(attribute);
     }
 };
@@ -463,4 +483,28 @@ P.refExceptionAttr = function(intermediate, object, attribute) {
 P.versionNumber = function(intermediate, object, attribute) {
     attribute.text = object.version.toString();
     intermediate.attributes.push(attribute);
+};
+
+P.externalEventAttr = function(intermediate, object, attribute) {
+    if(!O.isRef(attribute.value)) { return; }
+    const event = attribute.value.load();
+    if(!event.isKindOf(T.ExternalEvent)) { return; }
+    event.every((v,d,q) => {
+        let attr = _.clone(attribute);
+        attr.tag = undefined;
+        attr.text = v.toString();
+        if(d === A.Title) {
+            attr.tag = "event_title";
+        } else if(d === A.Location) {
+            attr.tag = "event_location";
+        } else if(d === A.EventDate) {
+            attr.tag = "event_dates";
+        } else if((d === A.Type) && (v != T.ExternalEvent)) {
+            attr.tag = "event_type";
+            attr.text = SCHEMA.getTypeInfo(v).name;
+        }
+        if(attr.tag) {
+            intermediate.attributes.push(attr);
+        }
+    });
 };

@@ -2,6 +2,3 @@
 attribute hres:attribute:abstract as Abstract
 attribute dc:attribute:author as Author
 attribute hres:attribute:editor as Editor
-
-type hres:type:collection as Collection
-attribute hres:attribute:collection-item as CollectionItem

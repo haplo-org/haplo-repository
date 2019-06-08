@@ -1,0 +1,9 @@
+<p> 
+  requestedBy " has made changes to "
+  if(list) {
+      "\"" std:object:title(object) "\". "
+  } else {
+      "this item. "
+  }
+  "Please approve the metadata for use on the repository's authoritative record."
+</p>

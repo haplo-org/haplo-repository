@@ -1,0 +1,73 @@
+
+pageTitle("Eprints Administration")
+
+<h2> "Eprint id lookup" </h2>
+<form method="GET" action="/do/hres-repo-eprints/admin/eprintid-lookup">
+    <p> <input type="text" name="lookup" placeholder="Eprint Id" style="width:200px">
+    <input type="submit" value="Find object"> </p>
+</form>
+
+<p><a href="/do/hres-repo-eprints/mapping">"Import/export tag mapping"</a></p>
+
+<hr>
+<h1> "Import" </h1>
+
+<h2>"File import admin"</h2>
+<p>
+    <a href="/do/hres-repo-eprints/fetch-file-urls">"Fetch file URLs"</a>
+    " | Status: "fetchFileStatus
+    if(fetchFileTimeTaken) { " | Time taken: "fetchFileTimeTaken" min" }
+</p>
+<p>
+    <a href="/do/hres-repo-eprints/download-files">"Download fetched file URLs"</a>
+    " | Status: "fileDownloadStatus
+    if(fileDownloadTimeTaken) { " | Time taken: "fileDownloadTimeTaken" min" }
+    if(fileDownloadStart) {
+        <p><i>"file download start: "fileDownloadStart", end: "fileDownloadEnd""</i></p>
+    }
+</p>
+<form method="GET" action="/do/hres-repo-eprints/admin/file-url-lookup">
+    <p> <input type="text" name="lookup" placeholder="File URL" style="width:200px">
+    <input type="submit" value="Find file"> </p>
+</form>
+
+<h2> "Eprint import admin" </h2>
+
+<p><a href="/do/hres-repo-eprints/upload-xml">"Start new import"</a></p>
+
+if(status) { <p>"Import status: " <b>status</b></p> }
+
+if(recentLogs) {
+    <h2>"Recent logs"</h2>
+    <table>
+        <tr>
+            <th>"Log id"</th>
+            <th>"Log"</th>
+            <th>"Tags and values"</th>
+            <th>"Filename"</th>
+            <th>"Started"</th>
+        </tr>
+        each(recentLogs) {
+            <tr>
+                <td>id</td>
+                <td><a href=["/do/hres-repo-eprints/log/" id]>"View"</a></td>
+                <td><a href=["/do/hres-repo-eprints/tags-and-values/" id]>"View"</a></td>
+                <td>filename</td>
+                <td>date</td>
+            </tr>
+        }
+    </table>
+    <p><a href="/do/hres-repo-eprints/all-logs">"All logs..."</a></p>
+}
+
+<hr>
+
+<h1> "Testing" </h1>
+<h2> "Meta tags" </h2>
+<form method="GET" action="/do/hres-repo-eprints/tags">
+    <p> <input type="text" name="lookup" placeholder="Object ref" style="width:200px">
+    <input type="submit" value="Get tags"> </p>
+</form>
+
+<h1> "Data monitoring" </h1>
+<p><a href="/do/hres-repo-data-monitoring/outputs-missing-authors">"Outputs missing authors"</a></p>

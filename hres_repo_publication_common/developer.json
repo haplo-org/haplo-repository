@@ -1,0 +1,7 @@
+{
+    "excludeFromSyntaxCheck": [
+        "static/lightbox/jquery-3-3-1-min.js",
+        "static/lightbox/featherlight-min.js",
+        "static/lightbox/featherlight-gallery-min.js"
+    ]
+}

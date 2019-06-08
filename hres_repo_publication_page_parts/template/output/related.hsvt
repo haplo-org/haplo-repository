@@ -1,13 +1,32 @@
 
-std:web-publisher:template("hres:repository:common:ui:panel") {
-  if(related.length) {
+// WARNING: REPLACEABLE =====================================================
+
+if(related.length) {
+  std:web-publisher:template("hres:repository:common:ui:panel") {
+    <h2>"Related outputs"</h2>
+
     each(related) {
-      <p class="haplo-repository-listing-citation">
-        <a href=href> output.title </a>
-        if(citation) { <br> <small> render(citation)</small> }
-      </p>
+      <div class="media my-4 pt-4">
+        if(file) {
+          std:web-publisher:object:link(output) { 
+            std:web-publisher:file:thumbnail(file)
+          } 
+        } else {
+          <i class="fas fa-file-alt fa-5x mr-3"></i>
+        }
+
+        <div class="media-body">
+          <h5 class="mt-0 mb-1">
+            std:web-publisher:object:link(output) { 
+              output.title
+            }
+          </h5>
+
+          if(citation) { 
+            <cite>render(citation)</cite>
+          }
+        </div>
+      </div>
     }
-  } else {
-    <p>"No related outputs"</p>
-  }
-} heading { "Related outputs" }
+  } heading {"Related outputs" }
+}

@@ -1,0 +1,32 @@
+{
+    "specificationVersion": 0,
+    "formId": "authorMatch",
+    "formTitle": "Authors matched",
+    "elements": [
+        {
+            "type": "repeating-section",
+            "path": "authors",
+            "allowAdd": false,
+            "allowDelete": false,
+            "elements": [
+                {
+                    "type": "display-value",
+                    "path": "name",
+                    "label": "Author"
+                },
+                {
+                    "type": "display-value",
+                    "path": "object",
+                    "label": "Matched to",
+                    "as": "html"
+                },
+                {
+                    "type": "lookup",
+                    "dataSource": "people",
+                    "label": "Amend to",
+                    "path": "linkTo"
+                }
+            ]
+        }
+    ]
+}

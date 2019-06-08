@@ -1,0 +1,58 @@
+
+// WARNING: REPLACEABLE =====================================================
+
+if(spec.title) {
+  pageTitle(spec.title)
+} else {
+  pageTitle("Departments and research groups")
+}
+
+if(spec.subtitle) {
+  std:web-publisher:block("pageheaderSubtitle") { spec.subtitle }
+}
+
+// TODO: Description & subheading for research institutes browse
+//  std:web-publisher:block("pageheaderSubtitle") {
+//    "Description goes here."
+//  }
+//  std:web-publisher:block("pageheaderExtra") {
+//    <p class="lead text-white"> "Additional instructions/description." </p>
+//  }
+
+<div class="container" id="choose">
+  <div class="row">
+    <div class="card-deck">
+      each(topLevel) {
+
+        <div class="col-md-4 mb-4">
+          <div class="card m-0 border-0 rounded-0 p-0">
+            if(image) {
+              <img class="card-img-top" src=image>
+            }
+
+            <div class=["card-body bg-dark" if(selected){"card-active"}]>
+              <h3 class="card-title text-primary h5 mb-0">
+                <a class=if(selected){}else{"collapsed"} href=href>
+                  title
+                </a>
+              </h3>
+            </div>
+
+            <ul class="list-group list-group-flush">
+              if(selected) {
+                each(institutes) {
+                  <li class="list-group-item"> std:web-publisher:object:link(.) </li>
+                }
+                if(ri) {
+                  <li class="list-group-item"> <i> std:web-publisher:object:link(ri) { "Everything in " title } </i> </li>
+                }
+              }
+            </ul>
+
+          </div>
+        </div>
+
+      }
+    </div>
+  </div>
+</div>

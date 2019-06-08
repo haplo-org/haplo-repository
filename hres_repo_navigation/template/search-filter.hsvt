@@ -1,6 +1,6 @@
 std:plugin:resources("filter.js")
 
-<h2> "Filter by" </h2>
+<h2> "Filter results by" </h2>
 <form method="GET">
   each(filterData) {
     <h3> title </h3>

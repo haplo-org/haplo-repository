@@ -1,0 +1,61 @@
+
+// WARNING: REPLACEABLE =====================================================
+
+pageTitle(object.title)
+
+// TODO: Description & subheading for research institutes
+//  std:web-publisher:block("pageheaderSubtitle") {
+//    "Description goes here."
+//  }
+//  std:web-publisher:block("pageheaderExtra") {
+//    <p class="lead text-white"> "Additional instructions/description." </p>
+//  }
+
+<div class="media bg-light mb-4">
+  <div class="media-body">
+    <div class="detail-table w-75 card border-0 bg-light">
+      <div class="card-body">
+        render(object.asTable)
+      </div>
+    </div>
+  </div>
+</div>
+
+std:web-publisher:block("sidebar") {
+  <div class="card border-0 bg-light mb-4">
+    <div class="card-header bg-transparent border-0">
+      <h3 class="mb-0">"People"</h3>
+    </div>
+
+    <div class="card-body">
+      each(researchers) {
+        <p>
+          std:web-publisher:object:link(.) {
+            std:web-publisher:utils:title:name(.)
+          }
+        </p>
+      }
+    </div>
+  </div>
+}
+
+std:web-publisher:block("below") {
+  <div class="card border-0 mb-4">
+    <div class="card-header bg-transparent border-0">
+      <div class="row align-items-center">
+        <div class="col-8">
+          <h3 class="mb-0">"Latest research outputs"</h3>
+        </div>
+        <div class="col-4 text-right">
+          //"Sort by: "
+          //<a href="#!" class="btn btn-sm btn-primary">"Date"</a>
+          //<a href="#!" class="btn btn-sm btn-primary">"Title"</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="card-body">
+      render(outputs.results)
+    </div>
+  </div>
+}

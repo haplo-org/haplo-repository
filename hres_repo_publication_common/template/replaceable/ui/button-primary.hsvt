@@ -1,6 +1,14 @@
 
-<div class="btn-group">
-  <a href=href class="btn btn-primary btn-lg">
-    yield()
-  </a>
+// WARNING: REPLACEABLE =====================================================
+
+<div class="card border-0 rounded-0">
+  <div class="card-body">
+
+    <div class="btn-group w-100">
+      <a href=href class="btn btn-primary btn-lg">
+        yield()
+      </a>
+    </div>
+
+  </div>
 </div>

@@ -1,0 +1,47 @@
+
+label std:label:deleted as DELETED
+
+label hres:label:accepted-into-repository as AcceptedIntoRepository
+
+# ------ Attributes -------------------------
+
+attribute dc:attribute:author as Author
+attribute std:attribute:isbn as ISBN
+
+attribute hres:attribute:abstract as Abstract
+attribute hres:attribute:authors-citation as AuthorsCitation
+attribute hres:attribute:editor as Editor
+attribute hres:attribute:editors-citation as EditorsCitation
+attribute hres:attribute:journal as Journal
+attribute hres:attribute:orcid as ORCID
+attribute hres:attribute:issn as ISSN
+attribute std:attribute:url as Url
+
+OPTIONAL attribute hres:attribute:digital-object-identifier-doi as DOI
+OPTIONAL attribute hres:attribute:pubmed-id as PubMedID
+
+# ------ Types -----------------------------
+
+type hres:type:audio as Audio
+type hres:type:artefact as Artefact
+type std:type:book as Book
+type hres:type:book-chapter as BookChapter
+type hres:type:conference-item as ConferenceItem
+type hres:type:conference-item:conference-keynote as ConferenceKeynote
+type hres:type:conference-item:conference-paper as ConferencePaper
+type hres:type:conference-item:conference-poster as ConferencePoster
+type hres:type:composition as Composition
+OPTIONAL type hres:type:dataset as Dataset
+type hres:type:design as Design
+type hres:type:devices-and-products as DevicesAndProducts
+type hres:type:digital-or-visual-media as DigitalOrVisualMedia
+type hres:type:exhibition as Exhibition
+type hres:type:journal-article as JournalArticle
+type hres:type:other as Other
+type hres:type:patent as Patent
+type hres:type:performance as Performance
+type hres:type:report as Report
+type hres:type:report:working-paper as WorkingPaper
+type hres:type:thesis as Thesis
+type hres:type:video as Video
+type hres:type:website as Website

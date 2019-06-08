@@ -20,8 +20,8 @@
   <h1>Instructions</h1>
     <li>Impersonating a Repository Editor, click the <i>"Repository"</i> button on the right to see administrative menus.</li>
     <li>Use the <i>"Repository overview"</i> directory to find a research output.</li>
-    <li>As an academic the <i>"My record"</i> button second on the home pages links directly to pages about your use of the system.</li>
-    <li>From your profile you can add research outputs to the system. They will only be included in the public interface to the repository once they have been approved through the deposit review workflow.</li>
+    <li>As an academic the <i>"My record"</i> button, second in the list on the right of the home page, links directly to pages about your use of the system.</li>
+    <li>From your profile you can add research outputs to the system, through links on the right hand side of the "My record page". Research outputs only be included in the public interface to the repository once they have been approved by repository editors through the deposit review workflow.</li>
     <li>This deposit process can be started from the output record, once it has been saved.</li>
     <li>When a workflow is in progress, it'll show who it's currently with on the right hand side. Impersonate the user to try the next step in the workflow.</li>
     <li>To see the notification emails the system would send, click the user name in the top right, then <i>"Test email viewer"</i>. (only available for administrator users)</li>

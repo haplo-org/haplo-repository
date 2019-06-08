@@ -24,7 +24,8 @@ schema-template hres:template-type:repository:output
     attribute dc:attribute:publisher [sort=10800]
     attribute hres:attribute:issn [sort=11001]
     attribute hres:attribute:publication-dates [sort=15100]
-    element: std:group:everyone right std:action_panel {"panel":"output"} [sort=100]
+    REMOVE element: std:group:everyone right std:action_panel {"panel":"output"} [sort=100]
+    element: std:group:everyone right std:action_panel {"panel":"output", "category":"hres:repository_item"} [sort=100]
 
 # ---------------------------------------------------------------------------
 
@@ -161,8 +162,11 @@ type hres:type:exhibition as Exhibition
     apply-schema-template hres:template-type:repository-item
     title: Exhibition
     search-name: exhibition
-    attribute dc:attribute:title [sort=10000]
-    attribute hres:aliased-attribute:external-event [sort=10900]
+    REMOVE attribute dc:attribute:title [sort=10000]
+    REMOVE attribute hres:aliased-attribute:title-of-work [sort=10000]
+    attribute hres:aliased-attribute:title-of-work [sort=10]
+    REMOVE attribute hres:aliased-attribute:external-event [sort=10900]
+    attribute hres:aliased-attribute:exhibition [sort=10900]
     render-icon: E504,1,f
     render-category 2
     default-subtype hres:type:exhibition
@@ -177,6 +181,7 @@ type hres:type:journal-article as JournalArticle
     attribute hres:attribute:journal-citation [sort=10760]
     attribute hres:attribute:accepted-author-manuscript [sort=14100]
     attribute hres:attribute:published-file [sort=14110]
+    attribute hres:attribute:supplemental-file [sort=15120]
     render-icon: E211,1,f
     render-category 3
     default-subtype hres:type:journal-article
@@ -218,7 +223,9 @@ type hres:type:performance as Performance
     apply-schema-template hres:template-type:repository-item
     title: Performance
     search-name: performance
-    attribute dc:attribute:title [sort=10000]
+    REMOVE attribute dc:attribute:title [sort=10000]
+    REMOVE attribute hres:aliased-attribute:title-of-work [sort=10000]
+    attribute hres:aliased-attribute:title-of-work [sort=10]
     attribute hres:aliased-attribute:external-event [sort=10900]
     render-icon: E233,1,f
     render-category 7
@@ -312,6 +319,23 @@ attribute hres:attribute:research-institute as ResearchInstitute
 attribute dc:attribute:author as Author
 attribute hres:attribute:editor as Editor
 
+aliased-attribute hres:aliased-attribute:exhibition
+    title Exhibition title
+    search-name exhibition
+    alias-of std:attribute:event
+    on-linked-type hres:type:external-event
+aliased-attribute hres:aliased-attribute:performance
+    title Performance title
+    search-name perfomance
+    alias-of std:attribute:event
+    on-linked-type hres:type:external-event
+
+aliased-attribute hres:aliased-attribute:title-of-work
+    title Title of work
+    search-name: title-of-work
+    search-name: title
+    alias-of dc:attribute:title
+
 aliased-attribute hres:aliased-attribute:current-research-institute as CurrentResearchInstitute
     title: Current Research Institute
     search-name: current-research-institute
@@ -323,6 +347,27 @@ attribute hres:attribute:original-research-institute as OriginalResearchInstitut
     qualifier std:qualifier:null
     data-type link
     linked-type hres:type:research-institute
+
+attribute hres:attribute:output as Output
+    linked-type hres:type:artefact
+    linked-type hres:type:audio
+    linked-type hres:type:book-chapter
+    linked-type hres:type:composition
+    linked-type hres:type:conference-item
+    linked-type hres:type:design
+    linked-type hres:type:devices-and-products
+    linked-type hres:type:digital-or-visual-media
+    linked-type hres:type:exhibition
+    linked-type hres:type:journal-article
+    linked-type hres:type:online-educational-resource
+    linked-type hres:type:other
+    linked-type hres:type:patent
+    linked-type hres:type:performance
+    linked-type hres:type:report
+    linked-type hres:type:software
+    linked-type hres:type:thesis
+    linked-type hres:type:video
+    linked-type hres:type:website
 
 # ---------------------------------------------------------------------------
 

@@ -1,0 +1,28 @@
+
+// WARNING: REPLACEABLE =====================================================
+
+pageTitle(object.title)
+
+<div class="card border-0 bg-light">
+  <div class="card-body">
+      <div class="container">
+        <div class="row">
+          <div class="col-sm-4 pb-4 pb-sm-0">
+            if(imagePagePartCategory) {
+              <div class="mw-100">
+                std:web-publisher:page-part:render-category(imagePagePartCategory)
+              </div>
+            }
+          </div>
+          <div class="col-sm-8">
+            <div class="detail-table card border-0 bg-light">
+              <div class="card-body px-0 px-sm-2 pt-0">
+                render(object.asTable)
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+  </div>
+</div>

@@ -1,4 +1,15 @@
 
 each(embargoes) {
-     <small class="text-uppercase"><mark>"Under embargo " if(end) { "until " std:date(end) } else { "indefinitely" }</mark></small>
+  <small class="text-uppercase"><mark>
+    "Under embargo "
+    if(end) {
+      "until " std:date(end)
+    } else {
+      "indefinitely"
+    }
+    if(multipleFiles) {
+      <em> " (" multipleFiles " files)" </em>
+    }
+  <br>
+  </mark></small>
 }

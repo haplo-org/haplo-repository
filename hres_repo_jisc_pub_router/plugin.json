@@ -1,0 +1,26 @@
+{
+  "pluginName": "hres_repo_jisc_pub_router",
+  "pluginAuthor": "Haplo Services",
+  "pluginVersion": 1,
+  "displayName": "Haplo RM Jisc Pub Router integration",
+  "displayDescription": "Support item harvesting from Jisc Publication Router",
+  "installSecret": "d0afb6e7b38fd7d133764153c2f0cc362bdb5790",
+  "apiVersion": 4,
+  "use": ["hres:doi", "hres:orcid"],
+  "privilegesRequired": [
+    "pHTTPClient",
+    "pDatabase",
+    "pBackgroundProcessing",
+    "pReportHealthEvent"
+  ],
+  "depend": [
+      "hres_repository",
+      "hres_repo_schema_data_recommended",
+      "hres_repo_schema_outputs_recommended",
+      "hres_repo_harvest_sources"
+  ],
+  "load": [
+      "js/hres_repo_jisc_pub_router.js"
+    ],
+  "respond": ["/do/hres-repo-jisc-pub-router"]
+}

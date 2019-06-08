@@ -1,0 +1,105 @@
+
+pageTitle("Welcome to " REPOSITORY_NAME)
+
+if(TEXT.description) {
+  <p class="lead pb-3 mb-0"> TEXT.description </p>
+}
+
+std:web-publisher:block("carousel") {
+  <div id="repo-carousel" class="carousel slide" data-ride="carousel">
+
+    if(HOME_CAROUSEL_NAV) {
+      <ol class="carousel-indicators">
+        each(HOME_CAROUSEL) {
+          <li data-target="#repo-carousel" data-slide-to=imageIndex class=if(isfirstImage){"active"}></li>
+        }
+      </ol>
+    }
+
+    <div class="carousel-inner">
+      each(HOME_CAROUSEL) {
+        <div class=["carousel-item" if(isfirstImage){"active"}]>
+          <img class="first-slide" src=image alt=imageDescription>
+          <div class="carousel-caption text-left">
+            if(title) { <h1> title </h1> }
+            if(text)  { <p> text </p> }
+          </div>
+        </div>
+      }
+    </div>
+
+    if(HOME_CAROUSEL_NAV) {
+      <a class="carousel-control-prev" href="#repo-carousel" role="button" data-slide="prev">
+        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+        <span class="sr-only">"Previous"</span>
+      </a>
+      <a class="carousel-control-next" href="#repo-carousel" role="button" data-slide="next">
+        <span class="carousel-control-next-icon" aria-hidden="true"></span>
+        <span class="sr-only">"Next"</span>
+      </a>
+    }
+
+  </div>
+
+  <section class="container haplo-search-form haplo-search-form-main my-3 py-3">
+    <form class="form-inline m-2 m-lg-0 card border-0 p-2" role="search" method="GET" action=SEARCH_PATH>
+      <div class="input-group m-auto p-0 w-75 shadow">
+        <input class="form-control form-control-lg py-2 border-2 border-primary" type="search" placeholder=TEXT.homeMainSearchPlaceholder aria-label="Search" name="q" autofocus="autofocus">
+        <span class="input-group-append">
+          <button class="btn btn-outline-primary bg-primary" type="submit">
+            <i class="fas fa-search text-light"></i>
+          </button>
+        </span>
+      </div>
+    </form>
+  </section>
+}
+
+<div class="card-deck py-3 mb-3">
+
+  <div class="card border-0">
+    // select images from /static/vendor/pixabay/browse
+    <img class="card-img-top" src=browseImg0>
+    <div class="card-body bg-dark">
+      <h3 class="card-title text-primary h5"><a href=[BASE_PATH "/researchers/a"]> TEXT.homeBrowseByResearcher </a></h3>
+      <p class="card-text"> TEXT.homeBrowseByResearcherText </p>
+    </div>
+  </div>
+
+  <div class="card border-0">
+    <img class="card-img-top" src=browseImg1>
+    <div class="card-body bg-dark">
+      <h3 class="card-title text-primary h5"><a href=SEARCH_PATH> TEXT.homeSearchTheRepository </a></h3>
+      <p class="card-text"> TEXT.homeSearchTheRepositoryText </p>
+    </div>
+  </div>
+
+  <div class="card border-0">
+    <img class="card-img-top" src=browseImg2>
+    <div class="card-body bg-dark">
+      <h3 class="card-title text-primary h5"><a href=[BASE_PATH "/departments"]> TEXT.homeBrowseBySubject </a></h3>
+      <p class="card-text"> TEXT.homeBrowseBySubjectText </p>
+    </div>
+  </div>
+
+  <div class="card border-0">
+    <img class="card-img-top" src=browseImg3>
+    <div class="card-body bg-dark">
+      <h3 class="card-title text-primary h5"><a href=[BASE_PATH "/year"]> TEXT.homeBrowseByYear </a></h3>
+      <p class="card-text"> TEXT.homeBrowseByYearText </p>
+    </div>
+  </div>
+
+</div>
+
+std:web-publisher:block("siteinfo") {
+  <div class="container my-4 py-4">
+    <div class="alert alert-info my-3 text-center text-break" role="alert">
+      std:web-publisher:page-part:render("hres:oai-pmh:declare-support")
+
+      if(PIXABAY_CREDIT) {
+        <p class="mt-4"> "This repository uses some images from " <a href="https://pixabay.com/service/license/"> "Pixabay" </a> </p>
+      }
+    </div>
+  </div>
+}

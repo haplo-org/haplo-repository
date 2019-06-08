@@ -4,6 +4,10 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.         */
 
+P.webPublication.registerReplaceableTemplate(
+    "hres:repo-publication-parts:person:outputs",
+    "person/outputs"
+);
 
 P.webPublication.pagePart({
     name: "hres:repository:person:outputs",
@@ -24,16 +28,32 @@ P.webPublication.pagePart({
                 sortByDate().
                 execute();
             }
+            var types = [],
+                seen = [];
             var displayOutputs = _.map(outputs, function(output) {
+                    var typeStr = output.firstType().toString();
+                    if(-1 === seen.indexOf(typeStr)) {
+                        types.push({
+                            type: typeStr,
+                            title: SCHEMA.getTypeInfo(output.firstType()).name
+                        });
+                        seen.push(typeStr);
+                    }
                     return {
                         output: output,
                         href: context.publishedObjectUrlPath(output),
-                        citation: O.service("hres_bibliographic_reference:for_object", output)
+                        citation: O.service("hres_bibliographic_reference:for_object", output),
+                        type: typeStr
                     };
                 }
             );
+            var sortedTypes = _.sortBy(types, "title");
             if(displayOutputs.length === 0) { return; }
-            return P.template("person/outputs").deferredRender({outputs:displayOutputs});
+            var template = context.publication.getReplaceableTemplate("hres:repo-publication-parts:person:outputs");
+            return template.deferredRender({
+                outputs: displayOutputs,
+                types: sortedTypes
+            });
         }
     }
 });

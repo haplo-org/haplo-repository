@@ -12,70 +12,60 @@ P.implementService("haplo:user_roles_permissions:setup", function(setup) {
     setup.groupRestrictionLabel(Group.DataPreparers, Label.ViewPreparedFiles);
 });
 
-P.hook("hObjectAttributeRestrictionLabelsForUser", function(response, user, object) {
+P.hook("hObjectAttributeRestrictionLabelsForUser", function(response, user, object, container) {
     if(O.serviceMaybe("hres:repository:is_author", user, object)) {
+        response.userLabelsForObject.add(Label.LiftAllFileControls);
+    }
+    if(container && O.serviceMaybe("hres:repository:is_author", user, container)) {
         response.userLabelsForObject.add(Label.LiftAllFileControls);
     }
 });
 
-P.implementService("hres:repository:access_requests:has_restricted_files_for_user", function(user, object) {
-    if(object.labels.includes(Label.ControlAllFiles)) {
+var objectOrGroupHasControlledFiles = function(user, obj) {
+    // Check to ensure a restriction is due to access level policy, not something else
+    if(obj.labels.includes(Label.ControlAllFiles) ||
+        obj.labels.includes(Label.RestrictAllFiles) || 
+        obj.labels.includes(Label.SafeguardAllFiles)) {
         var hasControlledFiles = false;
-        object.every(function(v,d,q) {
+        obj.every(function(v,d,q) {
             if(O.typecode(v) === O.T_IDENTIFIER_FILE) {
-                if(!object.canReadAttribute(d, user)) { 
+                if(!obj.canReadAttribute(d, user)) {
                     hasControlledFiles = true;
                 }
             }
         });
         return hasControlledFiles;
     }
+};
+
+P.implementService("hres:repository:access_requests:has_restricted_files_for_user", function(user, object) {
+    var objectGroups = object.extractAllAttributeGroups();
+    var hasControlledFiles = false;
+    if(objectOrGroupHasControlledFiles(user, object)) { hasControlledFiles = true; }
+    _.each(objectGroups.groups, function(group) {
+        if(objectOrGroupHasControlledFiles(user, group.object)) { hasControlledFiles = true; }
+    });
+    return hasControlledFiles;
 });
 
 // -------------------------------------------------------------------
 
-var filesAreRestricted = function(object) {
-    var access = object.first(A.AccessLevel);
-    var dataTypes = SCHEMA.getTypesWithAnnotation("hres:annotation:repository:research-data");
-    // Data files are more sensitive - restrict by default
-    if(_.any(dataTypes, function(type) { return object.isKindOf(type); })) {
-        return !(access && access.behaviour === "hres:list:file-access-level:open");
+P.hook("hLabelAttributeGroupObject", function(response, container, object, desc, groupId) {
+    // These will be removed from the 'remove' list if they are later 'added'
+    response.changes.remove([Label.ControlAllFiles, Label.RestrictAllFiles, Label.SafeguardAllFiles]);
+    var accessLevel = object.first(A.AccessLevel);
+    if(accessLevel) {
+        if(accessLevel.behaviour === "hres:list:file-access-level:controlled") {
+            response.changes.add(Label.ControlAllFiles);
+        } else if(accessLevel.behaviour === "hres:list:file-access-level:restricted") {
+            response.changes.add(Label.RestrictAllFiles);
+        } else if(accessLevel.behaviour === "hres:list:file-access-level:safeguarded") {
+            response.changes.add(Label.SafeguardAllFiles);
+        }
     } else {
-        return (access && access.behaviour !== "hres:list:file-access-level:open");
-    }
-};
-
-var modifyLabelChangesForRepoObject = function(object, changes) {
-    // These are removed from the 'remove' list when they are later 'added'
-    changes.remove([
-        Label.ControlAllFiles
-    ]);
-    // TODO: Currently is only a "whole object" access level - this should be extended to 
-    // apply a restriction per attribute when the schema is extended
-    if(filesAreRestricted(object)) {
-        changes.add(Label.ControlAllFiles);
-    }
-};
-
-// TODO: Remove this workaround as soon as possible.
-// Authors shouldn't have general relabel permissions, but *can* change the access level of files
-P.hook("hPostObjectChange", function(response, object, operation, previous) {
-    if(operation === "create" || operation === "update") {
-        if(O.service("hres:repository:is_repository_item", object)) {
-            var shouldBeRestricted = filesAreRestricted(object);
-            var isRestricted = object.labels.includes(Label.ControlAllFiles);
-            if(shouldBeRestricted !== isRestricted) {
-                O.background.run("hres_repo_access_level_policy:TEMP_relabel_on_change", {ref: object.ref.toString()});
-            }
+        // Data file deposits are closed by default
+        if(container.isKindOfTypeAnnotated("hres:annotation:repository:research-data")) {
+            response.changes.add([Label.ControlAllFiles, Label.RestrictAllFiles, Label.SafeguardAllFiles]);
         }
     }
-});
-
-P.backgroundCallback("TEMP_relabel_on_change", function(data) {
-    O.withoutPermissionEnforcement(function() {
-        var object = O.ref(data.ref).load();
-        var changes = O.labelChanges();
-        modifyLabelChangesForRepoObject(object, changes);
-        object.relabel(changes);
-    });
 });

@@ -1,0 +1,10 @@
+pageTitle("Regex cheatsheet")
+backLink(concat("/do/hres-repo-eprints/log/" row))
+
+<p>"These are helpful regex patterns to use to manipulate the error file. For example, if you want to give the client a file with only certain errors."</p>
+
+<p>"Match a log warning code and the end of the line:"</p>
+<pre>"^\\s+\"warning:something:not-found: .+$\\n"</pre>
+
+<p>"Match an empty error set (for example, if all the errors for this eprint were removed)"</p>
+<pre>"^\\s+\"\\w+\": \\[\\n\\s+\\],\\n"</pre>

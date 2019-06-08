@@ -8,7 +8,8 @@
             "style": "confirm",
             "path": "agreement",
             "label": "I agree that any files released will be for personal use only, and will not be distributed further.",
-            "trueLabel": "The user has agreed that any files released will be for personal use only, and will not be distributed further."
+            "trueLabel": "The user has agreed that any files released will be for personal use only, and will not be distributed further.",
+            "notConfirmedMessage": "You must confirm that files will only be for personal use before submitting this request."
         }
     ]
 }

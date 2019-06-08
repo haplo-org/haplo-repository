@@ -4,7 +4,6 @@
   "pluginVersion": 1,
   "displayName": "Haplo RM Open Access",
   "displayDescription": "Open Access compliance reporting for Haplo Research Manager repositories",
-  "installSecret": "6770507cc376f93b64e1335638d06766c3eecda1",
   "apiVersion": 4,
   "use": [
       "std:reporting"

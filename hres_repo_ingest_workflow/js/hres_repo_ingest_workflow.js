@@ -20,10 +20,7 @@ var fillPanel = function(display, builder) {
             depositPanel.link("default", "/do/hres-repo-ingest-workflow/start/"+object.ref.toString(), "Deposit item");
     }
 };
-P.implementService("std:action_panel:output", function(display, builder) {
-    fillPanel(display, builder);
-});
-P.implementService("std:action_panel:research_data", function(display, builder) {
+P.implementService("std:action_panel:category:hres:repository_item", function(display, builder) {
     fillPanel(display, builder);
 });
 

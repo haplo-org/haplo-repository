@@ -25,30 +25,66 @@ if(O.featureImplemented("std:web-publisher")) {
 
     // ----------------------------------------------------------------------
 
+/*HaploDoc
+node: /repository/hres_oai_pmh/implementation
+title: Implementation
+sort: 1
+--
+
+h2. Web Publication Feature
+
+The OAI-PMH interface is added to a publications using the web publication feature @hres:oai-pmh:server@, \
+which will provide an OAI-PMH endpoint at @HOSTNAME/oai2@.
+
+This is configured with a specification object, with keys:
+
+h3(function). refToOAIIdentifier
+
+Optional. Each record exposed through OAI PMH must have an identifier. The default implementation for this is \
+@"oai:"+publication.urlHostname+":"+ref@, but can be configured by setting a function at this key in the spec.
+
+h3(key). attributes
+
+Optional. A JavaScript object of metadata attributes about the repository itself. All entries in this \
+object are optional, overriding the default value.
+
+|*key*|*default value*|
+|@adminEmail@| "repository@HOSTNAME"|
+|@repositoryName@| "Haplo Research Manager: Repository"|
+|@earliestDateStamp@| "1900-01-01T00:00:00Z"|
+
+
+h2. Page Part
+
+A "hres:oai-pmh:declare-support" page part is implemented to render standard text to tell users about the \
+OAI-PMH support. Should be rendered on the homepage of the repository publication.
+*/
     P.webPublication.feature("hres:oai-pmh:server", function(publication, spec) {
 
+        let endpoint = (spec.pathPrefix || '') + WEB_PUBLICATION_ENDPOINT;
+        publication.$oaipmhServerEndpoint = endpoint;
+
         // Default to reasonable generation of identifiers
-        var refToOAIIdentifier = spec.refToOAIIdentifier;
+        let refToOAIIdentifier = spec.refToOAIIdentifier;
         if(!refToOAIIdentifier) {
-            var identifierBase = "oai:"+publication.urlHostname+":";
+            let identifierBase = "oai:"+publication.urlHostname+":";
             refToOAIIdentifier = (ref) => identifierBase+ref;
         }
 
-        // TODO: Consider more carefully if this is the right way of doing this
         // Expose OAI identifier for this publication to other plugins
         publication.oaiIdentifierForObject = function(object) {
             return refToOAIIdentifier(object.ref);
         };
 
-        publication.respondToExactPath(WEB_PUBLICATION_ENDPOINT,
+        publication.respondToExactPath(endpoint,
             function(E, context) {
-                var responder = responders[publication.urlHostname];
+                let responder = responders[publication.urlHostname];
                 if(!responder) {
                     // Set attributes, with reasonable defaults, but base URL forced
-                    var attributes = _.extend({
+                    let attributes = _.extend({
                         adminEmail: "repository@"+publication.urlHostname
                     }, DEFAULT_REPO_ATTRIBUTES, spec.attributes || {});
-                    attributes.baseURL = "https://"+publication.urlHostname+WEB_PUBLICATION_ENDPOINT;
+                    attributes.baseURL = "https://"+publication.urlHostname+endpoint;
                     // Create a responder
                     responder = responders[publication.urlHostname] = O.service("hres:oai-pmh:create-responder", {
                         refToOAIIdentifier: refToOAIIdentifier,
@@ -75,7 +111,7 @@ if(O.featureImplemented("std:web-publisher")) {
         deferredRender: function(E, context, options) {
             return P.template("publisher/declare-support").deferredRender({
                 context: context,
-                endpoint: WEB_PUBLICATION_ENDPOINT
+                endpoint: context.publication.$oaipmhServerEndpoint
             });
         }
     });

@@ -1,0 +1,7 @@
+
+<table>
+  <tr><th> "Original values" </th> <th> "Harvested values" </th></tr>
+  <tr>
+    <td> std:object(original "generic") </td> <td> std:object(updated "generic") </td>
+  </tr>
+</table>

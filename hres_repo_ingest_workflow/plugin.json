@@ -4,7 +4,6 @@
   "pluginVersion": 1,
   "displayName": "Haplo RM Repository Ingest Workflow",
   "displayDescription": "Ingest workflow for Haplo RM Repository applications",
-  "installSecret": "332e3b06cd6a17e8facb8db20dac0ced007e322f",
   "apiVersion": 4,
   "privilegesRequired": ["pDatabase"],
   "use": [

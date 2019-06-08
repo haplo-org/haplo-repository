@@ -1,0 +1,20 @@
+pageTitle("Eprint file lookup")
+backLink("/do/hres-repo-eprints/admin")
+
+<form method="GET" action="/do/hres-repo-eprints/admin/file-url-lookup">
+    <p> <input type="text" name="lookup" placeholder="File URL" style="width:200px">
+    <input type="submit" value="Find another file"> </p>
+</form>
+
+if(file) {
+    std:file(file)
+} else {
+    <p>if(notDownloaded) { "File not downloaded: " } else { "URL not saved for download: " } url</p>
+}
+
+if(haveFilesWithErrors) {
+    <h2>"Files with errors"</h2>
+    each(filesWithErrors) {
+        <p>"Url: "url" - "error</p>
+    }
+}

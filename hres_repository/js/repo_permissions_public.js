@@ -45,6 +45,7 @@ P.hook('hUserPermissionRules', function(response, user) {
         response.rules.rule(T.ResearchInstitute, O.STATEMENT_ALLOW, O.PERM_READ);
         response.rules.rule(T.Journal, O.STATEMENT_ALLOW, O.PERM_READ);
         response.rules.rule(T.ExternalEvent, O.STATEMENT_ALLOW, O.PERM_READ);
+        response.rules.rule(T.License, O.STATEMENT_ALLOW, O.PERM_READ);
 
         // TODO: this is to allow projects to be linked to in researcher profile forms. However,
         // the forms system still links them to the internal record. Fix this properly

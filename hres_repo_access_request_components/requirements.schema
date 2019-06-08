@@ -1,6 +1,5 @@
 
 group hres:group:repository-editors as RepositoryEditors
-group hres:group:data-preparers as DataPreparers
 
 OPTIONAL type hres:type:intended-audience as Audience
 OPTIONAL type hres:type:preparation-action as Action

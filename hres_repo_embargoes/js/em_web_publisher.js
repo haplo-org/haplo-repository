@@ -5,32 +5,34 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.         */
 
 
-P.implementService("hres_repo_publication_common:collect_renders_for_restricted_desc", function(object, desc, restrictions) {
-    
-    var q = P.getEmbargoData(object);
+P.implementService("hres_repo_publication_common:collect_renders_for_file_groups", function(object, groupDesc, restrictions) {
+    let q = P.getEmbargoData(object);
     if(q) {
         q.or(function(sq) {
-            // TODO remove this when "whole object" restrictions are implemented in the Publication UI
-            sq.where("desc", "=", desc).
+            sq.where("desc", "=", groupDesc).
                 where("desc", "=", null);
         });
-        if(q.length) {
-            var activeEmbargoes = _.filter(q, function(embargo) {
-                return embargo.isActive();
-            });
-            if(activeEmbargoes.length) {
-                restrictions.push({
-                    sort: 10,
-                    deferredRender: P.template("web-publisher/restriction-panel").deferredRender({
-                        embargoes: _.map(activeEmbargoes, function(embargo) {
-                            return {
-                                end: embargo.end
-                            };
-                        })
+        let activeEmbargoes = _.filter(q, (embargo) => {
+            return embargo.isActive();
+        });
+        if(activeEmbargoes.length) {
+            restrictions.push({
+                sort: 10,
+                deferredRender: P.template("web-publisher/restriction-panel").deferredRender({
+                    embargoes: _.map(activeEmbargoes, (embargo) => {
+                        // Find the number of files affected by this embargo in a non-crappy and terrible way
+                        let number = 0;
+                        if(embargo.extensionGroup) {
+                            var group = object.extractSingleAttributeGroup(embargo.extensionGroup);
+                            number = group.every(A.File).length;
+                        }
+                        return {
+                            multipleFiles: (number > 1) ? number : false,
+                            end: embargo.end
+                        };
                     })
-                });
-            }
+                })
+            });
         }
    }
- 
 });

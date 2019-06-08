@@ -98,22 +98,14 @@ P.respond("GET,POST", "/do/hres-repo-open-access/repository-items", [
     //      adding their filter to the details object
     //  1: A ref for the providing implementation to filter against
     var pe = E.request.extraPathElements;
-    var details = _.clone(REPOSITORY_ITEM_LOOKUP[oaType]);
+    var details = _.clone(REPOSITORY_ITEM_LOOKUP[oaType] || O.serviceMaybe("hres_repo_open_access:additional_oatype_details", oaType));
     if(pe.length) {
         O.serviceMaybe("hres_repo_open_access:custom_dashboard_filtering", details, pe.slice(1));
     }
-    var columns =  [
-        {fact: "author", link:true},
-        "type",
-        {fact: "publisher", link:true}
-    ];
-    if(oaType === "all") {
-        columns = columns.concat(["oaIsGreenOA", "oaIsGoldOA", "oaIsNotOA"]);
-    }
-    P.reporting.dashboard(E, {
+    var dashboard = P.reporting.dashboard(E, {
         kind: "list",
         collection: "repository_items",
-        name: "oa_repository_items",
+        name: (oaType === "all") ? "oa_repository_items_all" : "oa_repository_items",
         title: "Open Access Items: "+details.title,
         filter: "oaIsConfItemOrArticle"
     }).
@@ -128,6 +120,17 @@ P.respond("GET,POST", "/do/hres-repo-open-access/repository-items", [
             }
         }).
         columns(0, [{fact:"ref", heading:"Output", link:true}]).
-        columns(100, columns).
-        respond();
+        columns(100, [
+            {fact: "author", link:true},
+            "type",
+            {fact: "publisher", link:true}
+        ]);
+    if(oaType === "all") {
+        dashboard.columns(150, [
+            "oaIsGreenOA",
+            "oaIsGoldOA",
+            "oaIsNotOA"
+        ]);
+    }
+    dashboard.respond();
 });

@@ -1,0 +1,11 @@
+attribute hres:attribute:researcher as Researcher
+type hres:type:research-institute:faculty as Faculty
+type hres:type:research-institute:department as Department
+type std:type:person as Person
+type hres:type:research-institute as ResearchInstitute
+
+schema-template hres:template-type:repository:output
+    element std:group:everyone right hres_repo_usage_statistics:usage_overview
+
+group std:group:administrators as Administrators
+group hres:group:repository-editors as RepositoryEditors

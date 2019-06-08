@@ -4,7 +4,6 @@
   "pluginVersion": 1,
   "displayName": "Haplo RM APC",
   "displayDescription": "APC information support for Haplo Research Manager repositories",
-  "installSecret": "6c99a255d417bac091054cf2210db6fccd2f1edc",
   "apiVersion": 4,
   "privilegesRequired": ["pDatabase"],
   "use": [

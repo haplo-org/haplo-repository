@@ -2,12 +2,13 @@
     "specificationVersion": 0,
     "formId": "embargo",
     "formTitle": "Embargo period",
+    "class": "oforms-no-autofocus",
     "elements": [
         {
-            "type": "repeating-section",
-            "path": "embargoes",
-            "class": "embargo-repetition",
-            "allowDelete": true,
+            "type": "section",
+            "path": "all",
+            "class": "whole-object-embargo",
+            "heading": "Whole record embargo",
             "elements": [
                 {
                     "type": "static",
@@ -21,20 +22,56 @@
                 },
                 {
                     "type":"choice",
-                    "class":"embargo-attributes",
-                    "path":"appliesTo",
-                    "label":"Applies to",
-                    "choices": "attributes",
-                    "style": "multiple",
-                    "required": true
+                    "class":"embargo-length",
+                    "path":"embargoLength",
+                    "label":"Embargo length (in months)",
+                    "choices": "embargoLengths"
+                },
+                {
+                    "type": "static",
+                    "text": "Please use the links below, or the publisher's documentation directly, to find the canonical url for the 'under embargo' license."
+                },
+                {
+                    "type":"text",
+                    "path":"licenseURL",
+                    "label":"License URL (if available)"
+                }
+            ]
+        },
+        {
+            "type": "repeating-section",
+            "path": "embargoes",
+            "class": "embargo-repetition",
+            "heading": "Per-file embargoes",
+            "allowAdd": false,
+            "allowDelete": false,
+            "elements": [
+                {
+                    "type": "display-value",
+                    "path": "attribute",
+                    "as": "html"
+                },
+                {
+                    "type": "display-value",
+                    "path": "files",
+                    "as": "html"
+                },
+                {
+                    "type": "static",
+                    "html": "<a class='show-start-picker'>Set custom embargo start date</a>"
+                },
+                {
+                    "type":"date",
+                    "path":"customStart",
+                    "class":"start-picker oforms-no-autofocus",
+                    "label":"Custom start date"
                 },
                 {
                     "type":"choice",
                     "class":"embargo-length",
                     "path":"embargoLength",
                     "label":"Embargo length (in months)",
-                    "choices": "embargoLengths",
-                    "required": true
+                    "choices": "embargoLengths"
                 },
                 {
                     "type": "static",

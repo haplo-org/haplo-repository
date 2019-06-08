@@ -1,11 +1,23 @@
 
+// WARNING: REPLACEABLE =====================================================
+
 if(outputs.length) {
   std:web-publisher:template("hres:repository:common:ui:panel") {
+    <h2>"Research outputs"</h2>
+
     each(outputs) {
-      <p>
-          <a href=href> output.title </a>
-          if(citation) { <br> <small> render(citation) </small> }
-      </p>
+      <div class="media mb-3 output-result-entry" data-type=type>
+        <div class="media-body">
+          <h3 class="mt-0">
+            <a href=href> output.title </a>
+          </h3>
+          if(citation) {
+            <cite>
+              render(citation)
+            </cite>
+          }
+        </div>
+      </div>
     }
   } heading { "Research outputs" }
 }

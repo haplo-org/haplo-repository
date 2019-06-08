@@ -8,6 +8,18 @@
 if(O.featureImplemented("std:web-publisher")) {
     P.use("std:web-publisher");
 
+    P.webPublication.registerReplaceableTemplate(
+        "hres:repo-access-request:ui:sidebar-button",
+        "web-publisher/sidebar-button"
+    );
+    P.webPublication.registerReplaceableTemplate(
+        "hres:repo-access-request:page:access-request",
+        "web-publisher/access-request"
+    );
+    P.webPublication.registerReplaceableTemplate(
+        "hres:repo-access-request:page:access-request-submitted",
+        "web-publisher/access-request-submitted"
+    );
 
 /*HaploDoc
 title: Public access requests
@@ -70,7 +82,8 @@ Defines which objects have files that can be requested.
             sort: 355,
             deferredRender: function(E, context, options) {
                 if(context.object && spec.canStart(context.object)) {
-                    return P.template("web-publisher/sidebar-button").deferredRender({
+                    var template = context.publication.getReplaceableTemplate("hres:repo-access-request:ui:sidebar-button");
+                    return template.deferredRender({
                         title: spec.label,
                         href: "/plugin/"+spec.path+"/"+context.object.ref
                     });
@@ -78,7 +91,14 @@ Defines which objects have files that can be requested.
             }
         });
 
-        P.webPublication.feature("hres:repository:ar:"+spec.path, function(publication) {
+        P.webPublication.feature("hres:repository:ar:"+spec.path, function(publication, specification) {
+
+            if(!(specification && ("useFileMediatedAccess" in specification))) {
+                throw new Error("Must specify file release mechanism in "+spec.path+" feature.");
+            }
+            if(specification.useFileMediatedAccess) {
+                publication.use("hres:file_mediated_access");
+            }
 
             workflow.implementWorkflowService("ar:publication_hostname_for_instance", function(M) {
                 if(M.workUnit.tags["_publication"] === publication.name) {
@@ -94,7 +114,7 @@ Defines which objects have files that can be requested.
                         title: spec.label,
                         object: object,
                         button: {href:context.publishedObjectUrlPath(object)}
-                    }, "web-publisher/access-request-submitted");
+                    }, context.publication.getReplaceableTemplate("hres:repo-access-request:page:access-request-submitted"));
                 }
             );
 
@@ -118,9 +138,9 @@ Defines which objects have files that can be requested.
                     }
                     E.render({
                         title: spec.label,
-                        ref: O.ref(E.request.extraPathElements[0]),
+                        object: O.ref(E.request.extraPathElements[0]).load(),
                         form: form
-                    }, "web-publisher/access-request");
+                    }, context.publication.getReplaceableTemplate("hres:repo-access-request:page:access-request"));
                 }
             );
 

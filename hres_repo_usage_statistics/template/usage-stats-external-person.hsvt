@@ -1,0 +1,35 @@
+
+// WARNING: REPLACEABLE =====================================================
+
+std:web-publisher:template("hres:repository:common:ui:panel") {
+  <div class="card border-0 bg-light mb-1">
+    <div class="card-body">
+      <ul class="list-unstyled">
+        <li class="media mb-2">
+          <h5 class="mt-0 mb-1 mr-2">views</h5>
+          <div class="media-body">
+            " total views of outputs"
+          </div>
+        </li>
+        <li class="media mb-2">
+          <h5 class="mt-0 mb-1 mr-2">downloads</h5>
+          <div class="media-body">
+            " total downloads of outputs"
+          </div>
+        </li>
+        <li class="media mb-2">
+          <h5 class="mt-0 mb-1 mr-2">monthlyViews</h5>
+          <div class="media-body">
+            " views of outputs this month"
+          </div>
+        </li>
+        <li class="media">
+          <h5 class="mt-0 mb-1 mr-2">monthlyDownloads</h5>
+          <div class="media-body">
+              " downloads of outputs this month"
+          </div>
+        </li>
+      </ul>
+    </div>
+  </div>
+}

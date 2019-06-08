@@ -1,0 +1,32 @@
+
+// WARNING: REPLACEABLE =====================================================
+
+if(items.length) {
+  std:web-publisher:template("hres:repository:common:ui:panel") {
+    <div class="card border-0 bg-light">
+      <div class="card-header border-0 bg-transparent">
+          <h2> title </h2>
+      </div>
+      <div class="card-body">
+
+        each(items) {
+          <div class="media mb-4">
+            <div class="media-body">
+              <h5 class="mt-0 mb-1">
+                std:web-publisher:object:link(output) { 
+                  output.title 
+                }
+              </h5>
+
+              if(citation) {
+                <cite class="text-break">render(citation)</cite>
+              }
+            </div>
+          </div>
+        }
+
+      </div>
+    </div>
+  
+  } heading { title }
+}

@@ -23,7 +23,7 @@ var DCTERMS_ATTRS = [
 var ETHOS_ATTRS = [
     {name:"qualificationlevel", desc:A.Type},
     // TODO: QualificationName is "Mandatory" in EThOS recommendation, but not included in many
-    // EPrints examples I've seen. Should we include a default value?
+    // examples I've seen. Should we include a default value? If so, what?
     {name:"qualificationname", desc: "QualificationName"},
     {name:"institution", desc:A.InstitutionName},
     {name:"department", desc:A.DepartmentName},
@@ -111,13 +111,23 @@ var getObjectAsETHDCXML = function(item, cursor, options) {
             addPersonORCID(uketdterms, O.ref(ref));
         }
     });
+    // Check for linked projects or listed directly. Linked projects may depend on PhD Manager being installed
     item.every(A.Project, (v,d,q) => {
         let project = O.withoutPermissionEnforcement(() => { return v.load(); });
-        project.every(A.Supervisor, (v,d,q) => {
+        project.every(A.Supervisor, (vv,dd,qq) => {
+            let citation = O.service("hres:author_citation:get_citation_text_for_person_object", vv);
+            uketdterms.element("advisor").text(citation).up();
+            addPersonORCID(uketdterms, vv);
+        });
+    });
+    item.every(A.Supervisor, (v,d,q) => {
+        if(O.isRef(v)) {
             let citation = O.service("hres:author_citation:get_citation_text_for_person_object", v);
             uketdterms.element("advisor").text(citation).up();
             addPersonORCID(uketdterms, v);
-        });
+        } else {
+            uketdterms.element("advisor").text(v.toString()).up();
+        }
     });
 
     _.each(ETHOS_ATTRS, (attr) => simpleElement(uketdterms, attr.name, attr.desc));

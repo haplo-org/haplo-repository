@@ -21,7 +21,14 @@ P.implementService("std:reporting:collection:repository_items:setup", function(c
             },
             aggregate:"COUNT"
         }).
-        
+        statistic({
+            name:"emUnderEmbargoCount",
+            description:"Items currently under embargo",
+            filter(select) {
+                select.where("emUnderEmbargo", "=", true);
+            },
+            aggregate:"COUNT"
+        }).
         filter("emHasEmbargo", (select) => {
             select.where("emHasEmbargo", "=", true);
         });
@@ -65,3 +72,44 @@ P.implementService("std:reporting:dashboard:ref_embargoes:setup", function(dashb
             "emLength"
         ]);
 });
+P.implementService("std:reporting:dashboard:repository_overview:setup_export", function(dashboard) {
+    dashboard.columns(120, [
+        {fact:"emLength", heading: "Embargo length"},
+        {fact:"emStart", heading: "Embargo start"},
+        {fact:"emEnd", heading: "Embargo end"}
+    ]);
+});
+// --------------------------------------------------------------------------
+// Dashboards
+
+P.implementService("std:action_panel:activity:menu:repository", function(display, builder) {
+    if(O.currentUser.allowed(P.CanEditEmbargoes)) {
+        builder.panel(500).
+            link(120, "/do/hres-repo-embargoes/overview", "Embargo overview");
+    }
+});
+
+P.respond("GET,POST", "/do/hres-repo-embargoes/overview", [
+], function(E) {
+    P.CanEditEmbargoes.enforce();
+    P.reporting.dashboard(E, {
+        kind: "list",
+        collection: "repository_items",
+        name: "embargo_overview",
+        title: "Embargo overview",
+        filter: "emHasEmbargo"
+    }).
+        order(["emEnd"]).
+        summaryStatistic(0, "count").
+        summaryStatistic(1, "emUnderEmbargoCount").
+        columns(1, [{fact:"ref", heading:"Item", link:true, style:"wide"}]).
+        columns(25, [{fact:"author", link:true}]).
+        columns(100, [
+            "emStart",
+            "emEnd",
+            "emLength",
+            "emUnderEmbargo"
+        ]).
+        respond();
+});
+

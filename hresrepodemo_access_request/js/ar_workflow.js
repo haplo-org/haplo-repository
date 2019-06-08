@@ -16,9 +16,12 @@ AccessRequest.use("hres:repository:access_requests:workflow_setup", {
 
 AccessRequest.use("hres:repository:access_requests:default_text"); 
 
+const REQUEST_ACCESS = P.form("requestAccess", "form/public_request_submit.json"),
+    REQUEST_SUBMIT = P.form("requestSubmit", "form/request_submit.json");
+
 AccessRequest.use("hres:repository:access_requests:internal_submission", {
     label: "Request access to files",
-    form: P.form("requestSubmit", "form/request_submit.json"),
+    form: REQUEST_SUBMIT,
     canStart: function(user, object) {
         return O.serviceMaybe("hres:repository:access_requests:has_restricted_files_for_user", user, object);
     }
@@ -29,13 +32,22 @@ if(O.featureImplemented("std:web-publisher")) {
     AccessRequest.use("hres:repository:access_requests:public_submission", {
         path: "access-request",
         label: "Access request",
-        form: P.form("requestAccess", "form/public_request_submit.json"),
+        form: REQUEST_ACCESS,
         canStart: function(object) {
             // Permissions enforced by calling service with publication service user - could be neater?
             return O.serviceMaybe("hres:repository:access_requests:has_restricted_files_for_user", O.currentUser, object);
         }
     });
 }
+
+P.implementService("haplo_activity_navigation:blank-forms:repository", function(forms) {
+    forms({
+        name: "ar-rep-request-form",
+        title: "Access to files request: Request form",
+        sort: 410,
+        forms: [REQUEST_ACCESS, REQUEST_SUBMIT]
+    });
+});
 
 AccessRequest.use("hres:repository:access_requests:file_preparation", {
     upload: [
@@ -71,8 +83,7 @@ AccessRequest.use("hres:combined_application_entities", {
         } else {
             return this.researchDirector_refList;
         }
-    },
-    "editor": ["object", A.Editor]
+    }
 });
 
 AccessRequest.start(function(M, initial, properties) {

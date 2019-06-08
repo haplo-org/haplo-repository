@@ -7,8 +7,16 @@ group hres:group:data-preparers as DataPreparers
 
 # ------- Schema definitions ------------------------
 
-schema-template hres:template-type:repository:research-data
+schema-template hres:template-type:repository-file
     attribute hres:attribute:file-access-level [sort=15500]
+
+# TODO: Delete this once it has been REMOVEd in live systems
+schema-template hres:template-type:repository:research-data
+    REMOVE attribute hres:attribute:file-access-level [sort=15500]
+schema-template hres:template-type:repository:practice-based-research
+    REMOVE attribute hres:attribute:file-access-level [sort=15500]
+schema-template hres:template-type:repository:collection
+    REMOVE attribute hres:attribute:file-access-level [sort=15500]
 
 attribute hres:attribute:file-access-level as AccessLevel
     title: File Access Level
@@ -42,25 +50,44 @@ label hres:label:view-prepared-files as ViewPreparedFiles
 label hres:label:lift-all-file-controls as LiftAllFileControls
     title: Lift all file control restrictions
     category: Restriction
+label hres:label:lift-control-file-restriction
+    title: Lift restriction on controlled files
+    category: Restriction
+label hres:label:lift-restrict-file-restriction
+    title: Lift restriction on restricted files
+    category: Restriction
+label hres:label:lift-safeguard-file-restriction
+    title: Lift restriction on safeguarded files
+    category: Restriction
 
+# Different restrictions allow institutions to set different access rules for each access level
 label hres:label:control-all-files as ControlAllFiles
     title: Control all files
     category: Restriction
-
-restriction hres:restriction:control-accepted-author-manuscript
-    title: Control Author Accepted Manuscript
-    restrict-if-label hres:label:control-all-files
-    label-unrestricted hres:label:lift-all-file-controls
-    attribute-restricted hres:attribute:accepted-author-manuscript
-
-restriction hres:restriction:control-published-file
-    title: Control Published File
-    restrict-if-label hres:label:control-all-files
-    label-unrestricted hres:label:lift-all-file-controls
-    attribute-restricted hres:attribute:published-file
-
 restriction hres:restriction:control-file
-    title: Control generic file
+    REMOVE title: Control generic file
+    title: Control files
     restrict-if-label hres:label:control-all-files
     label-unrestricted hres:label:lift-all-file-controls
+    label-unrestricted hres:label:lift-control-file-restriction
+    attribute-restricted std:attribute:file
+
+label hres:label:restrict-all-files as RestrictAllFiles
+    title: Restrict all files
+    category: Restriction
+restriction hres:restriction:restrict-file
+    title: Restrict files
+    restrict-if-label hres:label:restrict-all-files
+    label-unrestricted hres:label:lift-all-file-controls
+    label-unrestricted hres:label:lift-restrict-file-restriction
+    attribute-restricted std:attribute:file
+
+label hres:label:safeguard-all-files as SafeguardAllFiles
+    title: Restrict all files
+    category: Restriction
+restriction hres:restriction:safeguard-file
+    title: Restrict files
+    restrict-if-label hres:label:safeguard-all-files
+    label-unrestricted hres:label:lift-all-file-controls
+    label-unrestricted hres:label:lift-safeguard-file-restriction
     attribute-restricted std:attribute:file

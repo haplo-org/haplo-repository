@@ -6,10 +6,10 @@
 
 
 P.implementService("hres:repository:open_access:is_green_oa", function(object) {
-    return !!object.first(A.AcceptedAuthorManuscript);
+    return !!object.getAttributeGroupIds(A.AcceptedAuthorManuscript).length;
 });
 P.implementService("hres:repository:open_access:is_not_oa", function(object) {
-    return (!object.first(A.OpenAccess) && !object.first(A.AcceptedAuthorManuscript));
+    return (!object.first(A.OpenAccess) && !object.getAttributeGroupIds(A.AcceptedAuthorManuscript).length);
 });
 
 // --------------------------------------------------------------------------
