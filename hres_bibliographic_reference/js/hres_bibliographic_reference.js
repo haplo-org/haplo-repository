@@ -46,8 +46,7 @@ var ensureProperties = function() {
         "event_title", "event_location", "event_dates", "place_of_pub", "publisher", "pagerange", "doi"]);
     propertiesForType.set(T.Report, ["authors", "year", "title", "place_of_pub", "publisher", "doi"]);
     propertiesForType.set(T.Artefact, ["authors", "year", "title", "place_of_pub", "publisher"]);
-    propertiesForType.set(T.Audio, ["authors", "year", "title", "place_of_pub"]);
-    propertiesForType.set(T.Video, ["authors", "year", "title", "place_of_pub"]);
+    propertiesForType.set(T.DigitalOrVisualMedia, ["authors", "year", "title", "place_of_pub"]);
     propertiesForType.set(T.Patent, ["authors", "year", "title", "patent_id"]);
     _.each([T.Performance, T.Exhibition], function(type) {
         propertiesForType.set(type, ["authors", "year", "title", "event_location"]);

@@ -24,6 +24,8 @@ attribute hres:attribute:dataset-file
 type hres:type:dataset-file
     apply-schema-template hres:template-type:repository-file
     title Data file
+    FORCE-REMOVE create-position normal
+    create-position never
     attribute hres:attribute:data-type [sort=13900]
     attribute hres:attribute:data-file-contents [sort=14000]
 

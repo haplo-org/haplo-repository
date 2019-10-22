@@ -280,8 +280,16 @@ P.webPublication.feature("hres:repository:common:research-institute", function(p
                 }
             });
 
+            var widget = P.webPublication.widget.object(object);
+            if(spec.withoutAttributes !== undefined) {
+                widget.withoutAttributes(spec.withoutAttributes);
+            }
+            if(spec.onlyAttributes !== undefined) {
+                widget.onlyAttributes(spec.onlyAttributes);
+            }
+
             E.render({
-                object: P.webPublication.widget.object(object),
+                object: widget,
                 researchers: researchers,
                 outputs: outputs
             }, context.publication.getReplaceableTemplate("hres:repo-publication-common:page:research-institute"));

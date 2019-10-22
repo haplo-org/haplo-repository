@@ -47,7 +47,8 @@ var rowsNotAttempted = function() {
 };
 
 var IGNORE_FILES = ["lightbox.jpg", "preview.jpg", "medium.jpg", "small.jpg", "indexcodes.txt"];
-var IGNORE_DESC_PREFIX = ["Generate index codes conversion from text to indexcodes", "Thumbnails conversion from"];
+var IGNORE_DESC_PREFIX = ["Generate index codes conversion from text to indexcodes", "Thumbnails conversion from",
+    "Generate index codes conversion from"];
 
 var ignoreDocument = P.ignoreDocument = function(docCursor) {
     let ignore = false;
@@ -61,7 +62,7 @@ var ignoreDocument = P.ignoreDocument = function(docCursor) {
     return ignore;
 };
 
-P.implementService("hres_repo_eprints:ignore_document", ignoreDocument);
+P.implementService("hres:repository:eprints:ignore-document", ignoreDocument);
 
 P.backgroundCallback("fetch_file_urls", function(document) {
     O.impersonating(O.SYSTEM, () => {
@@ -146,7 +147,9 @@ var Download = P.callback("download", function(data, client, response) {
                 console.log("WARNING: file with url " + url +
                     " may not have been downloaded correctly, html mimeType detected.");
             }
-            file = O.file(response.body);
+            let body = response.body;
+            body.filename = decodeURIComponent(body.filename);
+            file = O.file(body);
         } catch(e) {
             P.data.fileDownloadStatus = "ERROR: one or more files may not have been downloaded";
             row.error = e.message;
@@ -203,4 +206,9 @@ P.respond("GET", "/do/hres-repo-eprints/urls-without-files", [
     E.render({
         rows: rows
     });
+});
+
+P.implementService("hres:repository:eprints:get-downloaded-file", function(spec) {
+    return P.db.downloadedFiles.select().
+        where('url', '=', spec.url);
 });

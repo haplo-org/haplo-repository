@@ -13,6 +13,7 @@ P.Ingest.text({
     "status:on_hold": "Placed on hold",
     "status:returned_author": "Returned, awaiting further information",
     "status:published": "Published to institutional repository",
+    "status:published_closed": "Deposited as closed access",
     "status:rejected": "Not suitable for deposit",
     
     "status-list:wait_editor": "Waiting for Repository team to review the submitted item",
@@ -21,9 +22,15 @@ P.Ingest.text({
     "transition-indicator": "primary",
     "action-label": "Progress",
     
-    "transition:publish": "Publish",
-    "transition-notes:publish": "Publish this completed item record to the institutional repository.",
+    "transition:publish": "Deposit",
+    "transition-notes:publish": "Deposit this completed record, publishing to the institutional repository.",
     "transition-confirm:publish": "You have chosen to publish this item to the institutional repository.",
+
+    "transition:publish_closed": "Deposit closed access",
+    "transition-notes:publish_closed": "Deposit this completed record as a closed access deposit. The record will "+
+        "not be available in the public interface, but will be visible to all internal users of the system.",
+    "transition-confirm:publish_closed": "You have chosen to accept this item as a closed deposit.",
+    "transition-indicator:publish_closed": "secondary",
     
     "transition:return": "Return to submitter",
     "transition-notes:return": "Return the item to the submitter for further information.",
@@ -45,7 +52,8 @@ P.Ingest.text({
     "transition-indicator:reject": "terminal",
     
     "timeline-entry:START": "submitted the item for review",
-    "timeline-entry:publish": "publised the item to the institutional repository",
+    "timeline-entry:publish": "published the item to the institutional repository",
+    "timeline-entry:publish_closed": "deposited the item as a closed access deposit",
     "timeline-entry:return": "returned the item to the submitter",
     "timeline-entry:place_on_hold": "placed the deposit process on hold",
     "timeline-entry:submit": "resubmitted the item for review",

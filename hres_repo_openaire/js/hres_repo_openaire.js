@@ -12,13 +12,11 @@ oaireTypeList.set(T.JournalArticle, {label:"journal article", uri:"http://purl.o
 oaireTypeList.set(T.Patent, {label:"patent", uri:"http://purl.org/coar/resource_type/c_15cd", generalType:"other research product"});
 oaireTypeList.set(T.Report, {label:"report", uri:"http://purl.org/coar/resource_type/c_93fc", generalType:"literature"});
 oaireTypeList.set(T.Thesis, {label:"thesis", uri:"http://purl.org/coar/resource_type/c_46ec", generalType:"literature"});
-oaireTypeList.set(T.Audio, {label:"sound", uri:"http://purl.org/coar/resource_type/c_18cc", generalType:"other research product"});
 oaireTypeList.set(T.Composition, {label:"musical composition", uri:"http://purl.org/coar/resource_type/c_18cd", generalType:"other research product"});
 oaireTypeList.set(T.DigitalOrVisualMedia, {label:"image", uri:"http://purl.org/coar/resource_type/c_c513", generalType:"other research product"});
 oaireTypeList.set(T.Software, {label:"software", uri:"http://purl.org/coar/resource_type/c_5ce6", generalType:"software"});
 oaireTypeList.set(T.Dataset, {label:"dataset", uri:"http://purl.org/coar/resource_type/c_ddb1", generalType:"dataset"});
 oaireTypeList.set(T.OnlineEducationalResource, {label:"website", uri:"http://purl.org/coar/resource_type/c_7ad9", generalType:"other research product"});
-oaireTypeList.set(T.Video, {label:"video", uri:"http://purl.org/coar/resource_type/c_12ce", generalType:"other research product"});
 oaireTypeList.set(T.Website, {label:"website", uri:"http://purl.org/coar/resource_type/c_7ad9", generalType:"other research product"});
 
 const OTHER_TYPE_DETAILS = {label:"other", uri:"http://purl.org/coar/resource_type/c_1843", generalType:"other research product"};

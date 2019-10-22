@@ -31,7 +31,6 @@ attribute hres:attribute:published-file as PublishersVersion
 type std:type:book as Book
 
 type hres:type:artefact as Artefact
-type hres:type:audio as Audio
 type hres:type:book-chapter as BookChapter
 type hres:type:conference-item as ConferenceItem
 type hres:type:conference-item:conference-paper as ConferencePaper
@@ -49,7 +48,6 @@ type hres:type:performance as Performance
 type hres:type:report as Report
 type hres:type:software as Software
 type hres:type:thesis as Thesis
-type hres:type:video as Video
 type hres:type:website as Website
 
 object hres:list:license:rioxx-all-rights-reserved

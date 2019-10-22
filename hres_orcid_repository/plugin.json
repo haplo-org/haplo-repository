@@ -7,10 +7,12 @@
   "apiVersion": 4,
   "depend": [
       "hres_orcid",
-      "hres_repository"
+      "hres_repository",
+      "hres_orcid_obtain"
     ],
   "use": [
-      "hres:orcid"
+      "hres:orcid",
+      "std:reporting"
     ],
   "load": [
       "js/hres_orcid_repository.js"

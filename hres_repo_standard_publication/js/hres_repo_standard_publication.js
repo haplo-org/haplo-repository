@@ -5,11 +5,12 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.         */
 
 
-var HOSTNAME        = O.application.config['repo_standard_publication:hostname']     || P.webPublication.DEFAULT;
-var REPOSITORY_NAME = O.application.config['repo_standard_publication:name']         || O.application.name;
-var CONFIGURED_TEXT = O.application.config['repo_standard_publication:text']         || {}; // see DEFAULT_TEXT for keys
-var ADMIN_EMAIL     = O.application.config['repo_standard_publication:admin_email']  || 'invalid@example.org';
-var FOOTER_LINKS    = O.application.config['repo_standard_publication:footer_links'] || []; // array of objects with text and href
+var HOSTNAME             = O.application.config['repo_standard_publication:hostname']          || P.webPublication.DEFAULT;
+var REPOSITORY_NAME      = O.application.config['repo_standard_publication:name']              || O.application.name;
+var CONFIGURED_TEXT      = O.application.config['repo_standard_publication:text']              || {}; // see DEFAULT_TEXT for keys
+var ADMIN_EMAIL          = O.application.config['repo_standard_publication:admin_email']       || 'invalid@example.org';
+var FOOTER_LINKS         = O.application.config['repo_standard_publication:footer_links']      || []; // array of objects with text and href
+var HIDE_CAROUSEL        = O.application.config['repo_standard_publication:hide_carousel']     || false;
 var LOGO = {
     src             : O.application.config['repo_standard_publication:logo:src'],
     width           : O.application.config['repo_standard_publication:logo:width'],
@@ -129,7 +130,7 @@ Publication.layout(function(E, context, blocks) {
 
 P.implementService("std:action_panel:home_page", function(display, builder) {
     builder.panel(99999).
-        link('default', "https://"+Publication.urlHostname+HOME_PATH, REPOSITORY_NAME);
+        link('default', "https://"+Publication.urlHostname+HOME_PATH, NAME("hres:repository:standard_publication:link_name", REPOSITORY_NAME));
 });
 
 // --------------------------------------------------------------------------
@@ -197,6 +198,7 @@ Publication.respondToExactPath(HOME_PATH,
             SEARCH_PATH: SEARCH_PATH,
             REPOSITORY_NAME: REPOSITORY_NAME,
             TEXT: TEXT,
+            HIDE_HOME_CAROUSEL: HIDE_CAROUSEL,
             HOME_CAROUSEL: HOME_CAROUSEL,
             HOME_CAROUSEL_NAV: HOME_CAROUSEL.length > 1,
             PIXABAY_CREDIT: PIXABAY_CREDIT,
@@ -229,6 +231,9 @@ Publication.use("hres:oai-pmh:server", {
     }
 });
 
+// --------------------------------------------------------------------------
+
+Publication.use("hres:repository:irus:widget");  
 
 // --------------------------------------------------------------------------
 
@@ -303,7 +308,9 @@ Publication.use("hres:repository:common:output", {
 });
 
 Publication.use("hres:repository:common:research-institute", {
-    path: BASE_PATH+'/research-institute'
+    path: BASE_PATH+'/research-institute',
+    withoutAttributes: attrs(A_WITHOUT, 'research-institute'),
+    onlyAttributes: attrs(A_ONLY, 'research-institute')
 });
 
 Publication.use("hres:repository:common:researcher-directory", {
@@ -353,3 +360,12 @@ if("Impact" in T) {
     });
 }
 
+// Usually for use with eg. client-specific object types that need to be rendered.
+// Use VERY sparingly. Consider using a separate publication if this list gets long
+if(O.application.config['repo_standard_publication:client_publication_features']) {
+    _.each(O.application.config['repo_standard_publication:client_publication_features'], (feature) => {
+        Publication.use(feature, {
+            path: BASE_PATH
+        });
+    });
+}

@@ -22,5 +22,8 @@
   "load": [
       "js/hres_repo_doi_minting.js",
       "js/mint_test_data.js"
+    ],
+  "respond": [
+      "/do/hres-doi-minting"
     ]
 }

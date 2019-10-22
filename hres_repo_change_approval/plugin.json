@@ -4,7 +4,6 @@
   "pluginVersion": 1,
   "displayName": "Haplo RM Repository Change Approval",
   "displayDescription": "Support for adminsitrator approval of edits to published records.",
-  "installSecret": "2dba64c1c1c4f703df674c5e521b8b452903c8d7",
   "apiVersion": 4,
   "depend": [
       "std_action_panel",

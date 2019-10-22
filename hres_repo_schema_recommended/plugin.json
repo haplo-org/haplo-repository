@@ -8,8 +8,13 @@
   "depend": [
       "hres_repository"
     ],
+  "use": [
+      "std:reporting"
+    ],
   "load": [
       "js/hres_repo_schema_recommended.js"
     ],
-  "respond": []
+  "respond": [
+      "/do/hres-repository-schema"
+  ]
 }

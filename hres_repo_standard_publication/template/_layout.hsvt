@@ -48,7 +48,7 @@
   <header>
     <nav class="primary-nav navbar navbar-expand-lg navbar-dark fixed-top bg-primary p-0">
       <div class="container">
-        <a class="navbar-brand p-0 m-2 ml-lg-0 mr-lg-4" href=HOME_PATH aria-label="REPOSITORY_NAME">
+        <a class="navbar-brand p-0 m-2 ml-lg-0 mr-lg-4" href=HOME_PATH aria-label=REPOSITORY_NAME>
           if(LOGO) {
             within(LOGO) {
               <img class="navbar-logo mr-4 mb-2 mb-sm-0 d-block d-sm-inline" src=src alt=REPOSITORY_NAME>
@@ -121,6 +121,9 @@
 
       render(blocks.body)
 
+      if(context.hint.objectKind) {
+        std:web-publisher:page-part:render-category(concat("hres:repository:" context.hint.objectKind ":extra-body"))
+      }
       <div class="row">
           <div class="col-md-8 order-md-1 mb-4">
             if(blocks.below) {

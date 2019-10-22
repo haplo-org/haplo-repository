@@ -120,10 +120,15 @@ const REFAttributeLookup = {
     deposited(object) { return object.first(A.PublicationProcessDates, Q.Deposited); },
     refunit(object) { return object.first(A.REFUnitOfAssessment); },
     aam(object) {
-        let groups = object.getAttributeGroupIds(A.AcceptedAuthorManuscript);
-        if(groups.length) {
-            return object.extractSingleAttributeGroup(groups[0]).first(A.File);
-        }
+        let groups = object.getAttributeGroupIds(A.AcceptedAuthorManuscript).
+            concat(object.getAttributeGroupIds(A.PublishersVersion));
+        let foundFile;
+        _.each(groups, (group) => {
+            if(!foundFile) {
+                foundFile = object.extractSingleAttributeGroup(group).first(A.File);
+            }
+        });
+        return foundFile;
     }
 };
 

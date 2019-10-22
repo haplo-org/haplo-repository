@@ -4,7 +4,6 @@
   "pluginVersion": 1,
   "displayName": "Haplo RM Repository Minimal Demo Application",
   "displayDescription": "Demo version of a minimal installation of Haplo Research Manager Repository",
-  "installSecret": "f271405d482caef7343156d35533bb2e6ea30900",
   "apiVersion": 4,
   "use": [
       "haplo:activity_guidance_notes"

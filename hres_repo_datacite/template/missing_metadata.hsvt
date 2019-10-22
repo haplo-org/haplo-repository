@@ -1,0 +1,11 @@
+
+
+<table>
+    <tr><th> "Datacite property" </th> <th> "Missing field" </th></tr>
+    each(missing) {
+        <tr>
+            <td> name </td>
+            <td> attribute </td>
+        </tr>
+    }
+</table>

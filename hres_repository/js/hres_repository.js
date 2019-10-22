@@ -23,7 +23,7 @@ var CanEditRepositoryActivityOverview = O.action("hres:action:repository:can_edi
 
 // Creates link on the homepage action panel to a reporting and guides area
 P.implementService("haplo_activity_navigation:discover", function(activity) {
-    activity(40, "repository", "Repository", "E226,0,f", CanEditRepositoryActivityOverview);
+    activity(40, "repository", NAME("hres:repository-homepage-text", "Repository"), "E226,0,f", CanEditRepositoryActivityOverview);
 });
 
 // --------------------------------------------------------------------------
@@ -58,6 +58,26 @@ P.implementService("hres:repository:earliest_publication_date", function(output)
         }
     });
     return published;
+});
+
+var getFiles = function(output) {
+    var fileAttributes = [];
+    output.every(function(v,d,x) {
+        if(O.typecode(v) === O.T_IDENTIFIER_FILE) {
+            fileAttributes.push(O.file(v));
+        }
+    });
+    return fileAttributes;
+};
+
+P.implementService("hres:repository:zip_output_files", function(output) {
+    if(!output) { return; }
+    var files = getFiles(output.restrictedCopy(O.currentUser));
+    let zip = O.zip.create("Output-Files").rootDirectory("Output-Files");
+    _.each(files, function(file) {
+        zip.add(file);
+    });
+    return zip;
 });
 
 // --------------------------------------------------------------------------

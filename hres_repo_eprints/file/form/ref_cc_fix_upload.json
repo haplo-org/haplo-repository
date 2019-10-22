@@ -1,0 +1,19 @@
+{
+    "specificationVersion": 0,
+    "formId": "refCCFix",
+    "formTitle": "Upload CSV file to correct REF CC Eprints dates",
+    "elements": [
+        {
+            "type": "file-repeating-section",
+            "path": "csv",
+            "label": "Upload CSV file",
+            "allowAdd": false,
+            "allowDelete": false,
+            "elements": [
+                {"type":"file", "path":"."}
+            ],
+            "minimumCount": 1,
+            "maximumCount": 1
+        }
+    ]
+}

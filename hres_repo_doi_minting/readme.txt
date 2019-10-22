@@ -8,9 +8,11 @@ h2. Setup
 
 * Set @"hres:doi:minting:safety-application-hostname"@ in config data to the application's hostname.
 * Set @"hres:doi:minting:doi-prefix"@ in config data to the DOI prefix used for this app. End with a / or .
-      DataCite's test prefix is 10.5072, append a suffix such as /hostname/ or something when testing.
+      You will need a test account with DataCite, which will be authorised to mint DOIs against a specific prefix. Append a suffix such as /hostname/ or something when testing.
 * Set @"hres:doi:minting:doi-prefix-for-update"@ to an array of DOI prefixes which should be updated when the object changes. (It may not be just the copy of the prefix for new DOIs, as we want to be able to update DOIs imported from other repositories.)
 * Check @"hres:doi:minting:service-url"@ is set to the URL of the metadata store you want to mint DOIs.
+        For testing this is probably: https://mds.test.datacite.org
+        For live systems: https://mds.datacite.org
 * Create an "HTTP / Basic" keychain credential named "DOI Minting" containing the institution's DataCite username and password.
 
 

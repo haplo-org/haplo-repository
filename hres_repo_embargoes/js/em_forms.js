@@ -113,6 +113,7 @@ P.respond("GET,POST", "/do/hres-repo-embargoes/edit", [
     }
     var groups = output.extractAllAttributeGroups();
     _.each(groups.groups, function(group) {
+        // TODO: review whether attribute groups can be accurately identified this way
         if(!group.object.isKindOfTypeAnnotated("hres:annotation:repository:file")) { return; }
         var existing = _.find(document.embargoes, function(em) {
             return (em.groupId === group.extension.groupId);

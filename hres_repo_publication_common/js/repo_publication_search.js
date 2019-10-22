@@ -72,15 +72,36 @@ P.webPublication.feature("hres:repository:common:search-by-fields", function(pub
         // Lazily set up choices
         if(!choicesType) {
             choicesType = SCHEMA.getTypesWithAnnotation("hres:annotation:repository-item").map((ref) => {
-                return SCHEMA.getTypeInfo(ref).name;
-            }).sort();
+                let type = SCHEMA.getTypeInfo(ref);
+                return [type.shortName, type.name];
+            });
         }
+        
+        choicesType = _.sortBy(choicesType, type => {
+            return type[1];
+        });
+
+        let categorisedTypes = O.serviceMaybe("hres:repository:ingest_ui:types");
+        if(categorisedTypes) {
+            let types = categorisedTypes.primaryTypes.concat(categorisedTypes.secondaryTypes),
+                visibleTypes = {};
+                
+            _.each(types, type => {
+                visibleTypes[type.name] = SCHEMA.getTypeInfo(type.ref).shortName;
+            });
+
+            choicesType = _.filter(choicesType, type => {
+                return !!visibleTypes[type[1]];
+            });
+        }
+            
         if(!choicesField) {
             choicesField = (spec.fields || DEFAULT_OTHER_FIELDS).map((desc) => {
                 var i = SCHEMA.getAttributeInfo(desc);
                 return [i.shortName, i.name];
             });
         }
+
 
         // Form a search query and redirect to main search page
         E.setResponsiblePlugin(P);

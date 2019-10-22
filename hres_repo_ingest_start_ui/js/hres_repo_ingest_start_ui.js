@@ -38,6 +38,12 @@ P.implementService("std:action_panel:activity:menu:repository", function(display
             link(400, "/do/repository-ingest-start-ui/admin-order", "Re-order repository output types");
     }
 });
+P.implementService("std:action_panel:activity:my_items:repository", function(display, builder) {
+    if(O.currentUser.allowed(CanAddOutput)) {
+        builder.panel(150).
+            link(150, "/do/repository-ingest-start-ui/new-for", "Add output");
+    }
+});
 
 // category can take values:
 //  - primary

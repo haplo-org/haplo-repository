@@ -7,12 +7,47 @@
 
 // --------------------------------------------------------------------------
 // EPrints to StoreObject
-P.implementService("hres:repository:eprints:apply-xml-to-object", function(cursor, object, eprintsName) {
-    let intermediate = convertXMLToIntermediate(cursor, eprintsName);
-    if(intermediate) {
-        applyIntermediateToObject(intermediate, object);
-    }
+
+P.implementService("hres:repository:eprints:import", function() {
+    return new ImportContext();
 });
+
+var ImportContext = function() {
+    // TODO: log, objectsToSave, etc, should be properties of this object
+    // Currently this just pretends to encapsulate things nicely.
+};
+
+ImportContext.prototype.applyXMLToObject = function(cursor, object) {
+    resetLog();
+    log.eprints.IMPORT = []; // TODO: Remove the IMPORT eprintsid hack
+    let intermediate = convertXMLToIntermediate2(cursor, 'IMPORT', object);
+    applyIntermediateToObjectAttributes(intermediate, object);
+    return new AppliedEPrintsMetadata(object, intermediate);
+};
+
+ImportContext.prototype.saveAdditionalObjects = function() {
+    O.impersonating(O.SYSTEM, () => {
+        _.each(objectsToSave, (o) => {
+            if(o.firstType()) {
+                o.save();
+            } else {
+                console.log("EPrints saveAdditionalObjects(): Not saving object because no type", o);
+            }
+        });
+    });
+    objectsToSave = [];
+};
+
+// TODO: Log management in import context, ...
+
+var AppliedEPrintsMetadata = function(object, intermediate) {
+    this.object = object;
+    this.intermediate = intermediate;
+};
+
+AppliedEPrintsMetadata.prototype.saveAdditional = function() {
+    applyIntermediateToObjectAdditionalData(this.intermediate, this.object);
+};
 
 // --------------------------------------------------------------------------
 // Import management
@@ -29,6 +64,16 @@ P.db.table("eprintsMetadata", {
 
 var log = {};
 
+var resetLog = function() {
+    log = {
+        eprints: {},
+        tags: { "__not_imported": {} },
+        newObjects: {},
+        outputsByType: {},
+        start: new Date()
+    };
+};
+
 P.implementService("hres:repository:eprints:get-latest-log", function() {
     const query = P.db.eprintsLogging.select().order("id", true).limit(1);
     if(!query.count()) { O.stop("No eprints import logs found."); }
@@ -36,7 +81,11 @@ P.implementService("hres:repository:eprints:get-latest-log", function() {
 });
 
 var saveObjectWithLogging = function(object, eprintId) {
-    O.impersonating(O.SYSTEM, () => { object.save(); });
+    try {
+        O.impersonating(O.SYSTEM, () => { object.save(); });
+    } catch(e) {
+        throw new Error(e.message+"; thrown when attempting to save object with title "+object.title);
+    }
     if(eprintId) {
         log.eprints[eprintId].push("New object ref: "+object.ref+", title: "+object.title);
     }
@@ -86,13 +135,7 @@ P.respond("GET,POST", "/do/hres-repo-eprints/upload-xml", [
 P.backgroundCallback("import", function(document) {
     O.impersonating(O.SYSTEM, () => {
         P.data.eprintImportStatus = "RUNNING";
-        log = {
-            eprints: {},
-            tags: { "__not_imported": [] },
-            newObjects: {},
-            outputsByType: {},
-            start: new Date()
-        }; // reset log
+        resetLog();
         let newCount = 0;
         let file;
         try {
@@ -150,7 +193,26 @@ var IGNORE_TAGS = [
     "metadata_visibility",
     "item_issues",
     "item_issues_count",
-    "succeeds"
+    "succeeds",
+    "hoa_compliant", // this information is calculated from other data imported
+    "hoa_version_fcd", // imported when setting first file deposit
+    "hoa_emb_len",  // Calculated from embargo start and end dates
+    "hoa_ref_pan",  // Taken from author record
+    "hoa_ex_tec_txt",
+    "hoa_ex_dep_txt",
+    "hoa_ex_acc_txt",
+    "hoa_ex_fur_txt",
+    "number",   // imported with journal citation
+    "pagerange", // imported with journal citation
+    "event_dates", // used for linked event object
+    "event_location", // used for linked event object
+    "event_type", // used for linked event object
+    "date_type",
+    "num_pieces", // Number of files on the record
+    "thesis_type",  // used for subtype
+    "monograph_type", // used for subtype
+    "pres_type", // used for subtype
+    "contact_email"
 ];
 
 var getImportIgnoreTags = function() {
@@ -159,15 +221,15 @@ var getImportIgnoreTags = function() {
 };
 
 var prepareLog = function(row) {
-    let log = row.log;
+    let log = _.clone(row.log);
     let temp = {};
     _.each(log.eprints, (v, k) => { if(v.length) { temp[k] = v; } });
     log.eprints = temp;
-
-    const ignoreTags = getImportIgnoreTags();
-    let unimportedTags = _.difference(log.tags["__not_imported"], ignoreTags);
-    if(unimportedTags.length) {
-        log["ERROR:unimported_tags"] = unimportedTags;
+    _.each(getImportIgnoreTags(), (ignore) => { 
+        delete log.tags["__not_imported"][ignore];
+    });
+    if(!_.isEmpty(log.tags["__not_imported"])) {
+        log["ERROR:unimported_tags"] = log.tags["__not_imported"];
     }
     log = _.omit(log, "tags"); // don't want other info about tags here
     log = JSON.stringify(log, undefined, 2);
@@ -218,7 +280,7 @@ var setParagraph = function(cursor, intermediate, attribute) {
 var setUrl = function(cursor, intermediate, attribute) {
     let url = cursor.getText();
     // don't repeat url if url is DOI and id_number is DOI
-    if(url.indexOf("dx.doi.org") !== -1) {
+    if((url.indexOf("dx.doi.org") !== -1) || (url.indexOf("/doi.org") !== -1)) {
         cursor.up();
         // id_number may not store DOI in other eprints implementations
         let doiAttrInfo = _.find(P.getHaploAttributeInfo(), (a) => { return a.name === "DOI"; });
@@ -234,27 +296,33 @@ var setIsbn = function(cursor, intermediate, attribute) {
     setText(cursor, intermediate, attribute, O.T_IDENTIFIER_ISBN);
 };
 
-var setPersonCitation = function(cursor, intermediate, attribute) {
+var setPersonCitation = function(cursor, intermediate, attribute, setQualifierMaybe) {
     let hasPersonInSystem = false;
     cursor.eachChildElement("item", (personCursor) => {
         let person = _.clone(attribute), id, name;
         person.properties = {};
         personCursor.eachChildElement((personDetailCursor) => {
-            switch(personDetailCursor.getNodeName()) {
-                case "id":
-                    id = person.properties.id = personDetailCursor.getText();
-                    break;
-                case "name":
-                    name = person.properties.name = {};
-                    personDetailCursor.eachChildElement((personNameCursor) => {
-                        person.properties.name[personNameCursor.getNodeName()] = personNameCursor.getText();
-                    });
-                    break;
+            let nodeName = personDetailCursor.getNodeName();
+            if(nodeName === "id") {
+                id = person.properties.id = personDetailCursor.getText();
+            }
+            if(nodeName === "name") {
+                name = person.properties.name = {};
+                personDetailCursor.eachChildElement((personNameCursor) => {
+                    person.properties.name[personNameCursor.getNodeName()] = personNameCursor.getText();
+                });
+            }
+            if(setQualifierMaybe) {
+                setQualifierMaybe(cursor, nodeName, person);
             }
         });
         if(!person.properties.name || !person.properties.name.given || !person.properties.name.family) {
             logWarning(intermediate, "Cannot cite person without given and family names specified", "error:person-missing-names");
             return;
+        }
+        if(!person.properties.id) {
+            O.serviceMaybe("hres:repository:eprints:add-id-for-person", person.properties, intermediate);
+            if(person.properties.id) { id = person.properties.id; }
         }
         if(person.properties.id) {
             let email = O.text(O.T_IDENTIFIER_EMAIL_ADDRESS, id);
@@ -305,6 +373,79 @@ var setExhibitorCitation = function(cursor, intermediate, attribute) {
     }
 };
 
+var setContributorQualifier = function(cursor, nodeName, attribute) {
+    if(nodeName === "type") {
+        let contributorQual = CONTRIBUTOR_MAP[cursor.getText().toLowerCase()];
+        if(contributorQual && contributorQual in QUAL) {
+            attribute.qual = QUAL[contributorQual];
+        }
+    }
+};
+var setContributorCitation = function(cursor, intermediate, attribute) {
+    setPersonCitation(cursor, intermediate, attribute, setContributorQualifier);
+};
+
+var setOrganisationAsAuthor = function(cursor, intermediate, attribute) {
+    cursor.eachChildElement("item", divisionCursor => {
+        let organisationAttr = _.clone(attribute);
+        const orgName = divisionCursor.getText();
+        let org;
+        if(orgName) {
+            org = P.normalisedTitlesForType.get(T.Organisation)[normalise(orgName)];
+            if(!org) {
+                org = O.object();
+                org.append(T.Organisation, A.Type);
+                org.appendTitle(orgName);
+                P.updateTitleLookup(T.Organisation, org, intermediate);
+            }
+        }
+        if(org) {
+            organisationAttr.value = { object: org };
+            intermediate.attributes.push(organisationAttr);
+        } else {
+            logWarning(intermediate, "Did not add organisation for name "+orgName, attribute.tag+":not-added");
+        }
+    });
+};
+
+// EPrints seems to usually use this schema for contribution types
+var CONTRIBUTOR_MAP = {
+    "http://www.loc.gov/loc.terms/relators/act": "hres:qualifier:actor",
+    "http://www.loc.gov/loc.terms/relators/anm": "hres:qualifier:animator",
+    "http://www.loc.gov/loc.terms/relators/aui": "hres:qualifier:author-of-introduction",
+    "http://www.loc.gov/loc.terms/relators/aud": "hres:qualifier:author-of-screenplay",
+    "http://www.loc.gov/loc.terms/relators/cll": "hres:qualifier:calligrapher",
+    "http://www.loc.gov/loc.terms/relators/chr": "hres:qualifier:choreographer",
+    "http://www.loc.gov/loc.terms/relators/cng": "hres:qualifier:cinematographer",
+    "http://www.loc.gov/loc.terms/relators/cmp": "hres:qualifier:composer",
+    "http://www.loc.gov/loc.terms/relators/cnd": "hres:qualifier:conductor",
+    "http://www.loc.gov/loc.terms/relators/orm": "hres:qualifier:conference-organizer",
+    "http://www.loc.gov/loc.terms/relators/cst": "hres:qualifier:costume-designer",
+    "http://www.loc.gov/loc.terms/relators/cur": "hres:qualifier:curator",
+    "http://www.loc.gov/loc.terms/relators/dnc": "hres:qualifier:dancer",
+    "http://www.loc.gov/loc.terms/relators/dsr": "hres:qualifier:designer",
+    "http://www.loc.gov/loc.terms/relators/drt": "hres:qualifier:director",
+    "http://www.loc.gov/loc.terms/relators/flm": "hres:qualifier:film-editor",
+    "http://www.loc.gov/loc.terms/relators/ill": "hres:qualifier:illustrator",
+    "http://www.loc.gov/loc.terms/relators/itr": "hres:qualifier:instrumentallist",
+    "http://www.loc.gov/loc.terms/relators/lbt": "hres:qualifier:librettist",
+    "http://www.loc.gov/loc.terms/relators/lgd": "hres:qualifier:lighting-designer",
+    "http://www.loc.gov/loc.terms/relators/lyr": "hres:qualifier:lyricist",
+    "http://www.loc.gov/loc.terms/relators/mus": "hres:qualifier:musician",
+    "http://www.loc.gov/loc.terms/relators/prf": "hres:qualifier:performer",
+    "http://www.loc.gov/loc.terms/relators/pht": "hres:qualifier:photographer",
+    "http://www.loc.gov/loc.terms/relators/prm": "hres:qualifier:printmaker",
+    "http://www.loc.gov/loc.terms/relators/pro": "hres:qualifier:producer",
+    "http://www.loc.gov/loc.terms/relators/prd": "hres:qualifier:production-personnel",
+    "http://www.loc.gov/loc.terms/relators/prg": "hres:qualifier:programmer",
+    "http://www.loc.gov/loc.terms/relators/rce": "hres:qualifier:recording-engineer",
+    "http://www.loc.gov/loc.terms/relators/res": "hres:qualifier:researcher",
+    "http://www.loc.gov/loc.terms/relators/std": "hres:qualifier:set-designer",
+    "http://www.loc.gov/loc.terms/relators/sng": "hres:qualifier:singer",
+    "http://www.loc.gov/loc.terms/relators/trl": "hres:qualifier:translator",
+    "http://www.loc.gov/loc.terms/relators/vdg": "hres:qualifier:videographer"
+};
+
 var TYPE_MAP = {
     types: {
         "book": "Book",
@@ -325,6 +466,7 @@ var TYPE_MAP = {
         "conference_item.paper": "ConferencePaper",
         "conference_item.poster": "ConferencePoster",
         "conference_item.keynote": "ConferenceKeynote",
+        "dataset": "Dataset",
         "exhibition": "Exhibition",
         "article": "JournalArticle",
         "patent": "Patent",
@@ -334,6 +476,7 @@ var TYPE_MAP = {
         "thesis.masters": "MastersThesis",
         "thesis.mphil": "MPhilThesis",
         "thesis.pro_doc": "ProfDocThesis",
+        "thesis.doctoral": "PhdThesis",
         "video": {
             type: "DigitalOrVisualMedia",
             attr: { attr:"MediaType", behaviour:"hres:list:media-type:video" }
@@ -341,7 +484,11 @@ var TYPE_MAP = {
         "web_resource": "Website",
         "design": "Design",
         "design.other": "Design",
-        "other": "Other"
+        "other": "Other",
+        "image": {
+            type: "DigitalOrVisualMedia",
+            attr: { attr:"MediaType", behaviour:"hres:list:media-type:image" }
+        }
     },
     subtypeKeys: ["monograph_type", "pres_type", "thesis_type"]
 };
@@ -417,17 +564,35 @@ var setEmbargoStatus = function(cursor, intermediate, attribute) {
     if(status === "restricted") {
         let data = {};
         cursor.up();
-        if(cursor.firstChildElementMaybe("rioxx2_license_ref_input")) {
-            if(cursor.firstChildElementMaybe("license_ref")) {
-                data.license = cursor.getText();
-                cursor.up();
+        // only set embargo if there are no files, since normally the files will
+        // contain the accurate embargo information. It is worth checking with the client
+        // how their EPrints set up handles embargoes.
+        if(!cursor.firstChildElementMaybe("documents")) {
+            if(cursor.firstChildElementMaybe("rioxx2_license_ref_input")) {
+                if(cursor.firstChildElementMaybe("license_ref")) {
+                    data.license = cursor.getText();
+                    cursor.up();
+                }
+                if(cursor.firstChildElementMaybe("start_date")) {
+                    data.start = cursor.getText();
+                    cursor.up();
+                }
             }
-            if(cursor.firstChildElementMaybe("start_date")) {
-                data.start = cursor.getText();
-                cursor.up();
+            intermediate.embargoData.push(data);
+            logWarning(intermediate, "Restricted output has no files", "info:restricted-no-files");
+        } else if(!intermediate.embargoData.length) {
+            let hasRestrictedFile = false;
+            cursor.eachChildElement("document", dc => {
+                let policy = dc.getTextOfFirstChildElementMaybe("security");
+                if(policy === "staffonly" || policy === "restricted") {
+                    hasRestrictedFile = true; // so necessary measures will be taken when setting the file
+                }
+            });
+            if(!hasRestrictedFile) {
+                logWarning(intermediate, "Full text status is restricted, but no files are restricted "+
+                    "so no restrictions have been set", "ERROR:restricted-no-restrictions");
             }
         }
-        intermediate.embargoData.push(data);
     }
 };
 
@@ -501,7 +666,7 @@ var normalise = function(text) {
 };
 P.implementService("hres-repo-eprints:normalise", normalise);
 var objectsToSave = [];
-var normalisedTitlesForType = O.refdict(function(type) {
+var normalisedTitlesForType = P.normalisedTitlesForType = O.refdict(function(type) {
     let lookup = {};
     let objs = O.query().link(type, A.Type).execute();
     _.each(objs, o => {
@@ -512,10 +677,10 @@ var normalisedTitlesForType = O.refdict(function(type) {
     });
     return lookup;
 });
-P.implementService("hres-repo-eprints:getNormalisedTitlesForType", function(type) {
+P.implementService("hres-repo-eprints:get-normalised-titles-for-type", function(type) {
     return normalisedTitlesForType.get(type);
 });
-var updateTitleLookup = function(type, object, intermediate) {
+var updateTitleLookup =  P.updateTitleLookup = function(type, object, intermediate) {
     let lookup = normalisedTitlesForType.get(type);
     let title = object.title;
     if(!title) {
@@ -530,7 +695,7 @@ var updateTitleLookup = function(type, object, intermediate) {
         objectsToSave.push(object);
     }
 };
-P.implementService("hres-repo-eprints:updateNormalisedTitlesForType", function(type, object, intermediate) {
+P.implementService("hres-repo-eprints:update-normalised-titles-for-type", function(type, object, intermediate) {
     return updateTitleLookup(type, object, intermediate);
 });
 
@@ -561,13 +726,32 @@ var setPublication = function(cursor, intermediate, attribute) {
     intermediate.attributes.push(attribute);
 };
 
+var setProjects = function(cursor, intermediate, attribute) {
+    cursor.eachChildElement("item", projectCursor => {
+        setRefForTitle(intermediate, attribute, projectCursor.getText(), T.ProjectPast);
+        intermediate.attributes.push(attribute);
+    });
+};
+
 var setDOI = function(cursor, intermediate, attribute) {
     try {
-        attribute.value = P.DOI.create(cursor.getText());
+        // it's a free text field in EPrints, and users often add the prefix themselves
+        let doi = cursor.getText();
+        doi = doi.replace("DOI:", "");
+        doi = doi.replace("doi:", "");
+        doi = doi.trim();
+        attribute.value = P.DOI.create(doi);
         intermediate.attributes.push(attribute);
     } catch(e) {
         attribute.properties = {};
         logWarning(intermediate, "Invalid DOI: "+cursor.getText(), "warning:invalid-doi-found");
+    }
+};
+
+var setGoldOA = function(cursor, intermediate, attribute) {
+    if(cursor.getText() === "TRUE") {
+        attribute.value = O.behaviourRef("hres:list:open-access:gold");
+        intermediate.attributes.push(attribute);
     }
 };
 
@@ -666,12 +850,12 @@ var setFile = function(cursor, intermediate, attribute) {
                     "ERROR:missing-plugin:access-level-policy");
             }
         }
-         if(exAttrs.length) {
+        if(exAttrs.length) {
             extension.attributes = exAttrs;
             extension.embargo = embargo;
             fileAttr.extension = extension;
             intermediate.attributes.push(fileAttr);
-         }
+        }
      });
 };
 
@@ -804,9 +988,12 @@ var setExternalEvent = function(cursor, intermediate, attribute) {
         cursor.up();
     }
     if(cursor.firstChildElementMaybe("event_dates")) {
-        let eventDate = getEventDate(cursor);
+        let dateString = cursor.getText();
+        let eventDate = P.parseDateString(dateString);
         if(eventDate) {
             event.append(eventDate, A.EventDate);
+        } else {
+            logWarning(intermediate, "Invalid date: "+dateString, "ERROR:event:date");
         }
         cursor.up();
     }
@@ -838,55 +1025,6 @@ var setExternalEvent = function(cursor, intermediate, attribute) {
     }
     attribute.value = event;
     intermediate.attributes.push(attribute);
-};
-
-// TODO: this can be improved with the new O.dateParser next import implementation
-// dates can look like: "22 Jul 2018" or "22 to end of 24 Jul 2018" or "22 Jul to end of 1 Aug 2018"
-// or "30 Dec 2018 to end of 2 Jan 2019". The following checks for "to end of" to signal date range.
-// If a range, validate the end date first, since that will be used to infer missing info from start.
-var getEventDate = function(cursor) {
-    let eventDate;
-    if(O.serviceImplemented("hres:repository:event-date-import")) {
-        eventDate = O.service("hres:repository:event-date-import", cursor);
-    } else {
-        let splitTerm = " to end of ";
-        let datesString = cursor.getText().split(splitTerm);
-        let startDate = new XDate(datesString[0]);
-        if(datesString.length === 1 && startDate.valid()) {
-            // if just one date, set value if valid
-            eventDate = O.datetime(startDate);
-        } else if(datesString.length > 1) {
-            let endDate = new XDate(datesString[1]);
-            if(endDate.valid()) {
-                if(!startDate.valid()) {
-                    // if not already valid, attempt to build start date by combining start and end date info
-                    let endDateParts = datesString[1].split(' ');
-                    let startDateParts = datesString[0].split(' ');
-                    switch(startDateParts.length) {
-                        case 1: // just day given
-                            startDate = new XDate([startDateParts[0], endDateParts[1], endDateParts[2]].join(' '));
-                            break;
-                        case 2: // day and month given
-                            startDate = new XDate([startDateParts[0], startDateParts[1], endDateParts[2]].join(' '));
-                            break;
-                    }
-                }
-                if(startDate.valid()) {
-                    eventDate = O.datetime(startDate, endDate);
-                }
-            }
-        }
-    }
-    return eventDate;
-};
-
-var setEventDate = function(cursor, intermediate, attribute) {
-    attribute.value = getEventDate(cursor);
-    if(!attribute.value) {
-        logWarning(intermediate, "Could not set event date: "+cursor.getText(), "warning:event-date");
-    } else {
-        intermediate.attributes.push(attribute);
-    }
 };
 
 var setFirstFileDeposit = function(cursor, intermediate, attribute) {
@@ -937,7 +1075,9 @@ var REF_EXCEPTION_TAG_LOOKUP = {
     "hoa_ex_acc_a": "access-a",
     "hoa_ex_acc_b": "access-b",
     "hoa_ex_acc_c": "access-c",
-    "hoa_ex_acc_TRUE": "other"
+    "hoa_ex_acc_TRUE": "other",
+    "hoa_ex_fur_a": "other",
+    "hoa_ex_fur_b": "other-b"
 };
 
 var setREFException = function(cursor, intermediate, attribute) {
@@ -969,7 +1109,7 @@ var setFunders = function(cursor, intermediate, attribute) {
 
 // --------------------------------------------------------------------------
 
-var PEOPLE_TAGS = ["creators", "editors", "book_creators", "exhibitors"];
+var PEOPLE_TAGS = ["creators", "editors", "book_creators", "exhibitors", "contributors", "corp_creators"];
 
 var haploAttributeInfo = [
     {name: "Title",                 tag: "title",           xmlToIntermediate: setText,                 objectToIntermediate: P.textAttr},
@@ -986,6 +1126,7 @@ var haploAttributeInfo = [
     {name: "Publisher",             tag: "publisher",       xmlToIntermediate: setPublisher,            objectToIntermediate: P.refTitleAttr},
     {name: "Journal",               tag: "publication",     xmlToIntermediate: setPublication,          objectToIntermediate: P.refTitleAttr},
     {name: "Author",                tag: "creators",        xmlToIntermediate: setPersonCitation},
+    {name: "Author",                tag: "corp_creators",   xmlToIntermediate: setOrganisationAsAuthor},
     {name: "Editor",                tag: "editors",         xmlToIntermediate: setPersonCitation},
     {name: "AuthorsCitation",       tag: "creators",                                                    objectToIntermediate: P.personAttr},
     {name: "EditorsCitation",       tag: "editors",                                                     objectToIntermediate: P.personAttr},
@@ -993,22 +1134,18 @@ var haploAttributeInfo = [
     {name: "BookAuthorShadowed",    tag: "book_creators",   xmlToIntermediate: setPersonCitation},
     {name: "ContributorShadowed",   tag: "exhibitors",      xmlToIntermediate: setExhibitorCitation},
     {name: "BookAuthor",            tag: "book_creators",                                               objectToIntermediate: P.personAttr},
+    {name: "ContributorShadowed",   tag: "contributors",    xmlToIntermediate: setContributorCitation},
     {name: "Contributors",          tag: "contributors",                                                objectToIntermediate: P.contributorsAttr},
     {name: "Edition",               tag: "edition",         xmlToIntermediate: setText,                 objectToIntermediate: P.textAttr},
     {name: "PlaceOfPublication",    tag: "place_of_pub",    xmlToIntermediate: setText,                 objectToIntermediate: P.textAttr},
     {name: "Isbn",                  tag: "isbn",            xmlToIntermediate: setIsbn,                 objectToIntermediate: P.textAttr},
     {name: "Issn",                  tag: "issn",            xmlToIntermediate: setIsbn,                 objectToIntermediate: P.textAttr},
     {name: "ResearchInstitute",     tag: "subjects",        /*import to be implemented in client impl*/ objectToIntermediate: P.subjectsAttr},
-    {name: "File",                  tag: "documents",       xmlToIntermediate: setFile},
+    {name: "OutputFile",            tag: "documents",       xmlToIntermediate: setFile},
     {name: "JournalCitation",       tag: "volume",          xmlToIntermediate: setJournalCitation,      objectToIntermediate: P.journalCitationAttr},
     {name: "PageRange",             tag: "pagerange",       xmlToIntermediate: setPageRange,            objectToIntermediate: P.textAttr},
     {name: "DOI",                   tag: "id_number",       xmlToIntermediate: setDOI,                  objectToIntermediate: P.doiAttr},
     {name: "OutputStatus",          tag: "ispublished",     xmlToIntermediate: setOutputStatus,         objectToIntermediate: P.outputStatusAttr},
-// TODO: deprecated - Event schema now on its own object
-    {name: "EventTitle",            tag: "event_title",     xmlToIntermediate: setText,                 objectToIntermediate: P.textAttr},
-    {name: "EventLocation",         tag: "event_location",  xmlToIntermediate: setText,                 objectToIntermediate: P.textAttr},
-    {name: "EventDate",             tag: "event_dates",     xmlToIntermediate: setEventDate,            objectToIntermediate: P.textAttr},
-// end TODO
     {name: "Event",                 tag: "event_title",     xmlToIntermediate: setExternalEvent,        objectToIntermediate: P.externalEventAttr},
     {name: "Series",                tag: "series",          xmlToIntermediate: setText,                 objectToIntermediate: P.textAttr},
     {name: "OutputMedia",           tag: "output_media",    xmlToIntermediate: setText,                 objectToIntermediate: P.textAttr},
@@ -1018,6 +1155,7 @@ var haploAttributeInfo = [
     {name: "Pages",                 tag: "pages",           xmlToIntermediate: setText,                 objectToIntermediate: P.textAttr},
     {name: "Notes",                 tag: "note",            xmlToIntermediate: setParagraph,            objectToIntermediate: P.textAttr},
     {name: "WebAddressUrl",         tag: "official_url",    xmlToIntermediate: setUrl,                  objectToIntermediate: P.textAttr},
+    {name: "PatentApplicant",       tag: "patent_applicant",xmlToIntermediate: setText,                 objectToIntermediate: P.textAttr},
     {name: "REFUnitOfAssessment",   tag: "hoa_ref_pan",                                                 objectToIntermediate: P.refUoaAttr},
     {name: "Funder",                tag: "funders",         xmlToIntermediate: setFunders,              objectToIntermediate: P.refTitleAttr},
     {name: "RetentionReviewDate",   tag: "retention_date",                                              objectToIntermediate: P.simpleDateAttr},
@@ -1025,6 +1163,8 @@ var haploAttributeInfo = [
     {name: "DataCollectionMethod",  tag: "collection_method",                                           objectToIntermediate: P.textAttr},
     {name: "CollaboratingInstitution",tag: "collab_inst",                                               objectToIntermediate: P.textAttr},
     {name: "GrantID",               tag: "grant",                                                       objectToIntermediate: P.textAttr},
+    {name: "Project",               tag: "projects",        xmlToIntermediate: setProjects,             objectToIntermediate: P.refTitleAttr},
+    {name: "OpenAccess",            tag: "hoa_gold",        xmlToIntermediate: setGoldOA},
     // if tag information results in change to database, not attribute, set database to true
     {database: true,                tag: "full_text_status",xmlToIntermediate: setEmbargoStatus,        objectToIntermediate: P.embargoAttrs},
     {database: true,                tag: "hoa_date_fcd",    xmlToIntermediate: setFirstFileDeposit,     objectToIntermediate: P.firstFileDepositAttr},
@@ -1032,6 +1172,7 @@ var haploAttributeInfo = [
     {database: true,                tag: "hoa_ex_dep",      xmlToIntermediate: setREFException          /*This information is private, do not export*/},
     {database: true,                tag: "hoa_ex_tec",      xmlToIntermediate: setREFException},
     {database: true,                tag: "hoa_ex_acc",      xmlToIntermediate: setREFException},
+    {database: true,                tag: "hoa_ex_fur",      xmlToIntermediate: setREFException},
     {database: true,                tag: "hoa_ex_oth_txt",  xmlToIntermediate: setOtherREFException},
     {database: true,                tag: "rev_number",                                                  objectToIntermediate: P.versionNumber}
 ];
@@ -1056,6 +1197,7 @@ var findAttrInfo = function(nodeName, allowMultiple) {
 };
 
 var logWarning = function(intermediate, warning, stat) {
+    if(O.serviceMaybe("hres:repository:eprints:suppress-warning", warning, stat)) { return; }
     // intermediate can actually be intermediate or eprintid
     const eprintId = intermediate.eprintId || intermediate;
     log.eprints[eprintId].push(stat+": "+warning);
@@ -1083,9 +1225,10 @@ var matchServices = function() {
 };
 
 var preventImport = function(cursor, intermediate, eprintId) {
-    if(O.serviceMaybe("hres:repository:eprints:prevent-import", cursor.cursor())) {
-        logWarning(eprintId, "Import was stopped by a prevent-import service",
-            "not_imported:prevent-import");
+    let preventMessage = O.serviceMaybe("hres:repository:eprints:prevent-import", cursor.cursor());
+    if(preventMessage) {
+        preventMessage = (preventMessage === true) ? "Import was stopped by a prevent-import service" : preventMessage;
+        logWarning(eprintId, preventMessage, "not_imported:prevent-import");
         return true;
     }
     const idTags = O.serviceMaybe("hres:repository:eprints:id-tags") || ["id_number"];
@@ -1129,19 +1272,26 @@ var convertXMLToIntermediate = function(cursor, eprintsName, output) {
     P.data.eprintId = eprintId; // for debugging, since can't rely on object key ordering
     cursor.up();
     let status = cursor.firstChildElement("eprint_status").getText();
-    if(status !== "archive") {
+    if(!(status == "archive" || status == "buffer")) {
         logWarning(eprintId, "Unknown status: "+status,
             "not_imported:eprint_status:"+status);
         return;
     }
     cursor.up();
+    return convertXMLToIntermediate2(cursor, eprintId, output, preventImport);
+};
+
+var convertXMLToIntermediate2 = function(cursor, eprintId, output, preventImportFn) {
     let intermediate = {
         attributes: [],
         eprintId: eprintId,
         embargoData: [],
         output: output
     };
-    if(preventImport(cursor, intermediate, eprintId)) { return; } // e.g. if the object already is in the system
+    let status = cursor.firstChildElement("eprint_status").getText();
+    cursor.up();
+    intermediate.eprintStatus = status;
+    if(preventImportFn && preventImportFn(cursor, intermediate, eprintId)) { return; } // e.g. if the object already is in the system
     // some tags are repeated in the haploAttributeInfo structure, with various combinations of import & export fns
     let tagsWithImportFunction = [];
     let tagsWithoutImportFunction = [];
@@ -1172,8 +1322,9 @@ var convertXMLToIntermediate = function(cursor, eprintsName, output) {
         }
     });
     _.each(tagsWithoutImportFunction, tag => {
-        if((tagsWithImportFunction.indexOf(tag) === -1) && (log.tags["__not_imported"].indexOf(tag) === -1)) {
-            log.tags["__not_imported"].push(tag);
+        if((tagsWithImportFunction.indexOf(tag) === -1)) {
+            if(!(tag in log.tags["__not_imported"])) { log.tags["__not_imported"][tag] = 0; }
+            log.tags["__not_imported"][tag]++;
         }
     });
     return intermediate;
@@ -1181,6 +1332,23 @@ var convertXMLToIntermediate = function(cursor, eprintsName, output) {
 
 // Convert from intermediate to StoreObject
 var applyIntermediateToObject = function(intermediate, object) {
+    applyIntermediateToObjectAttributes(intermediate, object);
+    // TODO: not all clients will want the AcceptedIntoRepository label to be applied
+    O.impersonating(O.SYSTEM, () => {
+        if(intermediate.eprintStatus === "archive") {
+            object.save(O.labelChanges().add(Label.AcceptedIntoRepository));
+        } else {
+            object.save();
+        }
+    });
+    // TODO: Should this only apply to imported EPrints data?
+    if(intermediate.eprintId && object.ref) {
+        P.db.eprintsMetadata.create({ object: object.ref, eprintId: intermediate.eprintId }).save();
+    }
+    applyIntermediateToObjectAdditionalData(intermediate, object);
+};
+
+var applyIntermediateToObjectAttributes = function(intermediate, object) {
     const peopleTags = O.serviceMaybe("hres:repository:eprints:get-people-tags") || PEOPLE_TAGS;
     _.each(intermediate.attributes, (attribute) => {
         if(peopleTags.indexOf(attribute.tag) !== -1) {
@@ -1205,14 +1373,25 @@ var applyIntermediateToObject = function(intermediate, object) {
                 object.append(attribute.value, attribute.desc, attribute.qual);
             } else {
                 // check if the value is only appended in groups, not on the object directly
-                let onlyInGroup = true;
+                let seenOutsideOfGroup = false;
                 object.every(attribute.desc, attribute.qual, (v,d,q,x) => {
-                    if(!onlyInGroup) { return; }
-                    let valueMatch = O.isRef(attribute.value) ? (attribute.value == v) : (attribute.value === v);
-                    if(!valueMatch) { return; }
-                    onlyInGroup = !!x; // if x is defined, this value belongs to a group
+                    // if x is defined, the value is in a group and can be ignored
+                    if(seenOutsideOfGroup || ((attribute.qual || Q.Null) !== q) || x) {
+                        return;
+                    }
+                    let valueMatches = false;
+                    if(attribute.value.ref) {
+                        valueMatches = (attribute.value.ref == v);
+                    } else if((typeof attribute.value === "object") && attribute.value.toString && v.toString) {
+                        valueMatches = (attribute.value.toString() === v.toString());
+                    } else {
+                        valueMatches = (attribute.value === v);
+                    }
+                    if(valueMatches) {  // if x is undefined, this value is not in a group
+                        seenOutsideOfGroup = true;
+                    }
                 });
-                if(onlyInGroup) {
+                if(!seenOutsideOfGroup) {
                     object.append(attribute.value, attribute.desc, attribute.qual);
                 }
             }
@@ -1222,16 +1401,17 @@ var applyIntermediateToObject = function(intermediate, object) {
     });
     let typeTitle = object.firstType().load().title;
     log.outputsByType[typeTitle] = (log.outputsByType[typeTitle] || 0) + 1;
-    // TODO: not all clients will want the AcceptedIntoRepository label to be applied
-    O.impersonating(O.SYSTEM, () => { object.save(O.labelChanges().add(Label.AcceptedIntoRepository)); });
-    if(intermediate.eprintId && object.ref) {
-        P.db.eprintsMetadata.create({ object: object.ref, eprintId: intermediate.eprintId }).save();
-    }
+};
+
+var applyIntermediateToObjectAdditionalData = function(intermediate, object) {
     _.each(intermediate.embargoData, embargoData => {
+        // it is easier to determine a custom start date once the object is saved because earliest publication date
+        // service is available at this time
+        let customStart = O.serviceMaybe("hres:repository:eprints:custom-embargo-start", object, embargoData) || embargoData.start;
         // if has embargo data, want to throw error immediately if this service is not available
         O.service("hres_repo_embargoes:set_embargo", {
             object: object.ref,
-            customStart: embargoData.start,
+            customStart: customStart,
             embargoLength: embargoData.embargoLength,
             end: embargoData.end,
             licenseURL: embargoData.license,

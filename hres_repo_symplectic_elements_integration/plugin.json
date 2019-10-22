@@ -1,0 +1,15 @@
+{
+  "pluginName": "hres_repo_symplectic_elements_integration",
+  "pluginAuthor": "Haplo Services",
+  "pluginVersion": 1,
+  "displayName": "Repository Symplectic Elements Integration",
+  "displayDescription": "Integration for Symplectic Elements",
+  "apiVersion": 4,
+  "depend": [
+      "hres_repo_symplectic_elements_eprints_emulation"
+    ],
+  "load": [
+      "js/hres_repo_symplectic_elements_integration.js"
+    ],
+  "respond": ["/do/symplectic-elements-integration"]
+}

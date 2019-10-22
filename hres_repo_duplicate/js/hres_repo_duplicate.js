@@ -92,7 +92,7 @@ P.respond("GET", "/do/hres-repo-duplicate/duplicate-with-type", [
     let invalidType = false;
     var refInArray = (refArray, refToFind) => _.some(refArray, (ref) => ref == refToFind);
     if(repoTypes) {
-        invalidType = !_.some(repoTypes, (typeInfo) => refInArray(typeInfo, type));
+        invalidType = !_.some(repoTypes, (typeInfo) => refInArray(_.pluck(typeInfo, 'ref'), type));
     } else {
         repoTypes = SCHEMA.getTypesWithAnnotation("hres:annotation:repository-item");
         invalidType = !refInArray(repoTypes, type);

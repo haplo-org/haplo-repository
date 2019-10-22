@@ -3,6 +3,7 @@ group hres:group:repository-editors as RepositoryEditors
 group hres:group:ref-managers as REFManagers
 
 label hres:label:accepted-into-repository as AcceptedIntoRepository
+label hres:label:repository-item as RepositoryItem
 
 # TODO: remove when the following comment is possible
 restriction hres:restriction:ref-unit-of-assessment:repository-item
@@ -22,6 +23,8 @@ label hres:label:ref-unit-of-assessment:calculated
 schema-template hres:template-type:repository-item
     REMOVE attribute hres:attribute:ref-unit-of-assessment
     annotation hres:annotation:ref-unit-of-assessment:copy-from-researcher
+    attribute hres:attribute:ref-research [sort=17500]
+
 
 # ---------------------------------------------------------------------------
 
@@ -50,3 +53,24 @@ attribute hres:attribute:published-file as PublishersVersion
 attribute hres:attribute:ref-panel as REFPanel
 attribute hres:attribute:ref-unit-of-assessment as REFUnitOfAssessment
 attribute hres:attribute:researcher as Researcher
+
+attribute hres:attribute:ref-research as REFResearch
+    title: REF definitions of research
+    search-name: ref-definition-of-research
+    qualifier std:qualifier:null
+    data-type: link
+    ui-options checkbox
+    linked-type hres:type:ref-research-definition
+
+# ---------------------------------------------------------------------------
+
+type hres:type:ref-research-definition
+    title REF definition of research
+    search-name ref-definition-of-research
+    apply-schema-template hres:template-type:list
+object hres:list:ref-research-definition:research
+    title This item meets the REF definition of research
+    type hres:type:ref-research-definition
+object hres:list:ref-research-definition:not-research
+    title Does not meet the REF definition of research
+    type hres:type:ref-research-definition

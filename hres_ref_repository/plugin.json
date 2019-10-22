@@ -28,7 +28,8 @@
       "js/ref_workflow.js",
       "js/ref_exceptions.js",
       "js/ref_requirements.js",
-      "js/ref_reporting.js"
+      "js/ref_reporting.js",
+      "js/ref_process_reporting.js"
     ],
   "respond": [
       "/do/hres-ref-repo"

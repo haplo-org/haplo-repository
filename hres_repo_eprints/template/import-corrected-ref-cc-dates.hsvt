@@ -1,0 +1,7 @@
+
+<p>"Upload the CSV of corrected REF CC dates, supplied by the EPrints hosting providers."</p>
+
+<form method="POST"> std:form:token()
+  std:form(form)
+  <p> <input type="submit" value="Import"> </p>
+</form>

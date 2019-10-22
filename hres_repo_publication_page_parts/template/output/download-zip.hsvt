@@ -1,0 +1,5 @@
+
+// WARNING: REPLACEABLE =====================================================
+
+std:web-publisher:template("hres:repository:common:ui:button:primary")
+  { "Download files as zip" }

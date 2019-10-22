@@ -5,6 +5,7 @@ schema-template hres:template-type:repository:output
     attribute hres:attribute:publication-process-dates [sort=15101]
     FORCE-REMOVE attribute std:attribute:file [sort=14100]
     attribute hres:attribute:output-file [sort=14100]
+    element: std:group:everyone bottom hres_repo_research_fish:research_fish_metadata [sort=10001]
 
 schema-template hres:template-type:repository:practice-based-research
     annotation hres:annotation:repository:practice-based-research
@@ -19,7 +20,7 @@ schema-template hres:template-type:repository:practice-based-research
     attribute hres:attribute:contributors [sort=10500]
     FORCE-REMOVE attribute std:aliased-attribute:year
     attribute dc:attribute:date [sort=10700]
-    REMOVE attribute dc:attribute:publisher
+    FORCE-REMOVE attribute dc:attribute:publisher
     attribute hres:aliased-attribute:publisher-or-commissioning-body [sort=13500]
     FORCE-REMOVE attribute std:attribute:file [sort=14100]
     FORCE-REMOVE attribute hres:attribute:output-file [sort=14100]
@@ -140,6 +141,7 @@ attribute hres:attribute:contributors as Contributors
     qualifier std:qualifier:null
     qualifier hres:qualifier:actor
     qualifier hres:qualifier:animator
+    qualifier hres:qualifier:author-of-introduction
     qualifier hres:qualifier:author-of-screenplay
     qualifier hres:qualifier:calligrapher
     qualifier hres:qualifier:choreographer
@@ -229,6 +231,8 @@ attribute hres:attribute:supplemental-file
 type hres:type:text-output-file
     apply-schema-template hres:template-type:repository-file
     title Text-based output file
+    FORCE-REMOVE create-position normal
+    create-position never
 
 attribute hres:attribute:practice-based-output-file
     title Files
@@ -237,9 +241,12 @@ attribute hres:attribute:practice-based-output-file
     data-type attribute-group
     REMOVE group-type hres:type:text-output-file
     group-type hres:type:practice-based-output-file
+
 type hres:type:practice-based-output-file
     apply-schema-template hres:template-type:repository-file
     title Practice-based output file
+    FORCE-REMOVE create-position normal
+    create-position never
     attribute hres:attribute:image-credit
     attribute hres:attribute:measurements
     attribute hres:attribute:rights
@@ -286,6 +293,8 @@ type hres:type:exhibition as Exhibition
 type hres:type:journal-article as JournalArticle
     attribute hres:attribute:peer-review [sort=12000]
     attribute hres:attribute:funder [sort=13050]
+    FORCE-REMOVE attribute hres:attribute:output-file [sort=14100]
+    attribute hres:attribute:supplemental-file [sort=15120]
 
 type hres:type:performance as Performance
     apply-schema-template hres:template-type:repository:practice-based-research
@@ -348,6 +357,10 @@ qualifier hres:qualifier:actor
 qualifier hres:qualifier:animator
     title Animator
     search-name animator
+
+qualifier hres:qualifier:author-of-introduction
+    title Author of introduction
+    search-name author-of-introduction
 
 qualifier hres:qualifier:author-of-screenplay
     title Author of screenplay

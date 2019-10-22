@@ -13,6 +13,18 @@ if(P.workflow.workflowFeatureImplemented("hres:ref_compliance")) {
     Ingest.use("hres:ref_compliance");
 }
 
+Ingest.use("hres:combined_application_entities");
+Ingest.use("std:entities:add_entities", {
+    submitterOrAuthor: function() {
+        var submitter = this.M.workUnit.createdBy;
+        var submitterAndAuthors = this.author_refList;
+        if(submitter.ref) {
+            submitterAndAuthors.unshift(submitter.ref);
+        }
+        return O.deduplicateArrayOfRefs(submitterAndAuthors);
+    }
+});
+
 Ingest.use("std:notes", {
     canSeePrivateNotes: function(M, user) { return user.isMemberOf(Group.RepositoryEditors); }
 });
@@ -25,15 +37,27 @@ Ingest.actionPanelTransitionUI({state:"on_hold"}, function(M, builder) {
 
 Ingest.observeFinish({}, function(M) {
     var mItem = M.workUnit.ref.load();
-    var addLabel = (M.state === "published") ? Label.AcceptedIntoRepository : Label.RejectedFromRepository;
-    var removeLabel = (M.state === "published") ? Label.RejectedFromRepository : Label.AcceptedIntoRepository;
-    var changes = O.labelChanges().add(addLabel).remove(removeLabel);
+    var removeLabels = [
+        Label.AcceptedIntoRepository,
+        Label.AcceptedClosedDeposit,
+        Label.RejectedFromRepository
+    ];
+    var addLabel;
+    if(M.state === "published") {
+        addLabel = Label.AcceptedIntoRepository;
+    } else if(M.state === "published_closed") {
+        addLabel = Label.AcceptedClosedDeposit;
+    } else {
+        addLabel = Label.RejectedFromRepository;
+    }
+    // The addLabel is removed from the removeLabels list
+    var changes = O.labelChanges().remove(removeLabels).add(addLabel);
     if(mItem.first(A.PublicationProcessDates, Q.Deposited)) {
         mItem.relabel(changes);
     } else {
         mItem = mItem.mutableCopy();
         mItem.append(O.datetime(new Date(), undefined, O.PRECISION_DAY), A.PublicationProcessDates, Q.Deposited);
-        mItem.save(O.labelChanges().add(addLabel).remove(removeLabel));
+        mItem.save(changes);
     }
 });
 
@@ -46,6 +70,7 @@ Ingest.states({
         actionableBy: "hres:group:repository-editors",
         transitions: [
             ["publish", "published"],
+            ["publish_closed", "published_closed"],
             ["return", "returned_author"],
             ["place_on_hold", "on_hold"],
             ["reject", "rejected"]
@@ -58,12 +83,15 @@ Ingest.states({
         ]
     },
     "returned_author": {
-        actionableBy: "object:creator",
+        actionableBy: "submitterOrAuthor",
         transitions: [
             ["submit", "wait_editor"]
         ]
     },
     "published": {
+        finish: true
+    },
+    "published_closed": {
         finish: true
     },
     "rejected": {

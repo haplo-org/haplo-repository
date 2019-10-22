@@ -18,7 +18,6 @@
     "hres_digital_object_identifier",
     "hres_schema",
     "hres_repository",
-    "hres_repo_object_editor",
     "haplo_service_registry",
     "hres_journal_citation_value",
     "hres_repo_data_monitoring"
@@ -32,7 +31,8 @@
       "js/hres_repo_eprints_import.js",
       "js/hres_repo_eprints_meta_tags.js",
       "js/hres_repo_eprints.js",
-      "js/hres_repo_eprints_file_import.js"
+      "js/hres_repo_eprints_file_import.js",
+      "js/hres_repo_eprints_dates.js"
     ],
   "respond": ["/do/hres-repo-eprints"]
 }

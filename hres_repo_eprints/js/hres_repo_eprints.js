@@ -153,3 +153,115 @@ P.respond("GET,POST", "/do/hres-repo-eprints/arbitrary-test", [
         form: form,
     }, "upload-xml");
 });
+
+// --------------------------------------------------------------------------
+// Migration - Do not delete
+
+// The EPrints REF CC plugin initially had a bug that assigned the first open access and the 
+// first file deposit date for existing items as the date of install of the plugin. This has 
+// since been corrected, and a migration can be run within EPrints to correct the data at source.
+// The same migration script (https://github.com/eprintsug/ref_cc_c/tree/6ccf8f48c03ef89fb1b6a2a3b5717f39e31bdb1f)
+// can be used to generate a CSV of corrected data, to migrate the dates within Haplo. This
+// handler takes the CSV produced and corrects the imported data appropriately.
+
+var eprintsREFCCFixForm = P.form("refCCFix", "form/ref_cc_fix_upload.json");
+
+P.respond("GET,POST", "/do/hres-repo-eprints/import-corrected-ref-cc-dates", [
+], function(E) {
+    if(!O.currentUser.isSuperUser) { O.stop("Not permitted."); }
+    let document = {};
+    let form = eprintsREFCCFixForm.handle(document, E.request);
+    if(form.complete) {
+        O.background.run("hres_repo_eprints:correct_eprints_ref_cc_dates", {
+            file: document.csv[0]
+        });
+        return E.response.redirect("/");
+    }
+    E.render({
+        pageTitle: "Import corrected REF CC dates",
+        form: form
+    });
+});
+
+var HEADERS = ["eprintId", "fcd", "oldFcd", "foa", "oldFoa", "oldEmbLength", "embLength"];
+P.backgroundCallback("correct_eprints_ref_cc_dates", function(data) {
+    let corrections = O.file(data.file).readAsString("UTF-8");
+    let log = {
+        existingFFD: 0,
+        newFFD: 0,
+        existingFOA: 0,
+        newFOA: 0,
+        "hres:attribute:accepted-author-manuscript": 0,
+        "hres:attribute:published-file":0,
+        "no-file-warning": 0,
+        "noeprint-warning": 0
+    };
+    O.impersonating(O.SYSTEM, () => {
+        _.each(corrections.split(/[\r\n]+/), function(line) {
+            let fields = line.split(",");
+            if(fields[0] === "eprintid") { return; }    // Header row
+            let row = {};
+            _.each(fields, (f, idx) => {
+                row[HEADERS[idx]] = f;
+            });
+            let importedEPrintsData = P.db.eprintsMetadata.select().where("eprintId", "=", row.eprintId)[0];
+            if(!importedEPrintsData) {
+                console.log("WARNING: "+row.eprintId+": No record of eprintId in imported data");
+                log["noeprint-warning"]++;
+                return;
+            }
+            let object = importedEPrintsData.object.load();
+            let existingFFD = O.service("hres_ref_repository:get_first_file_deposit", object);
+            if(row["fcd"]) {
+                if(existingFFD) {
+                    existingFFD.date = new XDate(row["fcd"]).toDate();
+                    log.existingFFD++;
+                    existingFFD.save();
+                } else {
+                    let desc;
+                    [A.PublishedFile, A.OpenAccessFile].forEach((d) => {
+                        if(!desc && object.getAttributeGroupIds(d).length) {
+                            desc = d;
+                        }
+                    });
+                    if(desc) {
+                        O.service("hres_ref_repository:set_first_file_deposit", {
+                            output: object.ref,
+                            date: new XDate(row["fcd"]).toDate(),
+                            fileVersion: SCHEMA.getAttributeInfo(desc).code
+                        });
+                        log[SCHEMA.getAttributeInfo(desc).code]++;
+                        log.newFFD++;
+                    } else {
+                        log["no-file-warning"]++;
+                        console.log("WARNING: "+row.eprintId+" no AAM or VoR on object, type:"+object.firstType().load().title+", url:"+object.url(true));
+                    }
+                }
+            } else {
+                if(existingFFD) {
+                    existingFFD.deleteObject();
+                }
+            }
+            // And the same for FOA date
+            let existingFOA = O.service("hres_ref_repository:get_first_open_access", object);
+            if(row["foa"]) {
+                if(existingFOA) {
+                    log.existingFOA++;
+                    existingFOA.date = new XDate(row["foa"]).toDate();
+                    existingFOA.save();
+                } else {
+                    log.newFOA++;
+                    O.service("hres_ref_repository:set_first_open_access", {
+                        output: object.ref,
+                        date: new XDate(row["fcd"]).toDate()
+                    });
+                }
+            } else {
+                if(existingFOA) {
+                    existingFOA.deleteObject();
+                }
+            }
+        });
+    });
+    console.log(log);
+});

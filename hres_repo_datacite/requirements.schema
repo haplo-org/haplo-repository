@@ -14,6 +14,10 @@ attribute hres:attribute:research-institute as ResearchInstitute
 
 type hres:type:person:external-researcher as ExternalResearcher
 
+# Mandatory for the Datacite schema
+schema-template hres:template-type:repository-item
+    attribute dc:attribute:publisher [sort=10800]
+
 # ------ Default repository schema ---------------
 # These are OPTIONAL, to allow applications to implement different schemas if required
 
@@ -30,7 +34,6 @@ OPTIONAL type hres:type:conference-item as ConferenceItem
 OPTIONAL type hres:type:journal-article as JournalArticle
 
 OPTIONAL type hres:type:artefact as Artefact
-OPTIONAL type hres:type:audio as Audio
 OPTIONAL type hres:type:composition as Composition
 OPTIONAL type hres:type:dataset as Dataset
 OPTIONAL type hres:type:design as Design
@@ -43,5 +46,4 @@ OPTIONAL type hres:type:performance as Performance
 OPTIONAL type hres:type:report as Report
 OPTIONAL type hres:type:software as Software
 OPTIONAL type hres:type:thesis as Thesis
-OPTIONAL type hres:type:video as Video
 OPTIONAL type hres:type:website as Website

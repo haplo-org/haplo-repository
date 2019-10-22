@@ -189,12 +189,19 @@ P.respondAfterHTTPRequest("GET", "/api/hres-repo-embargoes/sherpa-romeo", [
         };
     },
     handle: function(data, result, E, output) {
-        var object = O.ref(data.object);
-        P.db.sherpaArchivingData.select().where('object', '=', object).deleteAll();
-        P.db.sherpaArchivingData.create({
-            object: object,
-            data: data
-        }).save();
+        if(!data) {
+            data = {
+                more: false,
+                publishers: []
+            };
+        } else {
+            var object = O.ref(data.object);
+            P.db.sherpaArchivingData.select().where('object', '=', object).deleteAll();
+            P.db.sherpaArchivingData.create({
+                object: object,
+                data: data
+            }).save();
+        }
         E.response.body = JSON.stringify(data);
         E.response.kind = 'json';
     }

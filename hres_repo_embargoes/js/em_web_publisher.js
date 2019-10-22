@@ -23,8 +23,11 @@ P.implementService("hres_repo_publication_common:collect_renders_for_file_groups
                         // Find the number of files affected by this embargo in a non-crappy and terrible way
                         let number = 0;
                         if(embargo.extensionGroup) {
-                            var group = object.extractSingleAttributeGroup(embargo.extensionGroup);
-                            number = group.every(A.File).length;
+                            var group = object.extractSingleAttributeGroupMaybe(embargo.extensionGroup);
+                            // Group can be missing if it's deleted from the object record without the corresponding embargo being removed
+                            if(group) {
+                                number = group.every(A.File).length;
+                            }
                         }
                         return {
                             multipleFiles: (number > 1) ? number : false,

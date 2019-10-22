@@ -122,8 +122,22 @@ var writeObjectAsDataciteXML = function(item, cursor, options) {
     simpleElement(A.Title, "title");
     resource.up();
 
-    simpleElement(A.Publisher, "publisher");
-    simpleElement(A.Date, "publicationYear");
+    var pub = item.first(A.Publisher);
+    if(pub) {
+        var str;
+        if(O.isRef(pub)) {
+            str = pub.load().title;
+        } else {
+            str = pub.toString();
+        }
+        resource.element("publisher").text(str).up();
+    }
+    if(item.first(A.Date)) {
+        // To guarantee the element contains only the year information
+        resource.element("publicationYear").
+            text(new XDate(item.first(A.Date).start).toString("yyyy")).
+            up();
+    }
     resource.element("subjects");
     elementMaybe("Keywords", "subject");
     resource.up();

@@ -9,8 +9,12 @@
   <tr>
     <td>
       <h2>title</h2>
-      <h2>authors</h2>
-      <h3>faculty</h3>
+      if(authors) {
+        <h2>authors</h2>
+      }
+      if(faculty) {
+        <h3>faculty</h3>
+      }
     </td>
   </tr>
 </table>

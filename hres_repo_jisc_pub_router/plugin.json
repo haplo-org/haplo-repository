@@ -4,7 +4,6 @@
   "pluginVersion": 1,
   "displayName": "Haplo RM Jisc Pub Router integration",
   "displayDescription": "Support item harvesting from Jisc Publication Router",
-  "installSecret": "d0afb6e7b38fd7d133764153c2f0cc362bdb5790",
   "apiVersion": 4,
   "use": ["hres:doi", "hres:orcid"],
   "privilegesRequired": [

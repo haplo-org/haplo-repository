@@ -30,6 +30,11 @@ P.webPublication.feature("hres:repository:common:platform-integration", function
         return publication.urlForObject(object);
     });
 
+    // This will give a URL for all files, but permissions may not allow them to be downloaded
+    P.implementService("hres:repository:common:public-url-for-file", function(fileOrIdentifier, options) {
+        return publication.urlForFileDownload(fileOrIdentifier, options);
+    });
+
     P.implementService("hres:repository:common:public-url-hostname", function(object) {
         return publication.urlHostname;
     });

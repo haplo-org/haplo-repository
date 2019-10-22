@@ -24,7 +24,6 @@ type hres:type:journal-article as JournalArticle
 attribute dc:attribute:publisher as Publisher
 attribute std:attribute:file as File
 attribute std:attribute:isbn as Isbn
-attribute hres:attribute:accepted-author-manuscript as AcceptedAuthorManuscript
 attribute hres:attribute:issn as Issn
 attribute hres:attribute:journal as Journal
 attribute hres:attribute:publication-dates as PublicationDate

@@ -23,7 +23,6 @@ OPTIONAL attribute hres:attribute:digital-object-identifier-doi as DOI
 # ------ Types -----------------------------
 
 type hres:type:artefact as Artefact
-type hres:type:audio as Audio
 type std:type:book as Book
 type hres:type:book-chapter as BookChapter
 type hres:type:conference-item as ConferenceItem
@@ -33,5 +32,5 @@ type hres:type:patent as Patent
 type hres:type:performance as Performance
 type hres:type:report as Report
 type hres:type:thesis as Thesis
-type hres:type:video as Video
+type hres:type:digital-or-visual-media as DigitalOrVisualMedia
 

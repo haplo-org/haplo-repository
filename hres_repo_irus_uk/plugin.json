@@ -8,8 +8,10 @@
   "privilegesRequired": ["pHTTPClient"],
   "depend": [
       "std_web_publisher",
-      "hres_oai_pmh"
+      "hres_oai_pmh",
+      "hres_repository"
     ],
+  "use": ["std:web-publisher"],
   "load": [
       "js/hres_repo_irus_uk.js"
     ],

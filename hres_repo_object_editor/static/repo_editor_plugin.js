@@ -11,7 +11,8 @@
 
     var NOTES = {
         "authcite": "In the left hand box, look up an existing author. In the right hand box, enter the author's name "+
-                "as they should be cited. If the author cannot be found, leave the left hand box blank.",
+                "as they should be cited. If the author cannot be found, leave the left hand box blank. Author's names "+
+                "may be dragged to reorder, if required.",
         "edcite": "In the left hand box, look up an existing editor. In the right hand box, enter the author's name "+
                 "as they should be cited. If the author cannot be found, leave the left hand box blank.",
         "bibref": "Use full, not abbreviated, publication names, and make sure page numbers etc are included "+
@@ -51,6 +52,7 @@
     Haplo.editor.registerDelegate("hres_repo_object_editor", function(editor, data) {
 
         var noteLookup = data.notes;
+        var additionalNotes = data.additionalNotes;
 
         // Make relevant metadata keys available to the custom text value type
         metadataKeys = data.metadataKeys;
@@ -60,10 +62,13 @@
                 var desc = attributeContainer.getDescriptor();
                 var key = noteLookup[desc];
                 if(key) {
-                    if(NOTES[key]) {
+                    var text;
+                    if(NOTES[key]) { text = NOTES[key]; }
+                    if(additionalNotes[key]) { text = additionalNotes[key]; }
+                    if(text) {
                         this.noteContainers = (this.noteContainers || []).concat([attributeContainer]);
                         attributeContainer.addUI('<div class="repository_guidance_show" style="position:absolute;top:-10px;right:0"><a href="#" title="what\'s this?"><p style="font-family:Ubuntu; color:#aaa; line-height:1.4em; border-style:solid; border-radius:1em; border-width:1px; border-color:#aaa; text-align:center; width:1.6em; margin:0"><b>?</b></p></a></div>');
-                        attributeContainer.addUI('<div class="repository_guidance_note" style="text-align:left; margin:16px 0 0 12px; color:#888; line-height: 1.4em; display:none">'+NOTES[key]+'</div>');
+                        attributeContainer.addUI('<div class="repository_guidance_note" style="text-align:left; margin:16px 0 0 12px; color:#888; line-height: 1.4em; display:none">'+text+'</div>');
                     } 
                 }
             },

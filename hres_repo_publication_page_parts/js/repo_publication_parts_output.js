@@ -26,6 +26,61 @@ P.webPublication.pagePart({
 // --------------------------------------------------------------------------
 
 P.webPublication.registerReplaceableTemplate(
+    "hres:repo-publication-parts:output:edit-link",
+    "output/edit-link"
+);
+
+P.webPublication.pagePart({
+    name: "hres:repository:output:edit-link",
+    category: "hres:repository:output:below",
+    sort: 10000,
+    deferredRender: function(E, context, options) {
+        if(context.object) {
+            var template = context.publication.getReplaceableTemplate("hres:repo-publication-parts:output:edit-link");
+            return template.deferredRender({
+                href: context.object.url(true)
+            });
+        }
+    }
+});
+
+// --------------------------------------------------------------------------
+
+
+P.webPublication.feature("hres:repository:output:zip-downloads", function(publication) {
+    publication.respondToDirectory("/zip-file-download",
+        function(E, context) {
+            var ref = (E.request.extraPathElements[0] || null);
+            if(!ref || !O.ref(ref)) { return; }
+            var output = O.ref(ref).load();
+            E.response.body = O.service("hres:repository:zip_output_files", output);
+    });
+    
+    P.webPublication.registerReplaceableTemplate(
+        "hres:repo-publication-parts:output:download-zip",
+        "output/download-zip"
+    );
+
+    P.webPublication.pagePart({
+        name: "hres:repository:output:download-zip-files",
+        sort: 360,
+        deferredRender: function(E, context, options) {
+            if(context.object) {
+                var files = O.serviceMaybe("hres:repository:zip_output_files", context.object);
+                if(files.count > 0) {
+                    var template = context.publication.getReplaceableTemplate("hres:repo-publication-parts:output:download-zip");
+                    return template.deferredRender({
+                        href: "/zip-file-download/"+context.object.ref
+                    });
+                }
+            }
+        }
+    });
+});
+
+// --------------------------------------------------------------------------
+
+P.webPublication.registerReplaceableTemplate(
     "hres:repo-publication-parts:output:related",
     "output/related"
 );

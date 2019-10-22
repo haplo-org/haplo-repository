@@ -7,6 +7,7 @@ attribute dc:attribute:author as Author
 attribute hres:attribute:editor as Editor
 attribute hres:attribute:edition as Edition
 attribute std:attribute:file as File
+OPTIONAL attribute hres:attribute:output-file as OutputFile
 OPTIONAL attribute hres:attribute:research-institute as ResearchInstitute
 OPTIONAL attribute hres:attribute:authors-citation as AuthorsCitation
 OPTIONAL attribute hres:attribute:editors-citation as EditorsCitation
@@ -31,10 +32,7 @@ OPTIONAL attribute hres:attribute:issn as Issn
 attribute std:attribute:notes as Notes
 attribute std:attribute:event as Event
 attribute hres:attribute:license as License
-OPTIONAL attribute hres:attribute:event-location as EventLocation
-OPTIONAL attribute hres:attribute:event-title as EventTitle
 OPTIONAL attribute hres:attribute:output-media as OutputMedia
-OPTIONAL attribute hres:attribute:event-date as EventDate
 OPTIONAL attribute hres:attribute:accepted-author-manuscript as OpenAccessFile
 OPTIONAL attribute hres:attribute:published-file as PublishedFile
 OPTIONAL attribute hres:attribute:supplemental-file as SupplementalFile
@@ -54,12 +52,16 @@ OPTIONAL attribute hres:attribute:data-collection-method as DataCollectionMethod
 attribute hres:attribute:collaborating-institution as CollaboratingInstitution
 OPTIONAL attribute hres:attribute:grant-id as GrantID
 OPTIONAL attribute hres:attribute:orcid as ORCID
+attribute hres:attribute:open-access as OpenAccess
+attribute hres:attribute:patent-applicant as PatentApplicant
+attribute std:attribute:project as Project
 
 attribute hres:attribute:event-date as EventDate
 attribute haplo:attribute:location as Location
 
 # -------- Qualifiers -------------------------
 
+qualifier std:qualifier:null as Null
 OPTIONAL qualifier hres:qualifier:exhibitor as Exhibitor
 
 # -------- Dates (potentially should be optional) -----------------------------------
@@ -91,6 +93,7 @@ OPTIONAL type hres:type:conference-item as ConferenceItem
 OPTIONAL type hres:type:conference-item:conference-paper as ConferencePaper
 OPTIONAL type hres:type:conference-item:conference-poster as ConferencePoster
 OPTIONAL type hres:type:conference-item:conference-keynote as ConferenceKeynote
+OPTIONAL type hres:type:dataset as Dataset
 OPTIONAL type hres:type:exhibition as Exhibition
 OPTIONAL type hres:type:journal-article as JournalArticle
 OPTIONAL type hres:type:patent as Patent
@@ -104,7 +107,9 @@ OPTIONAL type hres:type:digital-or-visual-media as DigitalOrVisualMedia
 OPTIONAL type hres:type:website as Website
 OPTIONAL type hres:type:design as Design
 type hres:type:other as Other
+type std:type:organisation as Organisation
 type hres:type:organisation:publisher as Publisher
+type hres:type:project:past as ProjectPast
 OPTIONAL type std:type:journal as Journal
 type hres:type:organisation:funder as Funder
 

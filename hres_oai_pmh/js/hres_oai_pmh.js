@@ -33,7 +33,7 @@ var REQUIRED_REPO_ATTRIBUTES = {
 
 /*HaploDoc
 node: /repository/hres_oai_pmh/metadata_formats
-title: Mtadata formats
+title: Metadata formats
 sort: 1
 --
 

@@ -1,0 +1,12 @@
+
+// WARNING: REPLACEABLE =====================================================
+
+<div class="card border-0 rounded-0">
+    <div class="card-body" style="padding:0;">
+        <div class="btn-group">
+            <a class="btn btn-primary" href=href>
+                "Log in to edit"
+            </a>
+        </div>
+    </div>  
+</div>

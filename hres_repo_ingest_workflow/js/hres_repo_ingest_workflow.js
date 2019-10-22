@@ -10,14 +10,23 @@ var canSubmitForIngest = function(user, item) {
         !P.Ingest.instanceForRef(item.ref));
 };
 
+var AdminBypass = O.action("hres_repo_ingest_workflow:admin_bypass").
+    title("Ingest administrator bypass").
+    allow("group", Group.RepositoryEditors);
+
 var fillPanel = function(display, builder) {
-    let object = display.object;
-    let depositPanel = builder.panel(100);
-    if(!P.Ingest.instanceForRef(object.ref) && !object.labels.includes(Label.AcceptedIntoRepository)) {
-        depositPanel.status(1, "Draft record - not yet available in public repository");
-    }
-    if(canSubmitForIngest(O.currentUser, object)) {
-            depositPanel.link("default", "/do/hres-repo-ingest-workflow/start/"+object.ref.toString(), "Deposit item");
+    var object = display.object;
+    if(!object.labels.includes(Label.AcceptedIntoRepository) && !object.labels.includes(Label.RejectedFromRepository)) {
+        var depositPanel = builder.panel(100);
+        if(!P.Ingest.instanceForRef(object.ref)) {
+            depositPanel.status(1, "Draft record - not yet available in public repository");
+            if(O.currentUser.allowed(AdminBypass)) {
+                depositPanel.link(50, "/do/hres-repo-ingest-workflow/deposit-admin-bypass/"+object.ref.toString(), "Deposit directly to repository");
+            }
+        }
+        if(canSubmitForIngest(O.currentUser, object)) {
+            depositPanel.link(20, "/do/hres-repo-ingest-workflow/start/"+object.ref.toString(), "Deposit item");
+        }
     }
 };
 P.implementService("std:action_panel:category:hres:repository_item", function(display, builder) {
@@ -57,6 +66,15 @@ P.respond("GET,POST", "/do/hres-repo-ingest-workflow/start", [
 
 // ----------------------------------------------------------------
 
+// TODO: Should this instead be a generic service to start the ingest workflow from other plugins,
+// which is called in client code, through and implementation of the 
+// "hres_repo_symplectic_elements_eprints_emulation:notify:saved" service?
+P.implementService("hres_repo_symplectic_elements_eprints_emulation:notify:saved", function(object) {
+    P.Ingest.create({object: object});
+});
+
+// ----------------------------------------------------------------
+
 P.hook('hPostObjectEdit', function(response, object, previous) {
     // Create operation
     if(!previous &&
@@ -83,4 +101,36 @@ P.implementService("hres:doi:minting:get-should-have-doi-function", function() {
             object.labels.includes(Label.AcceptedIntoRepository) &&
             !object.labels.includes(Label.RejectedFromRepository));
     };
+});
+
+// ----------------------------------------------------------------
+
+P.respond("GET,POST", "/do/hres-repo-ingest-workflow/deposit-admin-bypass", [
+    {pathElement:0, as:"object"}
+], function(E, object) {
+    AdminBypass.enforce();
+    var M = P.Ingest.instanceForRef(object.ref);
+    if(E.request.method === "POST") {
+        var changes = O.labelChanges().remove(Label.RejectedFromRepository).add(Label.AcceptedIntoRepository);
+        if(object.first(A.PublicationProcessDates, Q.Deposited)) {
+            object.relabel(changes);
+        } else {
+            var mutable = object.mutableCopy();
+            mutable.append(O.datetime(new Date(), undefined, O.PRECISION_DAY), A.PublicationProcessDates, Q.Deposited);
+            mutable.save(changes);
+        }
+        if(M) {
+            M.workUnit.deleteObject();
+            M.workUnit.save();
+        }
+        return E.response.redirect(object.url());
+    }
+    var verb = !!M ? "cancelling" : "bypassing";
+    E.render({
+        pageTitle: "Deposit bypassing approval",
+        object: object,
+        text: "The item will be deposited to the public repository, "+verb+" the usual approval process.\n"+
+            "Please confirm that it should be made available in the public interface immediately.",
+        options: [{label:"Confirm"}]
+    }, "std:ui:confirm");
 });

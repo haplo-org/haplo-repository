@@ -22,7 +22,6 @@ OPTIONAL attribute hres:attribute:pubmed-id as PubMedID
 
 # ------ Types -----------------------------
 
-type hres:type:audio as Audio
 type hres:type:artefact as Artefact
 type std:type:book as Book
 type hres:type:book-chapter as BookChapter
@@ -43,5 +42,4 @@ type hres:type:performance as Performance
 type hres:type:report as Report
 type hres:type:report:working-paper as WorkingPaper
 type hres:type:thesis as Thesis
-type hres:type:video as Video
 type hres:type:website as Website

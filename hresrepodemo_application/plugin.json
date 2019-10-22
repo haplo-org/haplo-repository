@@ -10,10 +10,15 @@
     ],
   "depend": [
       "haplo_activity_guidance_notes",
+      "haplo_data_import_api",
+      "haplo_data_import_batch",
+      "haplo_help_feedback_form",
       "hres_bibliographic_reference",
       "hres_development_test_data",
+      "hres_data_monitoring",
       "hres_file_mediated_access",
       "hres_orcid_repository",
+      "hres_orcid_affiliation",
       "hres_ref_repository",
       "hres_repo_access_level_policy",
       "hres_repo_apc",
@@ -35,7 +40,9 @@
       "hres_repo_metadata_dc",
       "hres_repo_navigation",
       "hres_repo_oa_green_stored",
+      "hres_repo_object_editor",
       "hres_repo_open_access",
+      "hres_repo_pubmed",
       "hres_repo_rioxx",
       "hres_repo_openaire",
       "hres_repo_schema_collections",
@@ -50,7 +57,9 @@
       "hresrepodemo_request_a_copy",
       "hres_repo_standard_publication",
       "hresrepodemo_test_harvest_source",
-      "hres_repo_web_profiles"
+      "hres_repo_web_profiles",
+      "hres_user_sync_generic",
+      "hresdemo_login"
     ],
   "load": [
       "js/hresrepodemo_application.js"

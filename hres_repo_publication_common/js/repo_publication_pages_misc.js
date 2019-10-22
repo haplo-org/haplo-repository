@@ -4,15 +4,56 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.         */
 
+/*HaploDoc
+node: /repository/hres_repo_publication_common
+title: Repository Publication Pages Common
+module_owner: Tom
+--
+
+h3(service). hres:repository:common:get_latest_additions
+
+Service to retrieve an array of the most recent additions, up to an optional limit.
+**REQUIRED:** utilisation of the Deposited qualifier on ingest.
+Usage: \
+@O.serviceMaybe("hres:repository:common:get_latest_additions", limit);@
+
+Where limit is the maximum number of items you wish to be returned from the list.
+
+
+
+h3(config). "repo_publication_common:latest_additions:page:max_items"
+
+This is used to set the maximum number of latest additions to display on the latest additions page
+
+*/
 
 // --------------------------------------------------------------------------
 //   LATEST ADDITIONS
 // --------------------------------------------------------------------------
 
+var LATEST_ADDITIONS_PAGE_MAX_ITEMS = O.application.config["repo_publication_common:latest_additions:page:max_items"] || 100;
+
 P.webPublication.registerReplaceableTemplate(
     "hres:repo-publication-common:page:latest-additions",
     "pages/latest-additions"
 );
+
+var getLatestAdditions = function(limit) {
+    var latest = O.query().
+        link(SCHEMA.getTypesWithAnnotation('hres:annotation:repository-item'), A.Type).
+        anyLabel([Label.AcceptedIntoRepository]).
+        execute();
+    latest = _.filter(latest, function(object) {
+        return !!object.first(A.PublicationProcessDates, Q.Deposited);
+    });
+    latest = _.sortBy(latest, function(object) {
+        // Sort descending
+        return -1*object.first(A.PublicationProcessDates, Q.Deposited).start;
+    });
+    return limit ? _.first(latest, limit) : latest;
+};
+
+P.implementService("hres:repository:common:get_latest_additions", getLatestAdditions);
 
 P.webPublication.feature("hres:repository:common:latest-additions", function(publication, spec) {
 
@@ -22,26 +63,12 @@ P.webPublication.feature("hres:repository:common:latest-additions", function(pub
     // This is a reasonable list of "latest deposit to public repository"
     publication.respondToExactPath(path,
         function(E, context) {
-            var latest = O.query().
-                link(SCHEMA.getTypesWithAnnotation('hres:annotation:repository-item'), A.Type).
-                anyLabel([Label.AcceptedIntoRepository]).
-                sortByDate().
-                limit(100).
-                execute();
-            latest = _.filter(latest, function(object) {
-                return object.first(A.PublicationProcessDates, Q.Deposited);
-            });
-            latest = _.sortBy(latest, function(object) {
-                // Sort descending
-                return -1*object.first(A.PublicationProcessDates, Q.Deposited).start;
-            });
             context.hint.isLatestAdditionsPage = true;
             E.render({
-                latestResults: { results: latest }
+                latestResults: { results: getLatestAdditions(LATEST_ADDITIONS_PAGE_MAX_ITEMS) }
             }, context.publication.getReplaceableTemplate("hres:repo-publication-common:page:latest-additions"));
         }
     );
-
 });
 
 

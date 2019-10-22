@@ -8,26 +8,24 @@
 // var LIVE_ENDPOINT = "https://irus.jisc.ac.uk/counter/";
 // var TEST_ENDPOINT = "https://irus.jisc.ac.uk/counter/test/";
 
-P.implementService("haplo_usage_tracking:notify:event", function(event) {
-    if(!(event.object && event.file)) { return; }
-    let object = O.withoutPermissionEnforcement(() => { return event.object.load(); });
-    let file = O.file(event.file);
+// Constants - matching KIND_ENUM saved in haplo_usage_tracking
+var VIEW_EVENT = 0;
+var DOWNLOAD_EVENT = 1;
 
-    let fileUrl, repositoryId, oaiIdentifier;
-    if(event.publication) {
-        let publication = O.service("std:web_publisher:get_publication", event.publication);
-        fileUrl = publication.urlForFileDownload(file);
-        repositoryId = publication.urlHostname;
-        oaiIdentifier = publication.oaiIdentifierForObject(object);
+P.implementService("haplo_usage_tracking:notify:event", function(event) {
+    if(!event.publication) { return; }  // IRUS only interested in public views and downloads
+    if(!event.object) { return; } 
+    let publication = O.service("std:web_publisher:get_publication", event.publication);
+    let object = O.withoutPermissionEnforcement(() => { return event.object.load(); });
+    if(!O.service("hres:repository:is_repository_item", object)) { return; }    // Only send them notifications for outputs
+    let oaiIdentifier = publication.oaiIdentifierForObject(object);
+    let svcDat;
+    if(event.kind === DOWNLOAD_EVENT) {
+        svcDat = publication.urlForFileDownload(O.file(event.file));
+    } else if(event.kind === VIEW_EVENT) {
+        svcDat = publication.urlForObject(object);
     } else {
-        // TODO: If we're setting a responsible publication for the OAI identifier, should we also do
-        // so for the url and repositoryId?
-        fileUrl = file.url({asFullUrl: true});
-        repositoryId = O.application.hostname;
-        let responsiblePublication = O.application.config["hres_repo_irus_uk:responsible_publication"];
-        if(!responsiblePublication) { throw new Error("No responsible publication set for IRUS-UK usage tracking"); }
-        let publication = O.service("std:web_publisher:get_publication", responsiblePublication);
-        oaiIdentifier = publication.oaiIdentifierForObject(object);
+        throw new Error("Unknown usage event kind.");
     }
 
     if(O.application.hostname === O.application.config["hres_repo_irus_uk:enabled_application"]) {
@@ -37,9 +35,10 @@ P.implementService("haplo_usage_tracking:notify:event", function(event) {
             queryParameter("req_id", event.remoteAddress).
             queryParameter("req_dat", event.userAgent).
             queryParameter("rft.artnum", oaiIdentifier).
-            queryParameter("svc_dat", fileUrl).
+            queryParameter("svc_dat", svcDat).
             queryParameter("rfr_dat", event.referrer).
-            queryParameter("rfr_id", repositoryId).
+            queryParameter("rfr_id", publication.urlHostname).
+            queryParameter("rft_dat", (event.kind === VIEW_EVENT) ? "Investigation" : "Request").
             request(IRUSResponse, {
                 event: event.id,
                 object: event.object.toString(),
@@ -59,4 +58,40 @@ var IRUSResponse = P.callback("irus", function(data, client, response) {
         console.log("Data sent:", data);
         console.log("Response body:", response.body ? response.body.readAsString("UTF-8") : "No body returned");
     }
+});
+
+//------------------------------------------------------------------------
+P.webPublication.registerReplaceableTemplate(
+    "hres:repository:irus:show-widget",
+    "irus-widget"
+);
+
+P.webPublication.registerReplaceableTemplate(
+    "hres:repository:irus:widget-banner",
+    "widget-banner"
+);
+
+P.webPublication.feature("hres:repository:irus:widget", function(publication, spec) {
+    publication.respondToExactPath("/external-statistics/irus-uk", function(E, context) {
+        var template = publication.getReplaceableTemplate("hres:repository:irus:show-widget");
+        var RID = O.application.config["hres_repo_irus_uk:repository_id"];
+        var params = O.serviceMaybe("hres:repository:irus:widget:get-parameters");
+        if(params) { RID += "&" + params; }
+        E.render({
+            unsafeScript: "<script id=\"irus-api-script\" src=\"https://irus.jisc.ac.uk/js/irus_pr_widget.js?RID="+RID+"\"></script>"
+        }, template);
+    });
+
+
+    P.webPublication.pagePart({
+        name: "hres:repository:irus-widget:banner",
+        category: "hres:repository:home:extra-body",
+        sort: 10,
+        deferredRender: function(E, context, options) {
+            var template = publication.getReplaceableTemplate("hres:repository:irus:widget-banner");
+            return template.deferredRender({
+                href: "/external-statistics/irus-uk"
+            });
+        }
+    });
 });

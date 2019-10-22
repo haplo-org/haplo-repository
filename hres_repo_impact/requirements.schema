@@ -97,7 +97,6 @@ attribute hres:attribute:underpinning-research as UnderpinningResearch
     linked-type std:type:project
     linked-type std:type:book
     linked-type hres:type:artefact
-    linked-type hres:type:audio
     linked-type hres:type:book-chapter
     linked-type hres:type:composition
     linked-type hres:type:conference-item
@@ -113,7 +112,6 @@ attribute hres:attribute:underpinning-research as UnderpinningResearch
     linked-type hres:type:report
     linked-type hres:type:software
     linked-type hres:type:thesis
-    linked-type hres:type:video
     linked-type hres:type:website
     linked-type hres:type:dataset
 

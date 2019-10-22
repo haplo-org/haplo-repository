@@ -94,6 +94,8 @@ P.implementService("std:reporting:collection:repository_items:get_facts_for_obje
     }
 });
 
+// --------------------------------------------------------------------------
+
 P.implementService("hres:reporting-aggregate-dimension:ref-oa-compliance", function() {
     return [
         { title: "Gold OA", filter(select) { 
@@ -317,7 +319,8 @@ P.respond("GET,POST", "/do/hres-ref-repo/overview", [
     dashboard.filter((select) => { select.where("refPublishedInREFPeriod", "=", true); }).
         columns(999, [
             "refPublishedInOAPeriod",
-            "refIsOACompliant"
+            "refIsOACompliant",
+            "refUnitOfAssessment"
         ]).
         respond();
 });

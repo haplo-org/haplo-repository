@@ -24,7 +24,6 @@ P.respond("GET", "/do/hres-repo-eprints/object-to-xml", [
     let cursor = document.cursor();
     objectToEprintsXML(object, cursor);
     E.response.body = document;
-    E.response.kind = 'text';
 });
 
 // object to intermediate
@@ -57,10 +56,15 @@ var objectToIntermediate = P.objectToIntermediate = function(object) {
 // No XSS issue as xml generator ensures that, and any data entered in Haplo will be ok, but may need
 // to mitigate for poor data from other systems
 var intermediateToXML = function(cursor, intermediate) {
-    let eprint = cursor.
-        element("eprint").
-        addNamespace("http://eprints.org/ep2/data/2.0", "eprints").
-        cursorWithNamespace("http://eprints.org/ep2/data/2.0");
+    let eprint;
+    if(cursor.getNamespaceURI() === "http://eprints.org/ep2/data/2.0") {
+        eprint = cursor.element("eprint");
+    } else {
+        eprint = cursor.
+            element("eprint").
+            addNamespace("http://eprints.org/ep2/data/2.0", "eprints").
+            cursorWithNamespace("http://eprints.org/ep2/data/2.0");
+    }
     _.each(intermediate.attributes, (a) => {
         if(a.tag === "rioxx2_license_ref_input") {
             if(!cursor.firstChildElementMaybe(a.tag)) {
@@ -171,7 +175,7 @@ if(USING_ORCID) { P.use("hres:orcid"); }
 P.personAttr = function(intermediate, object, attribute) {
     let person = {};
     let ref, personName;
-    personName = O.service("hres:author_citation:get_citation_text", attribute.value);
+    personName = attribute.value.toString();
     if(personName) {
         ref = O.service("hres:author_citation:get_ref_maybe", attribute.value);
         let m = personName.match(/^\s*(.*?)\s*,\s*(.*)\s*?$/);

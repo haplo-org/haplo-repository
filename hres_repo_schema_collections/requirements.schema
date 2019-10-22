@@ -68,7 +68,6 @@ attribute hres:attribute:collection-item as CollectionItem
     linked-type hres:type:patent
     linked-type hres:type:exhibition
     linked-type hres:type:book-chapter
-    linked-type hres:type:audio
     linked-type hres:type:artefact
     linked-type hres:type:journal-article
     linked-type hres:type:conference-item

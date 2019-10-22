@@ -8,6 +8,7 @@
 P.implementService("haplo:descriptive_object_labelling:setup", function(type) {
     P.REPOSITORY_TYPES.forEach(function(outputType) {
         type(outputType, {
+            selfLabelling: true,
             labels: [Label.ActivityRepository, Label.RepositoryItem],
             labelsFromLinked: [
                 [A.Author, A.ResearchInstitute],
@@ -16,7 +17,7 @@ P.implementService("haplo:descriptive_object_labelling:setup", function(type) {
             // Label with creator, authors and editors so they can always see their own outputs,
             // and can edit them when the output is accepted into the repository
             labelWithCreator: true,
-            labelWith: [A.Author, A.Editor]
+            labelWith: [A.Author, A.Editor, A.Project]
         });
     });
     

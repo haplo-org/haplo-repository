@@ -69,25 +69,30 @@ P.respond("GET,POST", "/do/hres-repo-schema-outputs/change-type", [
 // --------------------------------------------------------------------------
 // Computed current RI
 
-var addRisFromPeople = function(object, riAttr) {
-    let ris = [];
+var addAttrFromPeople = function(object, attrToFind, attrToChange) {
+    let attrs = [];
+    attrToChange = attrToChange || attrToFind;
     _.each([A.Researcher, A.Author, A.Editor], (personAttr) => {
         object.every(personAttr, (person) => {
             if(O.isRef(person) && person.load()) {
-                ris = ris.concat(person.load().every(A.ResearchInstitute));
+                attrs = attrs.concat(person.load().every(attrToFind));
             }
         });
     });
-    ris = O.deduplicateArrayOfRefs(ris);
-    object.remove(riAttr);
-    _.each(ris, (ri) => object.append(ri, riAttr));
+    attrs = O.deduplicateArrayOfRefs(attrs);
+    object.remove(attrToChange);
+    _.each(attrs, (attr) => object.append(attr, attrToChange));
 };
+
+P.implementService("hres:repository:add-attributes-from-creators", function(object, attrToFind, attrToChange) {
+    addAttrFromPeople(object, attrToFind, attrToChange);
+});
 
 P.hook('hComputeAttributes', function(response, object) {
     if(object.isKindOfTypeAnnotated("hres:annotation:repository-item")) {
-        addRisFromPeople(object, A.ResearchInstitute);
+        addAttrFromPeople(object, A.ResearchInstitute);
         if(!object.first(A.OriginalResearchInstitute)) {
-            addRisFromPeople(object, A.OriginalResearchInstitute);
+            addAttrFromPeople(object, A.ResearchInstitute, A.OriginalResearchInstitute);
         }
     }
 });

@@ -14,8 +14,81 @@ P.db.table('coversheet', {
     output: {type:"ref", indexed:true},
     type: {type:"text", nullable:true, indexedWith:["output"]},
     document: {type:"text", nullable:true},
+    // TODO: change to not nullable.
     originalFile: {type:"file", nullable:true},
+    // TODO: change to not nullable?
     lastGeneratedFile: {type:"file", nullable:true}
+});
+
+// Migration - TODO remove.
+// As original file and lastGeneratedFile are null in the rows where we stored the document, I
+// can't pre-fill the document with what was actually on the cover sheet because I can't think of
+// way to match it up to the latest relevant row without making assumptions like file transforms
+// not happening at the same time. The text will have to be retrieved manually from the file
+// versions. I hope that's fine - cover sheets are probably short anyway. Something is required as
+// the form cannot do text.statement from null.
+P.respond("GET,POST", "/do/hres-repo-cover-sheets/coversheet-db-single-triples", [
+    {parameter:"commit", as:"string", optional:true}
+], function(E, commit) {
+    if(!O.currentUser.isSuperUser) {
+        O.stop("Not permitted");
+    }
+    let updated = 0;
+    const descending = true;
+    const posting = E.request.method === "POST";
+    const committing = (posting && commit === "yes");
+    const fileTypes = getFileTypes();
+    const allRepositoryItems = O.query().
+        link(SCHEMA.getTypesWithAnnotation("hres:annotation:repository-item"), A.Type).
+        execute();
+    _.each(allRepositoryItems, (repositoryItem) => {
+        let repositoryItemIsUpdated = false;
+        _.each(fileTypes, (typeSpec, type) => {
+            repositoryItem.every(A.File, (fileId) => {
+                const rows = P.db.coversheet.select().
+                    where("output", "=", repositoryItem.ref).
+                    where("type", "=", type).
+                    where("lastGeneratedFile", "=", O.file(fileId)).
+                    order("id", descending).
+                    limit(1);
+                if(rows.length < 1) {
+                    return;
+                }
+                const latestRow = rows[0];
+                if(!latestRow.document) {
+                    latestRow.document = JSON.stringify(preFillCoversheetForm(repositoryItem, type));
+                    repositoryItemIsUpdated = true;
+                    if(committing) {
+                        latestRow.save();
+                    }
+                }
+            });
+        });
+        // Clean up as we're expecting single item, type and original file triples.
+        const nonMigratableCoverSheetDocumentQuery = P.db.coversheet.select().
+            where("output", "=", repositoryItem.ref).
+            where("document", "<>", null).
+            where("lastGeneratedFile", "=", null).
+            where("originalFile", "=", null);
+        const deletedNonMigratableCoverSheetDocumentRows = committing ?
+            nonMigratableCoverSheetDocumentQuery.deleteAll() :
+            nonMigratableCoverSheetDocumentQuery.count();
+        if(!repositoryItemIsUpdated && deletedNonMigratableCoverSheetDocumentRows > 0) {
+            repositoryItemIsUpdated = true;
+        }
+        if(repositoryItemIsUpdated) {
+            updated += 1;
+        }
+    });
+    if(posting) {
+        return E.response.redirect("/");
+    }
+    E.render({
+        pageTitle: "Migrate coversheet database to single row entries for each item, type and original file triple",
+        backLink: "/",
+        text: "Would you like to try to commit this change for "+updated+" repository items?",
+        options: [{ label:"Commit", parameters:{ commit:"yes" }}]
+    }, "std:ui:confirm");
 });
 
 // --------------------------------------------------------------------------
@@ -60,8 +133,9 @@ P.respond("GET,POST", "/do/hres-repo-cover-sheets/attach", [
     CanGenerateCoverSheet.enforce();
     const typeInfo = getFileTypes()[type];
     let file = O.file(digest);
-    let row = getSheetRow(output.ref, file, type, true);
-    let document = fileHasCoversheet(file, row) ? JSON.parse(row.document) : preFillCoversheetForm(output, type);
+    let row = getSheetRow(output.ref, file, type);
+    const isUpdate = !!fileHasCoversheet(file, row);
+    let document = isUpdate ? JSON.parse(row.document) : preFillCoversheetForm(output, type);
     const form = typeInfo.form.handle(document, E.request);
     if(E.request.method === "POST") {
         if(remove === "yes") {
@@ -70,12 +144,9 @@ P.respond("GET,POST", "/do/hres-repo-cover-sheets/attach", [
         } else if(form.complete) {
             // if the current file already has a cover sheet then use the source file
             // rather than append to an already appended document
-            let isUpdate = fileHasCoversheet(file, row);
-            if(isUpdate && row.originalFile) {
+            if(isUpdate) {
                 file = row.originalFile;
             }
-            row.document = JSON.stringify(document);
-            row.save();
             const redirectURL = generateAndPrependCoversheet(output, type, file, document, isUpdate);
             return E.response.redirect(redirectURL);
         }
@@ -86,7 +157,7 @@ P.respond("GET,POST", "/do/hres-repo-cover-sheets/attach", [
         output: output,
         publisher: O.isRef(publisher) ? publisher : undefined,
         form: form,
-        hasCoverSheet: fileHasCoversheet(file, row),
+        hasCoverSheet: isUpdate,
         remove: {
             text: "Would you like to remove the cover sheet?",
             options: [{
@@ -109,7 +180,9 @@ var generateAndPrependCoversheet = function(output, type, file, document, isUpda
         outputRef:output.ref.toString(),
         originalFileDigest: file.digest,
         type:type,
-        isUpdate:isUpdate
+        isUpdate:isUpdate,
+        // To save on SUCCESS.
+        document: document
     });
     let statement;
     if(document && document.text) {
@@ -127,13 +200,14 @@ var generateAndPrependCoversheet = function(output, type, file, document, isUpda
         subheading: _.map(output.every(A.Type), (type) => type.load().title).join(','),
         title: title,
         outputCitation: O.serviceMaybe("hres_bibliographic_reference:for_object", output),
-        authors: authorCitation.toString(),
+        authors: authorCitation ? authorCitation.toString() : undefined,
         statement: statement,
         outputUrl: O.serviceMaybe("hres:repository:common:public-url-for-object", output),
         publicRepoUrl: O.serviceMaybe("hres:repository:common:public-url-hostname"),
         datestamp: new XDate().toString("dd/MM/yyyy HH:mm")
     };
     _.extend(view, spec.view);
+
     const formattedTextSpec = spec.formattedText ? spec.formattedText(view) : {
         html: P.template("transforms/cover_sheet").render(view),
         marginTop: 160, marginBottom: 50, marginLeft: 62, marginRight: 62,
@@ -163,16 +237,17 @@ var generateAndPrependCoversheet = function(output, type, file, document, isUpda
 P.fileTransformPipelineCallback("hres_repo_cover_sheets:attach_cover_sheet", {
     success(result) {
         if(result.data.outputRef) {
-            const ref = O.ref(result.data.outputRef);
+            const output = O.ref(result.data.outputRef).load();
             const type = result.data.type;
             const attr = getFileTypes()[type].attr;
-            const originalFileDigest = result.data.originalFileDigest;
-            const originalFile = O.file(originalFileDigest);
-            let row = getSheetRow(ref, originalFile, type, true);
-            const output = ref.load();
+            const originalFile = O.file(result.data.originalFileDigest);
+            const createIfNotFound = true;
+            const row = getSheetRow(output.ref, originalFile, type, createIfNotFound);
+            const oldFile = result.data.isUpdate ? row.lastGeneratedFile : originalFile;
+            row.document = JSON.stringify(result.data.document);
             // store a reference to the source file for generation so that we can update the cover sheet
             // later without appending to an appended document
-            if(!row.originalFile || (row.lastGeneratedFile.digest !== originalFile.digest)) {
+            if(!result.data.isUpdate) {
                 row.originalFile = originalFile;
             }
             const fileWithCoverSheet = result.file("output", encodeURIComponent(output.title)+".pdf");
@@ -180,10 +255,12 @@ P.fileTransformPipelineCallback("hres_repo_cover_sheets:attach_cover_sheet", {
             // MUST save this before we append file to the object
             row.save();
             let newFileId = fileWithCoverSheet.identifier();
+            let qualifier;
             let extension;
             let oldFileId;
             output.every(A.File, (v,d,q,x) => {
-                if(v.digest === originalFileDigest) {
+                if(v.digest === oldFile.digest) {
+                    qualifier = q;
                     extension = x;
                     oldFileId = v;
                 }
@@ -193,16 +270,18 @@ P.fileTransformPipelineCallback("hres_repo_cover_sheets:attach_cover_sheet", {
                 const newFilename = oldFileId.filename.replace(/\.[\w\-\~]+$/, ".pdf");
                 newFileId.filename = newFilename;
                 newFileId.trackingId = oldFileId.trackingId;
-                newFileId.version = oldFileId.version; // TODO: is this right?
+                // We don't want to bump up the file version when adding a coversheet - it's the
+                // concept we've chosen to go with.
+                newFileId.version = oldFileId.version;
                 newFileId.logMessage = result.data.isUpdate ? 
                     "Updated cover sheet" :
                     "Automatically generated cover sheet added";
             }
             let mOutput = output.mutableCopy();
             mOutput.remove(A.File, (v,d,q) => {
-                return (v.digest === originalFileDigest);
+                return (v.digest === oldFile.digest);
             });
-            mOutput.append(newFileId, A.File, null, extension);
+            mOutput.append(newFileId, A.File, qualifier, extension);
             mOutput.save();
         }
     },
@@ -218,13 +297,11 @@ P.implementService("hres_repo_cover_sheets:generate", function(output, fileIdent
     });
     let row = getSheetRow(output.ref, fileIdentifier, type, true);
     let file = O.file(fileIdentifier);
-    const isUpdate = fileHasCoversheet(file, row);
+    const isUpdate = !!fileHasCoversheet(file, row);
     const document = isUpdate ? JSON.parse(row.document) : preFillCoversheetForm(output, type);
-    if(isUpdate && row.originalFile) {
+    if(isUpdate) {
         file = row.originalFile;
     }
-    row.document = JSON.stringify(document);
-    row.save();
     const redirectURL = generateAndPrependCoversheet(output, type, file, document, isUpdate);
     return redirectURL;
 });
@@ -237,21 +314,24 @@ var removeCoversheet = function(output, file, type) {
         where("lastGeneratedFile", "=", file)[0];
     if(!row || !row.originalFile) { O.stop("No original file found"); }
     const originalFileId = row.originalFile.identifier();
-    const newFilename = file.filename.replace(/\.[\w\-\~]+$/, ".pdf");
-    originalFileId.filename = newFilename;
     originalFileId.trackingId = file.trackingId;
+    // We don't want to bump up the file version when removing a coversheet - it's the concept
+    // we've chosen to go with.
     originalFileId.version = file.version;
     originalFileId.logMessage = "Removed cover sheet";
+    let qualifier;
     let extension;
     let mOutput = output.mutableCopy();
     mOutput.remove(A.File, (v,d,q,x) => {
         if(v.digest === file.digest) {
+            qualifier = q;
             extension = x;
             return true;
         }
     });
-    mOutput.append(originalFileId, A.File, null, extension);
+    mOutput.append(originalFileId, A.File, qualifier, extension);
     mOutput.save();
+    row.deleteObject();
 };
 
 // --------------------------------------------------------------------------

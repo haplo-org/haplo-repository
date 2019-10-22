@@ -17,6 +17,7 @@
       "hres:orcid"
     ],
   "load": [
-      "js/hres_repo_datacite.js"
+      "js/hres_repo_datacite.js",
+      "js/datacite_mandatory_metadata.js"
     ]
 }

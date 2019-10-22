@@ -3,6 +3,8 @@ group hres:group:repository-editors as RepositoryEditors
 
 label hres:label:accepted-into-repository as AcceptedIntoRepository
 
+label hres:label:accepted-as-closed-deposit as AcceptedClosedDeposit
+
 label hres:label:rejected-from-repository as RejectedFromRepository
 
 label hres:label:repository-item as RepositoryItem

@@ -33,6 +33,7 @@ Database rows contain:
 
 |*Field*|*Type*||*Nullable*|
 |@object@|@ref@|The ref of the output||
+|@groupExtension@|@int@|The extension of the attribute group this embargo applies to (if applicable)|Yes|
 |@desc@|@int@|The attribute that this embargo applies to (applies to all if null)|Yes|
 |@licenseURL@|@text@|The license that applies to this file when under embargo|Yes|
 |@start@|@date@|The start date of this embargo||
@@ -88,24 +89,6 @@ P.hook("hObjectAttributeRestrictionLabelsForUser", function(response, user, obje
     if(O.serviceMaybe("hres:repository:is_author", user, object)) {
         response.userLabelsForObject.add(Label.LiftAllEmbargoRestrictions);
     }
-});
-
-P.hook('hScheduleDailyEarly', function(response, year, month, dayOfMonth, hour, dayOfWeek) {
-    var today = new XDate(year, month, dayOfMonth);
-    var ending = P.db.embargoes.select().
-        where('end', '<', today.toDate());
-    if(P.data['lastLiftedEmbargoes']) {
-        var lastLiftedEmbargoes = new XDate(P.data['lastLiftedEmbargoes']); 
-        ending.where('end', '>', lastLiftedEmbargoes.clearTime().toDate());
-    }
-    var updated = O.refdict();
-    _.each(ending, (embargo) => {
-        if(!updated.get(embargo.object)) {
-            relabelForEmbargoes(embargo.object.load());
-            updated.set(embargo.object, true);
-        }
-    });
-    P.data['lastLiftedEmbargoes'] = (new Date()).toString();
 });
 
 P.implementService("haplo_alternative_versions:update_database_information", function(fromObject, toObject) {
@@ -209,8 +192,9 @@ P.db.table('embargoes', {
             new XDate(this.start).toString("dd MMM yyyy")+" - "+new XDate(this.end).toString("dd MMM yyyy") :
             "Indefinite embargo period");
     },
-    isActive: function() {
-        return (!this.end || (new XDate(this.end).diffDays(new XDate().clearTime) < 0));
+    isActive: function(onDay) {
+        if(!onDay) { onDay = new XDate().clearTime(); }
+        return (!this.end || (new XDate(this.end).diffDays(onDay) <= 0));
     },
     getLengthInMonths: function() {
         if(this.end) {
@@ -265,7 +249,10 @@ var setSingleEmbargo = function(spec) {
         throw new Error("Must specify object to embargo");
     }
     var object = O.isRef(spec.object) ? spec.object.load() : spec.object;
-    var document = {};
+    var document = {
+        all: {},
+        embargoes: []
+    };
     // assume the id only ever goes up, so ordering by id descending will get the latest row first
     var existingDocumentQuery = P.db.embargoDocuments.select().where("object", "=", object.ref).order("id", true);
     if(existingDocumentQuery.length) {
@@ -296,13 +283,11 @@ var setSingleEmbargo = function(spec) {
             }
         });
         if(!updatedExisting) {
-            if(!document.embargoes) { document.embargoes = []; }
             document.embargoes.push(updated);
         }
     } else {
         document.all = updated;
     }
-    if(!document.all) { document.all = {}; }
     P.db.embargoDocuments.create({
         object: object.ref,
         document: JSON.stringify(document)
@@ -313,9 +298,28 @@ var setSingleEmbargo = function(spec) {
 
 // -------------------------------------------------------------------
 
-P.hook("hLabelAttributeGroupObject", function(response, container, object, desc, groupId) {
-    // This will be removed from the 'remove' list if it is later 'added'
-    response.changes.remove(Label.EmbargoAllFiles);
+var liftEmbargoesDaily = P.liftEmbargoesDaily = function(onDay) {
+    var ending = P.db.embargoes.select().
+        where('end', '<', onDay || new XDate().clearTime().toDate());
+    if(P.data['lastLiftedEmbargoes']) {
+        var lastLiftedEmbargoes = new XDate(P.data['lastLiftedEmbargoes']); 
+        ending.where('end', '>', lastLiftedEmbargoes.clearTime().addDays(-1).toDate());
+    }
+    var updated = O.refdict();
+    _.each(ending, (embargo) => {
+        if(!updated.get(embargo.object)) {
+            relabelForEmbargoes(embargo.object.load(), onDay);
+            updated.set(embargo.object, true);
+        }
+    });
+    P.data['lastLiftedEmbargoes'] = (new Date()).toString();
+};
+P.hook('hScheduleDailyEarly', function(response, year, month, dayOfMonth, hour, dayOfWeek) {
+    liftEmbargoesDaily();
+});
+
+var shouldLabelAttributeGroupObject = P.shouldLabelAttributeGroupObject = function(container, groupId, onDay) {
+    var shouldLabel = false;
     if(container.ref) {
         var q = getEmbargoData(container);
         if(q) {
@@ -323,22 +327,30 @@ P.hook("hLabelAttributeGroupObject", function(response, container, object, desc,
                 sq.where("extensionGroup", "=", groupId).
                     where("extensionGroup", "=", null);
             }).each(function(embargo) {
-                if(embargo.isActive()) {
-                    response.changes.add(Label.EmbargoAllFiles);
+                if(embargo.isActive(onDay)) {
+                    shouldLabel = true;
                 }
             });
         }
     }
+    return shouldLabel;
+};
+P.hook("hLabelAttributeGroupObject", function(response, container, object, desc, groupId) {
+    // This will be removed from the 'remove' list if it is later 'added'
+    response.changes.remove(Label.EmbargoAllFiles);
+    if(shouldLabelAttributeGroupObject(container, groupId)) {
+        response.changes.add(Label.EmbargoAllFiles);
+    }
 });
 
-var relabelForEmbargoes = P.relabelForEmbargoes = function(object) {
+var relabelForEmbargoes = P.relabelForEmbargoes = function(object, onDay) {
     // This is removed from the 'remove' list if it is later 'added'
     var changes = O.labelChanges().remove([Label.EmbargoAllFiles]);
     var q = getEmbargoData(object);
     if(q) {
         // Per-file embargoes are dealt with by indexing and the hLabelAttributeGroupObject hook above
         q.where("extensionGroup", "=", null).each(function(embargo) {
-            if(embargo.isActive()) {
+            if(embargo.isActive(onDay)) {
                 changes.add(Label.EmbargoAllFiles);
             }
         });
@@ -355,4 +367,23 @@ P.respond("GET", "/do/hres-repo-embargoes/embargo-count", [
 ], function(E) {
     O.action("std:action:administrator_override").enforce();
     E.response.body = P.db.embargoes.select().count().toString();
+});
+
+// --------------------------------------------------------------------------
+// Force relabelling of all obects with embargoes - used mostly for migration
+
+P.respond("GET,POST", "/do/hres-repo-embargoes/admin/reapply-embargo-labels", [
+], function(E) {
+    if(!O.currentUser.isSuperUser) { O.stop("Not permitted."); }
+    if(E.request.method === "POST") {
+        P.data['lastLiftedEmbargoes'] = undefined;
+        liftEmbargoesDaily(new XDate().toDate());
+        E.response.redirect("/");
+    }
+    E.render({
+        pageTitle: "Re-apply all embargo labels",
+        text: "Do you want to force re-apply embargo labels for all items with embargoes? This will "+
+            "ensure embargo labels are correct according to the data in the underlying database.",
+        options: [{label: "Confirm"}]
+    }, "std:ui:confirm");
 });

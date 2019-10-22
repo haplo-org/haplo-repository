@@ -1,0 +1,5 @@
+std:plugin:resources("widget.css")
+pageTitle("IRUS Stats")
+
+<div id="jisc_container_div"></div>
+unsafeHTML(unsafeScript)

@@ -7,10 +7,6 @@
 
 if(O.featureImplemented("hres:doi")) { P.use("hres:doi"); }
 
-P.implementService("hres:orcid:integration:authenticated_scopes:discover", function(scopes) {
-    scopes.push("/activities/update");
-});
-
 // ------------ System triggers for pushing output records to ORCID ---------
 
 var pushDataToORCIDForUser = function(user, object) {
@@ -93,8 +89,8 @@ var ORCID_TYPE_MAP = {
     "dissertation": [T.Thesis],
     "invention": [T.Design],
     "journal-article": [T.JournalArticle],
-    "lecture-speech": [T.Audio, T.ConferenceKeynote],
-    "other": [T.Other, T.Artefact, T.DigitalOrVisualMedia, T.Exhibition, T.Video],
+    "lecture-speech": [T.DigitalOrVisualMedia, T.ConferenceKeynote],
+    "other": [T.Other, T.Artefact, T.DigitalOrVisualMedia, T.Exhibition],
     "patent": [T.Patent],
     "report": [T.Report],
     "research-tool": [T.DevicesAndProducts],
@@ -221,3 +217,148 @@ var getXMLDocumentForObject = function(object) {
 
     return xmlDocument;
 };
+
+// --------------------------------------------------------------------------
+// hres_orcid_obtain reporting
+// --------------------------------------------------------------------------
+
+var orcidActivity = O.application.config["hres_orcid_obtain:activity"] || "repository";
+
+var CanViewORCIDProgress = O.action("hres:action:can-view-orcid-progress");
+
+P.implementService("std:action_panel:activity:menu:"+orcidActivity.replace(/-/g,'_'), function(display, builder) {
+    if(O.currentUser.allowed(CanViewORCIDProgress)) {
+        builder.panel(9999).
+            link("top", "/do/hres-orcid-repository/output-orcid-by-faculty", "Output ORCID Progress by "+NAME("Faculty"));
+        if(O.service("hres:schema:institute_depth") > 1) {
+            builder.panel(9999).
+                link("top", "/do/hres-orcid-repository/output-orcid-by-department", "Output ORCID Progress by "+NAME("Department"));
+        }
+    }
+});
+
+P.implementService("std:reporting:collection:repository_items:setup", function(collection) {
+    collection.
+        fact("hasAuthorWithAuthenticatedORCID", "boolean", "Has author with authenticated ORCID").
+        fact("hasAuthorWithORCID",              "boolean", "Has author with ORCID").
+        statistic({
+            name:"noAuthorOrcid", description: "Outputs with no authors with ORCID ID",
+            filter: function(select) { 
+                select.or(function(sq) {
+                    sq.where("hasAuthorWithORCID","=",false).
+                        where("hasAuthorWithORCID","=", null); 
+                });
+            },
+            aggregate: "COUNT"
+        }).
+        statistic({
+            name:"noAuthorAuthenticatedOrcid", description: "Outputs with no ORCID authenticated authors",
+            filter: function(select) { 
+                select.and(function(sq) {
+                    sq.or(function(sqq) {
+                        sqq.where("hasAuthorWithAuthenticatedORCID","=",false).
+                            where("hasAuthorWithAuthenticatedORCID","=", null); 
+                        }).
+                    where("hasAuthorWithORCID", "=", true);
+                });
+            },
+            aggregate: "COUNT"
+        }).
+        statistic({
+            name:"oneAuthorAuthenticatedOrcid", description: "Outputs with ORCID authenticated author(s)",
+            filter: function(select) { select.where("hasAuthorWithAuthenticatedORCID","=",true); },
+            aggregate: "COUNT"
+        });
+});
+
+P.implementService("std:reporting:collection:repository_items:get_facts_for_object", function(object, row) {
+    var hasAuthorWithORCID = false,
+        hasAuthorWithAuthenticatedORCID = false;
+    
+    object.every(A.Author, function(value) {
+        if(!O.isRef(value)) { return; }
+        let author = value.load();
+        let orcid = author.first(A.ORCID);
+        if(orcid) {
+            hasAuthorWithORCID = true;
+            if(O.user(author.ref)){
+                let authenticated = !!O.service("hres:orcid:integration:for_user", O.user(author.ref));
+                if(authenticated) { hasAuthorWithAuthenticatedORCID = true; }
+            }
+        }
+    });
+    row.hasAuthorWithAuthenticatedORCID = hasAuthorWithAuthenticatedORCID;
+    row.hasAuthorWithORCID = hasAuthorWithORCID;
+});
+
+P.respond("GET,POST", "/do/hres-orcid-repository/output-orcid-by-department", [
+], function(E) {
+    CanViewORCIDProgress.enforce();
+    var deptName = NAME("Department");
+    var dashboard = P.reporting.dashboard(E, {
+        kind: "aggregate",
+        collection: "repository_items",
+        name: "output_orcid_by_department",
+        title: "Output ORCID state by "+deptName,
+        y: "hres:reporting-aggregate-dimension:department",
+        x: "hres:reporting-aggregate-dimension:orcid-states:outputs"
+    }).
+    summaryStatistic(0, "noAuthorOrcid").
+    summaryStatistic(1, "noAuthorAuthenticatedOrcid").
+    summaryStatistic(2, "oneAuthorAuthenticatedOrcid").
+    respond();
+});
+
+P.respond("GET,POST", "/do/hres-orcid-repository/output-orcid-by-faculty", [
+], function(E) {
+    CanViewORCIDProgress.enforce();
+    var facultyName = NAME("Faculty");
+    var dashboard = P.reporting.dashboard(E, {
+        kind: "aggregate",
+        collection: "repository_items",
+        name: "output_orcid_by_faculty",
+        title: "Output ORCID state by "+facultyName,
+        y: "hres:reporting-aggregate-dimension:faculty",
+        x: "hres:reporting-aggregate-dimension:orcid-states:outputs"
+    }).
+    summaryStatistic(0, "noAuthorOrcid").
+    summaryStatistic(1, "noAuthorAuthenticatedOrcid").
+    summaryStatistic(2, "oneAuthorAuthenticatedOrcid").
+    respond();
+});
+
+var getDimension = function(fact, value, title) {
+    return {
+        title: title,
+        filter: function(select) {
+            if(value === false) {
+                select.or(function(sq) {
+                    sq.where(fact, "=", value).
+                        where(fact,"=", null);
+                });
+            }
+            else {
+                select.where(fact, "=", value);
+            }
+        }
+    };
+};
+
+P.implementService("hres:reporting-aggregate-dimension:orcid-states:outputs", function() {
+    return [
+        getDimension("hasAuthorWithAuthenticatedORCID", true, "ORCID authenticated author(s)"),
+        {
+            title: "No ORCID authenticated authors",
+            filter: function(select) {
+                select.and(function(sq) {
+                    sq.or(function(sqq) {
+                        sqq.where("hasAuthorWithAuthenticatedORCID", "=", false).
+                            where("hasAuthorWithAuthenticatedORCID", "=", null); 
+                        }).
+                    where("hasAuthorWithORCID", "=", true);
+                });
+            }
+        },
+        getDimension("hasAuthorWithORCID", false, "No authors with an ORCID ID")
+    ];
+});

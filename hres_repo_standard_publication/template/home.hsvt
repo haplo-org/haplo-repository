@@ -5,54 +5,56 @@ if(TEXT.description) {
   <p class="lead pb-3 mb-0"> TEXT.description </p>
 }
 
-std:web-publisher:block("carousel") {
-  <div id="repo-carousel" class="carousel slide" data-ride="carousel">
+unless(HIDE_HOME_CAROUSEL) {
+  std:web-publisher:block("carousel") {
+    <div id="repo-carousel" class="carousel slide" data-ride="carousel">
 
-    if(HOME_CAROUSEL_NAV) {
-      <ol class="carousel-indicators">
-        each(HOME_CAROUSEL) {
-          <li data-target="#repo-carousel" data-slide-to=imageIndex class=if(isfirstImage){"active"}></li>
-        }
-      </ol>
-    }
-
-    <div class="carousel-inner">
-      each(HOME_CAROUSEL) {
-        <div class=["carousel-item" if(isfirstImage){"active"}]>
-          <img class="first-slide" src=image alt=imageDescription>
-          <div class="carousel-caption text-left">
-            if(title) { <h1> title </h1> }
-            if(text)  { <p> text </p> }
-          </div>
-        </div>
+      if(HOME_CAROUSEL_NAV) {
+        <ol class="carousel-indicators">
+          each(HOME_CAROUSEL) {
+            <li data-target="#repo-carousel" data-slide-to=imageIndex class=if(isfirstImage){"active"}></li>
+          }
+        </ol>
       }
+
+      <div class="carousel-inner">
+        each(HOME_CAROUSEL) {
+          <div class=["carousel-item" if(isfirstImage){"active"}]>
+            <img class="first-slide" src=image alt=imageDescription>
+            <div class="carousel-caption text-left">
+              if(title) { <h1> title </h1> }
+              if(text)  { <p> text </p> }
+            </div>
+          </div>
+        }
+      </div>
+
+      if(HOME_CAROUSEL_NAV) {
+        <a class="carousel-control-prev" href="#repo-carousel" role="button" data-slide="prev">
+          <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+          <span class="sr-only">"Previous"</span>
+        </a>
+        <a class="carousel-control-next" href="#repo-carousel" role="button" data-slide="next">
+          <span class="carousel-control-next-icon" aria-hidden="true"></span>
+          <span class="sr-only">"Next"</span>
+        </a>
+      }
+
     </div>
 
-    if(HOME_CAROUSEL_NAV) {
-      <a class="carousel-control-prev" href="#repo-carousel" role="button" data-slide="prev">
-        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-        <span class="sr-only">"Previous"</span>
-      </a>
-      <a class="carousel-control-next" href="#repo-carousel" role="button" data-slide="next">
-        <span class="carousel-control-next-icon" aria-hidden="true"></span>
-        <span class="sr-only">"Next"</span>
-      </a>
-    }
-
-  </div>
-
-  <section class="container haplo-search-form haplo-search-form-main my-3 py-3">
-    <form class="form-inline m-2 m-lg-0 card border-0 p-2" role="search" method="GET" action=SEARCH_PATH>
-      <div class="input-group m-auto p-0 w-75 shadow">
-        <input class="form-control form-control-lg py-2 border-2 border-primary" type="search" placeholder=TEXT.homeMainSearchPlaceholder aria-label="Search" name="q" autofocus="autofocus">
-        <span class="input-group-append">
-          <button class="btn btn-outline-primary bg-primary" type="submit">
-            <i class="fas fa-search text-light"></i>
-          </button>
-        </span>
-      </div>
-    </form>
-  </section>
+    <section class="container haplo-search-form haplo-search-form-main my-3 py-3">
+      <form class="form-inline m-2 m-lg-0 card border-0 p-2" role="search" method="GET" action=SEARCH_PATH>
+        <div class="input-group m-auto p-0 w-75 shadow">
+          <input class="form-control form-control-lg py-2 border-2 border-primary" type="search" placeholder=TEXT.homeMainSearchPlaceholder aria-label="Search" name="q">
+          <span class="input-group-append">
+            <button class="btn btn-outline-primary bg-primary" type="submit">
+              <i class="fas fa-search text-light"></i>
+            </button>
+          </span>
+        </div>
+      </form>
+    </section>
+  }
 }
 
 <div class="card-deck py-3 mb-3">

@@ -5,7 +5,8 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.         */
 
 
-var NOTES = {};
+var NOTES = {},
+    ADDITIONAL_NOTES = {};
 NOTES[A.AuthorsCitation] = "authcite";
 NOTES[A.EditorsCitation] = "edcite";
 // TODO: Make these notes composable
@@ -34,8 +35,56 @@ P.hook('hObjectEditor', function(response, object) {
             notes:NOTES,
             authorAttrs:AUTHOR_ATTR_FIELDS,
             publisherAttr:A.Publisher,
-            metadataKeys:P.REPOSITORY_METADATA_KEYS
+            metadataKeys:P.REPOSITORY_METADATA_KEYS,
+            additionalNotes: ADDITIONAL_NOTES
         };
         P.template("include_repo_editor_plugin").render();
     }
+});
+
+/*HaploDoc
+node: repository/hres_repo_object_editor
+title: Repository Object Editor
+sort: 1
+--
+
+h2(service). "hres:repository:add_info_bubble"
+
+h3(arguments). Arguments
+
+Service takes one javascript object as an argument, in the form
+
+<pre>
+Attribute: {
+    lookup: "key",
+    note: "Note to Display"
+}
+</pre>
+Where:
+- @Attribute@ is the attribute to attach the note to, i.e @A.Title@
+- @key@ is an identifying key which can be used to override default info bubbles 
+- @Note to Display@ is the note to show in the object editor
+Both of type string
+
+h3(usage). Usage: O.service("hres:repository:add_info_bubbles", NOTES);
+
+Where notes is defined and the service is called like so:
+
+<pre>language=javascript
+NOTES[A.Title] = {
+    lookup: "title",
+    note: "Enter the title of the output here"
+};
+
+P.onLoad = function() {
+    O.service("hres:repository:add_info_bubbles", NOTES);
+};
+</pre>
+The service is called in @P.onLoad@ to ensure that the repository object editor plugin is loaded and there is no dependency on the load order.
+*/
+P.implementService("hres:repository:add_info_bubbles", function(notes) {
+    _.each(notes, function(value, key) {
+        NOTES[key] = value.lookup;
+        ADDITIONAL_NOTES[value.lookup] = value.note;
+    });
 });

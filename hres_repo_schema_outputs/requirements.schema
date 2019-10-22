@@ -38,15 +38,6 @@ type hres:type:artefact as Artefact
     render-category 0
     default-subtype hres:type:artefact
 
-type hres:type:audio as Audio
-    apply-schema-template hres:template-type:repository-item
-    title: Audio
-    search-name: audio
-    attribute dc:attribute:title [sort=10000]
-    render-icon: E410,1,f
-    render-category 1
-    default-subtype hres:type:audio
-
 type std:type:book as Book
     apply-schema-template hres:template-type:repository-item
     apply-schema-template hres:template-type:repository:output
@@ -181,7 +172,6 @@ type hres:type:journal-article as JournalArticle
     attribute hres:attribute:journal-citation [sort=10760]
     attribute hres:attribute:accepted-author-manuscript [sort=14100]
     attribute hres:attribute:published-file [sort=14110]
-    attribute hres:attribute:supplemental-file [sort=15120]
     render-icon: E211,1,f
     render-category 3
     default-subtype hres:type:journal-article
@@ -290,16 +280,6 @@ type hres:type:thesis as Thesis
     render-category 2
     default-subtype hres:type:thesis
 
-type hres:type:video as Video
-    apply-schema-template hres:template-type:repository-item
-    apply-schema-template hres:template-type:repository:output
-    title: Video
-    search-name: video
-    attribute dc:attribute:title [sort=10000]
-    render-icon: E512,1,f
-    render-category 3
-    default-subtype hres:type:video
-
 type hres:type:website as Website
     apply-schema-template hres:template-type:repository-item
     apply-schema-template hres:template-type:repository:output
@@ -350,7 +330,6 @@ attribute hres:attribute:original-research-institute as OriginalResearchInstitut
 
 attribute hres:attribute:output as Output
     linked-type hres:type:artefact
-    linked-type hres:type:audio
     linked-type hres:type:book-chapter
     linked-type hres:type:composition
     linked-type hres:type:conference-item
@@ -366,7 +345,6 @@ attribute hres:attribute:output as Output
     linked-type hres:type:report
     linked-type hres:type:software
     linked-type hres:type:thesis
-    linked-type hres:type:video
     linked-type hres:type:website
 
 # ---------------------------------------------------------------------------
