@@ -19,6 +19,8 @@
       "hres_file_mediated_access",
       "hres_orcid_repository",
       "hres_orcid_affiliation",
+      "hres_data_management_plans",
+      "hres_data_management_plans_standalone",
       "hres_ref_repository",
       "hres_repo_access_level_policy",
       "hres_repo_apc",
