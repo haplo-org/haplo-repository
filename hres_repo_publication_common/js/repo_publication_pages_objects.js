@@ -273,10 +273,7 @@ P.webPublication.feature("hres:repository:common:research-institute", function(p
                     query.
                         // Restrict search to repository items
                         anyLabel([Label.RepositoryItem]).
-                        linkToQuery(A.Author, function(sq) {
-                            sq.link(T.Person, A.Type).
-                                link(object.ref, A.ResearchInstitute);
-                        });
+                        link(context.object.ref);
                 }
             });
 

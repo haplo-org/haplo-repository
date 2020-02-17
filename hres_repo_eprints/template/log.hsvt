@@ -9,7 +9,7 @@ if(file) {
 if(log) {
     <h2> "Log" </h2>
     <span>
-        <a href=["/do/hres-repo-eprints/download-log/"row]>"Download as JSON..."</a> " | "
+        <a href=["/do/hres-repo-eprints/download-log/"row] role="button">"Download as JSON..."</a> " | "
         <a href=["/do/hres-repo-eprints/regex-cheatsheet/"row]>"Useful regex patterns"</a>
     </span>
     <pre style="font-size:10px;line-height:12px"> log </pre>

@@ -1,0 +1,14 @@
+{
+  "pluginName": "hres_geographic_bounding_box_value",
+  "pluginAuthor": "Haplo Services",
+  "pluginVersion": 1,
+  "displayName": "Geographic Bounding Box Value",
+  "displayDescription": "Implementation of bounding box value data type",
+  "apiVersion": 4,
+  "depend": [
+    "hres_repo_schema_research_data"
+  ],
+  "load": [
+      "js/hres_geographic_bounding_box_value.js"
+    ]
+}

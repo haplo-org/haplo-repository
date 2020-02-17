@@ -1,0 +1,14 @@
+{
+  "pluginName": "hres_repo_export_formats",
+  "pluginAuthor": "Haplo Services",
+  "pluginVersion": 1,
+  "displayName": "Haplo RM Repository Export Formats",
+  "displayDescription": "Management of export formats from Haplo Research Manager Repositories",
+  "installSecret": "4b2e766353cc70c3613e419d1909fbf2827df880",
+  "apiVersion": 4,
+  "load": [
+      "js/hres_repo_export_formats.js",
+      "js/ef_web_publisher.js"
+    ],
+  "respond": ["/do/hres-repo-export-formats"]
+}

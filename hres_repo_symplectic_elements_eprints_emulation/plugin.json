@@ -1,0 +1,19 @@
+{
+  "pluginName": "hres_repo_symplectic_elements_eprints_emulation",
+  "pluginAuthor": "Haplo Services",
+  "pluginVersion": 1,
+  "displayName": "Repository Symplectic Elements EPrints Emulation",
+  "displayDescription": "Emulated EPrints API for integrating with Symplectic Elements",
+  "apiVersion": 4,
+  "privilegesRequired": ["pDatabase"],
+  "depend": [
+      "hres_oai_pmh",
+      "hres_repo_eprints",
+      "hres_orcid_obtain"
+    ],
+  "load": [
+      "js/hres_repo_symplectic_elements_eprints_emulation.js"
+    ],
+  "respond": ["/api/symplectic-elements-eprints-emulation"],
+  "allowAnonymousRequests": true
+}

@@ -9,6 +9,7 @@ var CanManageREF = P.CanManageREF = O.action("hres_ref_repository:manage_ref").
     title("Can managed REF").
     allow("group", Group.RepositoryEditors).
     allow("group", Group.REFManagers).
+    allow("role", "Unit of Assessment Lead").
     allow("role", "Head");
 
 P.db.table("exceptions", {
@@ -102,7 +103,11 @@ P.implementService("hres_ref_repository:get_exception", function(object) {
 // -----------------------------------------------------------
 
 var isConfItemOrJournalArticle = P.isConfItemOrJournalArticle = function(output) {
-    return (output.isKindOf(T.JournalArticle) || output.isKindOf(T.ConferenceItem));
+    var conferenceISSN;
+    if(output.isKindOf(T.ConferenceItem)) {
+        conferenceISSN = output.first(A.ISSN);
+    }
+    return !!(output.isKindOf(T.JournalArticle) || conferenceISSN);
 };
 
 var isGoldOA = P.isGoldOA = function(output) {
@@ -122,10 +127,17 @@ var isPublishedInREFOAPeriod = P.isPublishedInREFOAPeriod = function(object) {
 var isPublishedInREFPeriod = P.isPublishedInREFPeriod = function(output) {
     let published = O.service("hres:repository:earliest_publication_date", output);
     let accepted = output.first(A.PublicationProcessDates, Q.Accepted) ? output.first(A.PublicationProcessDates, Q.Accepted).start : null;
-    let refCutoffDate = published || accepted;
-    // Items that are eligable for submission to the next REF are those publised after the 1 April 2014
-    return !!(refCutoffDate && refCutoffDate > new XDate("2014-04-01").toDate());
+    let printDate;
+    if(output.isKindOf(T.JournalArticle) && output.first(A.PublicationDates, Q.Print)) {
+        printDate = output.first(A.PublicationDates, Q.Print).start;
+    }
+    // refCutoffDate for articles is when they were printed (UoA lead responsibility for further checks)
+    let refCutoffDate = printDate || published || accepted;
+    // Items that are eligable for submission to the next REF are those publised after the 1 January 2014
+    return !!(refCutoffDate && refCutoffDate >= new XDate("2014-01-01").toDate());
 };
+
+P.implementService("hres_ref_repository:is_published_in_ref_period", output => { return isPublishedInREFPeriod(output); });
 
 var passesREFOAChecks = P.passesREFOAChecks = function(output) {
     return _.every(P.REFChecks, (c) => c.check(output));

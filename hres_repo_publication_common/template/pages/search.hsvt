@@ -12,14 +12,16 @@ std:web-publisher:block("pageheaderExtra") {
   </div>
 }
 
-<div class="search-results">
-  render(search.results)
-</div>
-
-ifAll(showingForm searchByFieldsPath) {
-  <div class="text-center">
-    <p>
-      <a href=searchByFieldsPath class="btn btn-show btn-outline-primary"> "Search by fields..." </a>
-    </p>
+std:web-publisher:block("below") {
+  <div class="search-results">
+      render(search.results)
   </div>
+
+  ifAll(showingForm searchByFieldsPath) {
+    <div class="text-center">
+      <p>
+        <a href=searchByFieldsPath class="btn btn-show btn-outline-primary" role="button"> NAME("hres:repository:publication:name:search-by-fields" "Search by fields...") </a>
+      </p>
+    </div>
+  }
 }

@@ -5,18 +5,146 @@ attribute dc:attribute:publisher as Publisher
 attribute dc:attribute:author as Author
 
 attribute hres:attribute:abstract as Abstract
+attribute hres:attribute:data-collection-method as DataCollectionMethod
+attribute hres:attribute:data-processing as DataProcessing
 attribute hres:attribute:authors-citation as AuthorsCitation
 attribute hres:attribute:digital-object-identifier-doi as DOI
 attribute hres:attribute:editor as Editor
 attribute hres:attribute:editors-citation as EditorsCitation
 attribute hres:attribute:orcid as ORCID
 attribute hres:attribute:research-institute as ResearchInstitute
+attribute hres:attribute:grant-id as GrantId
+attribute std:attribute:project as Project
+attribute hres:attribute:funder as Funder
+OPTIONAL attribute hres:attribute:related-output as RelatedOutput
 
+OPTIONAL attribute hres:attribute:geographic-location as GeographicLocation
+OPTIONAL attribute hres:attribute:geographic-bounding-box as BoundingBox
+OPTIONAL attribute hres:attribute:geographic-coverage as GeographicCoverage
+OPTIONAL attribute hres:attribute:dataset-file as DatasetFile
+OPTIONAL attribute hres:attribute:data-type as DataType
+attribute std:attribute:url as Url
 type hres:type:person:external-researcher as ExternalResearcher
-
+type hres:type:research-institute:university as University
 # Mandatory for the Datacite schema
 schema-template hres:template-type:repository-item
     attribute dc:attribute:publisher [sort=10800]
+
+OPTIONAL attribute hres:attribute:grid-id as GridID
+
+attribute hres:attribute:contributors as Contributors
+    title Contributors
+    search-name contributors
+    REMOVE qualifier hres:qualifier:producer
+    REMOVE qualifier hres:qualifier:researcher
+    qualifier hres:datacite:qualifier:contact-person
+    qualifier hres:datacite:qualifier:data-collector
+    qualifier hres:datacite:qualifier:data-curator
+    qualifier hres:datacite:qualifier:data-manager
+    qualifier hres:datacite:qualifier:distributor
+    qualifier hres:datacite:qualifier:editor
+    qualifier hres:datacite:qualifier:hosting-institution
+    qualifier hres:datacite:qualifier:producer
+    qualifier hres:datacite:qualifier:project-leader
+    qualifier hres:datacite:qualifier:project-manager
+    qualifier hres:datacite:qualifier:project-member
+    qualifier hres:datacite:qualifier:registration-agency
+    qualifier hres:datacite:qualifier:registration-authority
+    qualifier hres:datacite:qualifier:related-person
+    qualifier hres:datacite:qualifier:researcher
+    qualifier hres:datacite:qualifier:research-group
+    qualifier hres:datacite:qualifier:rights-holder
+    qualifier hres:datacite:qualifier:sponsor
+    qualifier hres:datacite:qualifier:supervisor
+    qualifier hres:datacite:qualifier:work-package-leader
+    qualifier hres:datacite:qualifier:other
+# -------- Qualifiers -------------------------
+
+qualifier hres:datacite:qualifier:contact-person
+    title: Contact Person
+    search-name: contact person
+
+qualifier hres:datacite:qualifier:data-collector
+    title: Data Collector
+    search-name: data collector
+
+qualifier hres:datacite:qualifier:data-curator
+    title: Data Curator
+    search-name: data curator
+
+qualifier hres:datacite:qualifier:data-manager
+    title: Data Manager
+    search-name: data manager
+
+qualifier hres:datacite:qualifier:distributor
+    title: Distributor
+    search-name: distributor
+
+qualifier hres:datacite:qualifier:editor
+    title: Editor
+    search-name: editor
+
+qualifier hres:datacite:qualifier:hosting-institution
+    title: Hosting Institution
+    search-name: hosting institution
+
+qualifier hres:datacite:qualifier:producer
+    title: Producer
+    search-name: producer
+
+qualifier hres:datacite:qualifier:project-leader
+    title: Project Leader
+    search-name: project leader
+
+qualifier hres:datacite:qualifier:project-manager
+    title: Project Manager
+    search-name: project manager
+
+qualifier hres:datacite:qualifier:project-member
+    title: Project Member
+    search-name: project member
+
+qualifier hres:datacite:qualifier:registration-agency
+    title: Registration Agency
+    search-name: registration agency
+
+qualifier hres:datacite:qualifier:registration-authority
+    title: Registration Authority
+    search-name: registration authority
+
+qualifier hres:datacite:qualifier:related-person
+    title: Related Person
+    search-name: related person
+
+qualifier hres:datacite:qualifier:researcher
+    title: Researcher
+    search-name: researcher
+
+qualifier hres:datacite:qualifier:research-group
+    title: Research Group
+    search-name: research group
+
+qualifier hres:datacite:qualifier:rights-holder
+    title: Rights Holder
+    search-name: rights holder
+
+qualifier hres:datacite:qualifier:sponsor
+    title: Sponsor
+    search-name: sponsor
+
+qualifier hres:datacite:qualifier:supervisor
+    title: Supervisor
+    search-name: supervisor
+
+qualifier hres:datacite:qualifier:work-package-leader
+    title: Work Package Leader
+    search-name: work package leader
+
+qualifier hres:datacite:qualifier:other
+    title: Other
+    search-name: other
+
+
 
 # ------ Default repository schema ---------------
 # These are OPTIONAL, to allow applications to implement different schemas if required

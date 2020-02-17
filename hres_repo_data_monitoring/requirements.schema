@@ -1,2 +1,7 @@
 
 group hres:group:repository-editors as RepositoryEditors
+
+type std:type:person as Person
+attribute dc:attribute:author as Author
+attribute hres:attribute:authors-citation as AuthorsCitation
+attribute dc:attribute:type as Type

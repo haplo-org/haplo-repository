@@ -59,6 +59,25 @@ attribute std:attribute:project as Project
 attribute hres:attribute:event-date as EventDate
 attribute haplo:attribute:location as Location
 
+# Import EPrints administrator comments and restrict. Don't add to any types,
+# as we'd prefer them to use private notes in the timeline
+attribute hres:attribute:eprints-comments-and-suggestions as EPrintsCommentsAndSuggestions
+    title EPrints administrator comments
+    search-name administrator-comments
+    search-name comments-and-suggestions
+    qualifier std:qualifier:null
+    data-type text-paragraph
+
+label hres:label:eprints-admin-attributes as ManageEPrintsAdminAttrs
+    title: Manage imported EPrints admin attributes
+    category: Restriction
+
+restriction hres:restriction:repository-admin-attributes
+    title: Repository admin attributes
+    restrict-if-label hres:label:repository-item
+    label-unrestricted hres:label:eprints-admin-attributes
+    attribute-restricted hres:attribute:eprints-comments-and-suggestions
+
 # -------- Qualifiers -------------------------
 
 qualifier std:qualifier:null as Null
@@ -121,6 +140,7 @@ type hres:type:external-event:workshop as Workshop
 # -------- Groups -----------------------------------
 
 group std:group:administrators as Administrators
+group hres:group:repository-editors as RepositoryEditors
 
 # -------- Labels -----------------------------------
 

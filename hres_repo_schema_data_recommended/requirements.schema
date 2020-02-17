@@ -1,6 +1,7 @@
 
 type hres:type:dataset as Dataset
     REMOVE attribute dc:attribute:type [sort=100]
+    attribute hres:attribute:dataset-version [sort=11200]
     attribute hres:attribute:peer-review [sort=12000]
     REMOVE attribute hres:attribute:data-type [sort=14000]
     FORCE-REMOVE attribute std:attribute:file [sort=14100]
@@ -28,7 +29,6 @@ type hres:type:dataset-file
     create-position never
     attribute hres:attribute:data-type [sort=13900]
     attribute hres:attribute:data-file-contents [sort=14000]
-
 
 # ------ Attributes -----------------------------------------------
 
@@ -70,6 +70,12 @@ attribute hres:attribute:retention-review-action
     search-name retention-review-action
     qualifier std:qualifier:null
     data-type text-paragraph
+
+attribute hres:attribute:dataset-version
+    title Version of dataset
+    search-name dataset version
+    qualifier std:qualifier:null
+    data-type text
 
 # --------- Lists --------------------------------------------
 

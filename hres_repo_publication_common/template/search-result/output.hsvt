@@ -1,7 +1,7 @@
 
 // WARNING: REPLACEABLE =====================================================
 
-<div class="media my-4 pt-4">
+<div class="media my-4 pt-4" data-ref=object.ref>
   if(file) {
     std:web-publisher:object:link(object) { 
       std:web-publisher:file:thumbnail(file)

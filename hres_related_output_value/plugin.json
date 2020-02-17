@@ -1,0 +1,24 @@
+{
+  "pluginName": "hres_related_output_value",
+  "pluginAuthor": "Haplo Services",
+  "pluginVersion": 1,
+  "displayName": "Hres Related Output Value",
+  "displayDescription": "Plugin to provide the related output data type and the UI framework to add the types",
+  "installSecret": "68440e15c0b33c002bdb1e6ae772ec5ab764054b",
+  "apiVersion": 4,
+  "loadPriority": 5510,
+  "load": [
+      "js/hres_related_output_value.js"
+    ],
+  "use": [
+    "hres:doi",
+    "hres:hdl",
+    "hres:pmid"
+  ],
+  "depend": [
+    "hres_handle_identifier",
+    "hres_repo_pubmed",
+    "hres_digital_object_identifier"
+  ],
+  "respond": ["/do/hres-related-output-value"]
+}

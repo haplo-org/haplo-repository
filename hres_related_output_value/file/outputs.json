@@ -1,0 +1,12 @@
+{
+    "specificationVersion": 0,
+    "formId": "outputs",
+    "formTitle": "Outputs",
+    "elements": [
+        {
+            "type": "lookup",
+            "path": "output",
+            "dataSource": "outputs"
+        }
+    ]
+}

@@ -1,0 +1,20 @@
+
+// WARNING: REPLACEABLE =====================================================
+std:plugin:resources("export-formats.css")
+
+std:web-publisher:template("hres:repository:common:ui:panel") {
+  <div class="card border-0 bg-light mb-1">
+    <div class="card-body controls">
+      <form method="GET" action=["/plugin/export-format/export/" object.ref]>
+        <select class="filter-select w-50 text-nowrap" name="format" aria-label="Choose format">
+          each(choices) {
+            <option value=format> format </option>
+          }
+        </select>
+        <button class="btn btn-primary btn-search pl-10" type="submit" id="export-submit">
+          "Export"
+        </button>
+      </form>
+    </div>
+  </div>
+} heading { <h2> "Export as" </h2> }

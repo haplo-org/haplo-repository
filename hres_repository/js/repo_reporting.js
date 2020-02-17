@@ -30,24 +30,6 @@ P.implementService("std:action_panel:activity:statistics:repository", function(d
             statistic(1000, "/do/hres-repository/full-overview", "count", "Repository items");
 });
 
-// Sentinel object for reporting on uncontrolled publisher entries
-P.onInstall = function() {
-    if(!O.behaviourRefMaybe("hres:object:publisher-reporting-sentinel")) {
-        var sentinel = O.object([Label.ARCHIVED]);
-        sentinel.appendType(T.IntranetPage);
-        sentinel.appendTitle("Unregistered publisher entered");
-        sentinel.append(O.text(O.T_IDENTIFIER_CONFIGURATION_NAME, "hres:object:publisher-reporting-sentinel"), A.ConfiguredBehaviour);
-        sentinel.save();
-    }
-    if(!O.behaviourRefMaybe("hres:object:journal-reporting-sentinel")) {
-        var journalSentinel = O.object([Label.ARCHIVED]);
-        journalSentinel.appendType(T.IntranetPage);
-        journalSentinel.appendTitle("Unregistered journal entered");
-        journalSentinel.append(O.text(O.T_IDENTIFIER_CONFIGURATION_NAME, "hres:object:journal-reporting-sentinel"), A.ConfiguredBehaviour);
-        journalSentinel.save();
-    }
-};
-
 // --------------------------------------------------------
 // Publishers
 
@@ -100,7 +82,8 @@ P.implementService("std:reporting:collection:repository_items:setup", function(c
         fact("onlinePublicationDate", "date", "Published online").
         fact("hasAnyFile",      "boolean",  "Has file").
         fact("isPublished",         "boolean",      "Published").
-        fact("isRejected",          "boolean",      "Rejected");
+        fact("isRejected",          "boolean",      "Rejected").
+        fact("url",             "text",             "URL");
 
     collection.statistic({
         name: "count", description: "Total",
@@ -112,16 +95,19 @@ P.implementService("std:reporting:collection:repository_items:get_facts_for_obje
     row.type = object.firstType();
     // Retrieves first author with a StoreObject record
     row.title = object.title;
-    var author = object.first(A.Author);
+    var author = object.first(A.Author) || object.first(A.Editor);
+    var dept = null, fac = null;
     if(author) {
         row.author = author;
         // TODO: Repository entities to be properly defined
         var entities = P.hresCombinedApplicationStandaloneEntities({
             "researcher": function(context) { return (context === "list") ? [author] : author; }
         }).constructEntitiesObject(author.load());
-        row.faculty = entities.faculty_refMaybe || null;
-        row.department = entities.department_refMaybe || null;
+        fac = entities.faculty_refMaybe || null;
+        dept = entities.department_refMaybe || null;
     }
+    row.department = O.serviceMaybe("hres:repository:get_department_for_output", object) || dept;
+    row.faculty = O.serviceMaybe("hres:repository:get_faculty_for_output", object) || fac;
     if(object.first(A.Date)) {
         row.year = object.first(A.Date).start;
     }
@@ -156,6 +142,7 @@ P.implementService("std:reporting:collection:repository_items:get_facts_for_obje
 
     row.isPublished = object.labels.includes(Label.AcceptedIntoRepository);
     row.isRejected = object.labels.includes(Label.RejectedFromRepository);
+    row.url = O.application.hostname + "/" + object.ref;
 });
 
 // ---------------------------------------------------------

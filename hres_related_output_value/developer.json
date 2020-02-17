@@ -1,0 +1,5 @@
+{
+    "excludeFromSyntaxCheck": [
+        "js/hres_related_output_value.js"
+    ]
+}

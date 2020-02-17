@@ -1,0 +1,6 @@
+pageTitle("Saving...")
+std:layout:minimal()
+std:plugin:resources("saving-attributes.js")
+
+<div id="editor-cover-should-close" data-output=output>
+</div>

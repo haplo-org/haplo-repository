@@ -1,0 +1,24 @@
+std:layout:minimal()
+std:plugin:resources(
+    "bulk_author_addition_plugin.css"
+    "bulk_author_addition_plugin.js"
+    "get_authors.js"
+)
+pageTitle("Bulk author addition")
+
+
+<p>"Enter the authors in the form: "<i>"CITATION" delimiter</i> if(hasOrcid) {" or "<i> "CITATION ORCID" delimiter </i>}</p>
+<p> "E.g. "<i>exampleCitation delimiter exampleCitation if(hasOrcid) { " 0000-0000-0000-0000" }</i></p>
+if(hasOrcid) {
+    <p>"Where the ORCID would be used to identify the the second " exampleCitation " exactly.
+    This allows for disambiguation between authors with similar citations"</p>
+}
+<p>"You will then be presented with a set of options for each citation if the system cannot find a suitable match."</p>
+
+<form method="POST" id="get-authors" action=["/do/hres-bulk-author-addition/return-found/" objectRef]>
+    std:form:token()
+    <textarea name="citations" id="authors" rows="10">citations</textarea>
+    <div id="loading">
+        <input type="submit" value="Continue">
+    </div>
+</form>

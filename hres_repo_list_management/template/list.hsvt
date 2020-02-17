@@ -1,6 +1,6 @@
 pageTitle("List: " name)
 
-<p> <a href=["/do/repository-list-management/new/" type]> "Add new " name "..." </a> </p>
+<p> <a href=["/do/repository-list-management/new/" type] role="button"> "Add new " name "..." </a> </p>
 <hr>
 
 within(search) { template:std:search_results() }

@@ -1,0 +1,46 @@
+std:layout:minimal()
+std:plugin:resources(
+    "bulk_author_addition_plugin.css"
+    "get_authors.js"
+)
+pageTitle("Bulk author addition")
+
+<form id="author-selection" class=if(noneToDisplay) { "auto-submit hidden" } name="authorSelection" action=["/do/hres-bulk-author-addition/saving-authors/" objectRef]>
+<div role="table">
+    <p> "Select the correct author's name from the list presented next to their citation. If none of the authors are 
+        correct the system will populate their field without linking to a profile. If the author has a profile you will 
+        need to add the link manually on the main screen. Press add authors at the bottom when you are happy with the options."
+    </p>
+    <div class="row" role="row">
+        <div class="columns" role="columnheader">
+            <h3> "Citations" </h3>
+        </div>
+
+        <div class="columns" role="columnheader">
+            <h3> "Correct author" </h3>
+        </div>
+    </div>
+    
+    std:form:token()
+    each(citations) {
+        <div class=if(isDefinite) {"row hidden" } else { "row" } role="row">
+            <div class="columns top-rule" role="cell">
+                <p>citation</p>
+            </div>
+            <div class="columns top-rule" role="cell">
+                <input type="radio" class="authors" name=concat("[author]["unsafe-id"]") value="none" id=unsafeAttributeValue(unsafe-id) checked=unless(singleAuthor) { "true" } >
+                <label for=unsafe-id>"Author not listed"</label>
+                <br>
+                each(authors) {
+                    <input type="radio" class="authors" name=concat("[author]["^{unsafe-id}"]") value=author.ref id=unsafeAttributeValue(unsafe-id) checked=ifAny(^{isDefinite} ^{singleAuthor}) { "true" }>
+                    <label for=unsafe-id>author.title " (" type.title ")"</label>
+                    <br>
+                }
+                //Map for author-X to citation
+                <input type="hidden" name=concat("[key]["unsafe-id"]") value=displayCitation >
+            </div>
+        </div>
+    }
+    <a href=["/do/hres-bulk-author-addition/get-authors/" objectRef ? citations=allCitations]>"Back"</a><input type="submit" value="Add authors" style="float:right">
+</div>
+</form>

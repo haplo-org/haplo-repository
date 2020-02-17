@@ -11,7 +11,7 @@
 
     var NOTES = {
         "authcite": "In the left hand box, look up an existing author. In the right hand box, enter the author's name "+
-                "as they should be cited. If the author cannot be found, leave the left hand box blank. Author's names "+
+                "as they should be cited. If the author cannot be found, leave the left hand box blank. Authors' names "+
                 "may be dragged to reorder, if required.",
         "edcite": "In the left hand box, look up an existing editor. In the right hand box, enter the author's name "+
                 "as they should be cited. If the author cannot be found, leave the left hand box blank.",

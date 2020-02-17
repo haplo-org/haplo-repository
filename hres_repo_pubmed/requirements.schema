@@ -1,0 +1,21 @@
+
+attribute hres:attribute:pubmedcentral-id as PubMedCentralID
+    title PubMed Central ID
+    search-name pubmed-central-id
+    qualifier std:qualifier:null
+    data-type text
+
+attribute hres:attribute:pubmed-id as PubMedID
+    title: PubMed ID
+    search-name: pubmed-id
+    qualifier: std:qualifier:null
+    data-type text
+
+schema-template hres:template-type:repository:output
+    attribute hres:attribute:pubmed-id [sort=11150]
+    attribute hres:attribute:pubmedcentral-id [sort=11160]
+    
+# Fix for previously uploaded schema
+schema-template hres:template-type:repository-item
+    REMOVE attribute hres:attribute:pubmed-id [sort=11150]
+    REMOVE attribute hres:attribute:pubmedcentral-id [sort=11160]

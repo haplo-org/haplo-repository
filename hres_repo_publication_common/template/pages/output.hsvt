@@ -38,7 +38,7 @@ if(images) {
       <div class="card-footer border-0 bg-transparent haplo-images-show-more" style="display:none">
         <div class="d-flex justify-content-center mb-4">
           <div class="text-center">
-            <a href="#" class="btn btn-show haplo-images-show-more-button btn-outline-primary">"Show more"</a>
+            <a href="#" class="btn btn-show haplo-images-show-more-button btn-outline-primary" role="button">"Show more"</a>
           </div>
         </div>
       </div>

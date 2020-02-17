@@ -10,11 +10,17 @@
       "hres_orcid_researcher_profile",
       "hres_orcid",
       "hres_digital_object_identifier",
-      "hres_schema"
+      "hres_handle_identifier",
+      "hres_schema",
+      "hres_repo_schema_recommended",
+      "hres_schema_projects",
+      "hres_repo_pubmed"
     ],
   "use": [
       "hres:doi",
-      "hres:orcid"
+      "hres:orcid",
+      "hres:hdl",
+      "hres:pmid"
     ],
   "load": [
       "js/hres_repo_datacite.js",

@@ -2,10 +2,10 @@
   <div class="panel-heading">
     <h3 class="panel-title">"Research Impact"</h3>
   </div>
-  <div class="panel-body">
+  <div class="panel-body" role="list">
     each(impacts) {
-      <a href=href> impact.title </a>
-      if(summary) { <br> <small> <p> summary </p> </small> }
+      <a href=href role="listitem"> impact.title </a>
+      if(summary) { <br> <small role="listitem"> <p> summary </p> </small> }
     }
   </div>
 </div>

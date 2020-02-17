@@ -103,7 +103,7 @@ attribute hres:attribute:prepared-file as PreparedFile
 attribute hres:attribute:publication-process-dates as PublicationProcessDates
     title: Publication process dates
     search-name: publication-process-dates
-    qualifier hres:qualifier:submitted
+    REMOVE qualifier hres:qualifier:submitted
     qualifier hres:qualifier:accepted
     qualifier hres:qualifier:deposited
     qualifier hres:qualifier:completed

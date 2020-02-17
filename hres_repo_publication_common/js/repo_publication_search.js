@@ -18,6 +18,8 @@ P.webPublication.feature("hres:repository:common:search", function(publication, 
 
     publication.respondToExactPath(spec.path,
         function(E, context) {
+            let showing = !!E.request.parameters.q;
+            context.hint.objectKind = showing ? "search-results" : "search";
             var search = P.webPublication.widget.search(E, {
                 modifyQuery(query) {
                     if(spec.includeLabels) {
@@ -26,7 +28,7 @@ P.webPublication.feature("hres:repository:common:search", function(publication, 
                 }
             });
             E.render({
-                showingForm: !E.request.parameters.q,
+                showingForm: showing,
                 searchByFieldsPath: publication.$usingHresRepositorySearchByFieldsAtPath,
                 search: search
             }, context.publication.getReplaceableTemplate("hres:repo-publication-common:page:search"));

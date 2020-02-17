@@ -4,6 +4,8 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.         */
 
+var SHERPA_CREDENTIAL_NAME = O.application.config["hres_repo_embargoes:sherpa_api_credential_name"] || "Sherpa API Key";
+
 var NODE_LOOKUP = [
     {
         "name": "copyrightlinktext",
@@ -145,13 +147,16 @@ P.respondAfterHTTPRequest("GET", "/api/hres-repo-embargoes/sherpa-romeo", [
     setup: function(data, E, output, keysDoneStr) {
         var keysDoneIn = (keysDoneStr||'').split(',');
         var keysDoneOut = [];   // rebuild to avoid trusting input
-
+        var apiKey = O.keychain.credential(SHERPA_CREDENTIAL_NAME).secret;
+        if(!apiKey) {
+            throw new Error(SHERPA_CREDENTIAL_NAME + " not set up, this is required for embargoes to run");
+        }
         var queries = [];
         _.each(QUERY_STRING_TO_ATTRIBUTE, function(desc, key) {
             var v = output.first(desc);
             if(v && (-1 === keysDoneIn.indexOf(key))) {
                 var search;
-                var params = {};                            
+                var params = {};
                 if(key === "issn") {
                     search = v.toString();
                 } else {
@@ -172,6 +177,7 @@ P.respondAfterHTTPRequest("GET", "/api/hres-repo-embargoes/sherpa-romeo", [
             data.object = output.ref.toString();
             var http = O.httpClient("http://www.sherpa.ac.uk/romeo/api29.php");
             _.each(q.params, function(v,k) { http.queryParameter(k,v); });
+            http.queryParameter("ak", apiKey.Secret);
             return http;
         }
     },

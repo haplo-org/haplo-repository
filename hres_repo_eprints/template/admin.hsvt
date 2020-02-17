@@ -14,12 +14,12 @@ pageTitle("Eprints Administration")
 
 <h2>"File import admin"</h2>
 <p>
-    <a href="/do/hres-repo-eprints/fetch-file-urls">"Fetch file URLs"</a>
+    <a href="/do/hres-repo-eprints/fetch-file-urls" role="button">"Fetch file URLs"</a>
     " | Status: "fetchFileStatus
     if(fetchFileTimeTaken) { " | Time taken: "fetchFileTimeTaken" min" }
 </p>
 <p>
-    <a href="/do/hres-repo-eprints/download-files">"Download fetched file URLs"</a>
+    <a href="/do/hres-repo-eprints/download-files" role="button">"Download fetched file URLs"</a>
     " | Status: "fileDownloadStatus
     if(fileDownloadTimeTaken) { " | Time taken: "fileDownloadTimeTaken" min" }
     if(fileDownloadStart) {

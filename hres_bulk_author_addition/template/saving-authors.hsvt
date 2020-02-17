@@ -1,0 +1,5 @@
+pageTitle("Saving...")
+std:layout:minimal()
+std:plugin:resources("saving-authors.js")
+
+<div id="editor-cover-should-close" data-attributes=attributes data-titles=titles></div>

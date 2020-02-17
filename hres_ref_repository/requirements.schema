@@ -23,8 +23,6 @@ label hres:label:ref-unit-of-assessment:calculated
 schema-template hres:template-type:repository-item
     REMOVE attribute hres:attribute:ref-unit-of-assessment
     annotation hres:annotation:ref-unit-of-assessment:copy-from-researcher
-    attribute hres:attribute:ref-research [sort=17500]
-
 
 # ---------------------------------------------------------------------------
 
@@ -39,7 +37,7 @@ type hres:type:conference-item as ConferenceItem
 type hres:type:research-institute:faculty as Faculty
 type hres:type:journal-article as JournalArticle
 type hres:type:ref-unit-of-assessment as REFUnitOfAssessment
-
+type std:type:person as Person
 # ---------------------------------------------------------------------------
 
 attribute dc:attribute:author as Author
@@ -53,24 +51,5 @@ attribute hres:attribute:published-file as PublishersVersion
 attribute hres:attribute:ref-panel as REFPanel
 attribute hres:attribute:ref-unit-of-assessment as REFUnitOfAssessment
 attribute hres:attribute:researcher as Researcher
+attribute hres:attribute:issn as ISSN
 
-attribute hres:attribute:ref-research as REFResearch
-    title: REF definitions of research
-    search-name: ref-definition-of-research
-    qualifier std:qualifier:null
-    data-type: link
-    ui-options checkbox
-    linked-type hres:type:ref-research-definition
-
-# ---------------------------------------------------------------------------
-
-type hres:type:ref-research-definition
-    title REF definition of research
-    search-name ref-definition-of-research
-    apply-schema-template hres:template-type:list
-object hres:list:ref-research-definition:research
-    title This item meets the REF definition of research
-    type hres:type:ref-research-definition
-object hres:list:ref-research-definition:not-research
-    title Does not meet the REF definition of research
-    type hres:type:ref-research-definition

@@ -1,0 +1,10 @@
+{
+    "hres:repository:endnote:export-object-as-binary-data": {
+        "statements": [
+            "hres:repository:exportable-metadata-format"
+        ],
+        "metadata": {
+            "hres:repository:export-format": "EndNote"
+        }
+    }
+}

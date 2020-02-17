@@ -160,6 +160,9 @@ P.webPublication.feature("hres:repository:common:research-institute-browse", fun
     var images = spec.images || [];
 
     var researchInstituteBrowse = function(E, context) {
+        if(O.serviceImplemented("hres:repository:update_branding")) {
+            images = O.service("hres:repository:update_branding", "research-institute", images);
+        }
         var selected = E.request.extraPathElements[0];
         var topLevel = [];
         var imageIdx = 0;

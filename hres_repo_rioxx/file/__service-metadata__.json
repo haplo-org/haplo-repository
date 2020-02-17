@@ -8,7 +8,15 @@
             "hres:oai-pmh:metadata-prefix":     "rioxx",
             "hres:oai-pmh:schema":              "http://www.rioxx.net/schema/v2.0/rioxx/rioxx.xsd",
             "hres:oai-pmh:metadata-namespace":  "http://www.rioxx.net/schema/v2.0/rioxx/",
-            "hres:oai-pmh:root-element":        "rioxx" 
+            "hres:oai-pmh:root-element":        "rioxx"
+        }
+    },
+    "hres:repository:rioxx:export-object-as-binary-data": {
+        "statements": [
+            "hres:repository:exportable-metadata-format"
+        ],
+        "metadata": {
+            "hres:repository:export-format":    "RIOXX"
         }
     }
 }

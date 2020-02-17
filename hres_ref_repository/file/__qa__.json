@@ -1,0 +1,5 @@
+{
+    "suppress": {
+        "dangerous-dashboard-service-implemented/hres_ref_repository/std:reporting:collection_dashboard:repository_items:setup_final/0": "Adds key REF data from this plugin to all dashboard exports related to outputs in the REF exercise."
+    }
+}

@@ -138,6 +138,9 @@
             if(context.hint.objectKind) {
               std:web-publisher:page-part:render-category(concat("hres:repository:" context.hint.objectKind ":sidebar"))
             }
+            if(blocks.sidebar) {
+              render(blocks.sidebar)
+            }
           </div>
       </div>
     </div>
@@ -157,7 +160,7 @@
 
         <div class="footer-copyright text-center py-3">
           <p><span class="haplo-copyright">"&copy; Copyright - "
-          <a href=HOME_PATH class="text-white"> REPOSITORY_NAME </a>
+          <a href=COPYRIGHT_LINK.href class="text-white"> COPYRIGHT_LINK.text </a> 
           " 2019 "</span>
 
           <span class="haplo-powered">" Powered by " 
@@ -168,6 +171,7 @@
         </div>
 
       </div>
+      std:web-publisher:page-part:render-category("hres:repository:misc:footers")
     </footer>
   </main>
 

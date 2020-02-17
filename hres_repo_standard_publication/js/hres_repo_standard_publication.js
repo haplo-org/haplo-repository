@@ -5,12 +5,13 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.         */
 
 
-var HOSTNAME             = O.application.config['repo_standard_publication:hostname']          || P.webPublication.DEFAULT;
-var REPOSITORY_NAME      = O.application.config['repo_standard_publication:name']              || O.application.name;
-var CONFIGURED_TEXT      = O.application.config['repo_standard_publication:text']              || {}; // see DEFAULT_TEXT for keys
-var ADMIN_EMAIL          = O.application.config['repo_standard_publication:admin_email']       || 'invalid@example.org';
-var FOOTER_LINKS         = O.application.config['repo_standard_publication:footer_links']      || []; // array of objects with text and href
-var HIDE_CAROUSEL        = O.application.config['repo_standard_publication:hide_carousel']     || false;
+var HOSTNAME             = O.application.config['repo_standard_publication:hostname']                   || P.webPublication.DEFAULT;
+var REPOSITORY_NAME      = O.application.config['repo_standard_publication:name']                       || O.application.name;
+var CONFIGURED_TEXT      = O.application.config['repo_standard_publication:text']                       || {}; // see DEFAULT_TEXT for keys
+var ADMIN_EMAIL          = O.application.config['repo_standard_publication:admin_email']                || 'invalid@example.org';
+var FOOTER_LINKS         = O.application.config['repo_standard_publication:footer_links']               || []; // array of objects with text and href
+var HIDE_CAROUSEL        = O.application.config['repo_standard_publication:hide_carousel']              || false;
+var COPYRIGHT_LINK       = O.application.config['repo_standard_publication:copyright_link'];
 var LOGO = {
     src             : O.application.config['repo_standard_publication:logo:src'],
     width           : O.application.config['repo_standard_publication:logo:width'],
@@ -94,7 +95,8 @@ var Publication = P.webPublication.register(HOSTNAME).
     permitFileDownloadsForServiceUser().
     use("hres:repository:common:platform-integration").
     use("hres:repository:common:search-results").
-    use("hres:repository:ar:request-a-copy", { useFileMediatedAccess: true });
+    use("hres:repository:ar:request-a-copy", { useFileMediatedAccess: true }).
+    use("hres:repository:export-formats");
 
 // Access request process for data files, if implemented
 if(Publication.featureImplemented("hres:repository:ar:access-request")) {
@@ -110,12 +112,18 @@ if(Publication.featureImplemented("hres:researcher-profile:photo:permit-image-do
     Publication.use("hres:researcher-profile:photo:permit-image-downloads");
 }
 
+// Integration for large branding images
+if(Publication.featureImplemented("hres:repository:branding:update")) {
+    Publication.use("hres:repository:branding:update");
+}
+
 Publication.layout(function(E, context, blocks) {
     return P.template("_layout").render({
         HOME_PATH: HOME_PATH,
         BASE_PATH: BASE_PATH,
         SEARCH_PATH: SEARCH_PATH,
         REPOSITORY_NAME: REPOSITORY_NAME,
+        COPYRIGHT_LINK: COPYRIGHT_LINK || {href:HOME_PATH, text: REPOSITORY_NAME},
         TEXT: TEXT,
         LOGO: LOGO,
         FOOTER_LINKS: FOOTER_LINKS,
@@ -192,6 +200,10 @@ Publication.setHomePageUrlPath(HOME_PATH);
 Publication.respondToExactPath(HOME_PATH,
     function(E, context) {
         context.hint.objectKind = 'home';
+        if(O.serviceImplemented("hres:repository:update_branding")) {
+            HOME_CAROUSEL = O.service("hres:repository:update_branding", "carousel", HOME_CAROUSEL);
+            BROWSE_IMAGES = O.service("hres:repository:update_branding", "browse", BROWSE_IMAGES);
+        }
         E.render({
             HOME_PATH: HOME_PATH,
             BASE_PATH: BASE_PATH,

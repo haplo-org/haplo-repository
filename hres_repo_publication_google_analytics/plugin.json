@@ -1,0 +1,14 @@
+{
+  "pluginName": "hres_repo_publication_google_analytics",
+  "pluginAuthor": "Haplo Services",
+  "pluginVersion": 1,
+  "displayName": "Hres Repo Publication Google Analytics",
+  "displayDescription": "Plugin to add feature to allow for the use of google analytics tracking",
+  "installSecret": "17965b8a496ee8875b9b9b0454f2b5643b0061a1",
+  "apiVersion": 4,
+  "depend": ["std_web_publisher"],
+  "use": ["std:web-publisher"],
+  "load": [
+      "js/hres_repo_publication_google_analytics.js"
+    ]
+}

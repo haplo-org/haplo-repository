@@ -1,0 +1,7 @@
+type std:type:person as Person
+type std:type:book as Book
+
+attribute dc:attribute:author as Author
+attribute dc:attribute:type as Type
+attribute hres:attribute:authors-citation as AuthorsCitation
+OPTIONAL attribute hres:attribute:orcid as Orcid

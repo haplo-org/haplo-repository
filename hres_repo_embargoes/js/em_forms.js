@@ -130,6 +130,7 @@ P.respond("GET,POST", "/do/hres-repo-embargoes/edit", [
             });
             existing.attribute = "<b>"+_.escape(SCHEMA.getAttributeInfo(group.extension.desc).name)+"</b>";
         } else {
+            if(!document.embargoes) { document.embargoes = []; }
             document.embargoes.push({
                 groupId: group.extension.groupId,
                 desc: group.extension.desc,

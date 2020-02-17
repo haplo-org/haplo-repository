@@ -1,0 +1,41 @@
+std:layout:minimal()
+std:plugin:resources(
+    "related-output-covering.css"
+    "related-output-covering.js"
+)
+
+<h2>"Add Related Output"</h2>
+<form id="related-output" name="relatedOutput" action=["/do/hres-related-output-value/submit/" outputRef]>
+    <div class="columns">
+        <h3> "Relationship" </h3>
+        each(relationships) {
+            <input type="radio" name="relationship" value=unsafe-value id=unsafeAttributeValue(unsafe-value)>
+            <label for=unsafe-value>display</label>
+            <br>
+        }
+    </div>
+
+    <div class="columns">
+        <h3> "Relation Identifier Type" </h3>
+            each(types) {
+                <input type="radio" class="types" name="type" value=unsafe-value id=unsafeAttributeValue(unsafe-value) data-hint=hint>
+                <label for=unsafe-value>display</label>
+                <br>
+            }
+    </div>
+
+    <div class="columns">
+        <h3> "Value" </h3>
+
+        <div id="outputForm" class="enterValue">
+            render(outputForm)
+        </div>
+        <div id="generalValue" class="enterValue">
+            <input type="text" name="value">
+        </div>
+
+        <div id="documentViewer"></div>
+        <input type="submit" value="Save related output">
+        <p id="warning"></p>
+    </div>
+</form>

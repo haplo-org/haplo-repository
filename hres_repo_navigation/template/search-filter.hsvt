@@ -1,11 +1,11 @@
 std:plugin:resources("filter.js")
 
-<h2> "Filter results by" </h2>
+<h2> "Filter results" </h2>
 <form method="GET">
   each(filterData) {
     <h3> title </h3>
     if(isDropdownSelection) {
-      <select name=parameter>
+      <select name=parameter aria-label="Parameter">
         <option value=""> "---" </option>
         each(options) {
           <option value=yearStr selected=if(selected) { "selected" }> yearStr </option>
@@ -14,7 +14,7 @@ std:plugin:resources("filter.js")
     } else {
       each(objs) {
         <label>
-          <input type="checkbox" name=concat(parameter "[" ref "]") value="1" checked=if(checked) { "true" }>
+          <input type="checkbox" name=concat(parameter "[" ref "]") value=if(value) { value } else { "1" } checked=if(checked) { "true" }>
           title
         </label>
         <br>

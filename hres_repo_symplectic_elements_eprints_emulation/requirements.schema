@@ -1,0 +1,27 @@
+
+group hres:repository:group:symplectic-elements-api as SymplecticElementsAPI
+    title: External Systems: Symplectic Elements
+
+group hres:group:public-repository-access
+    member hres:repository:group:symplectic-elements-api
+
+service-user hres:repository:service-user:symplectic-elements
+    title: Symplectic Elements
+    group hres:repository:group:symplectic-elements-api
+
+# ---------------------------------------------------------------------------
+
+label std:label:deleted as DELETED
+label hres:label:accepted-into-repository as AcceptedIntoRepository
+label hres:label:can-edit-orcid as CanEditORCID
+
+label hres:repository:symplectic-elements:label:ingested-from-elements as SymplecticElements
+    title: Symplectic Elements
+    category: Repository
+
+# ---------------------------------------------------------------------------
+
+type std:type:person as Person
+
+attribute std:attribute:file as File
+OPTIONAL attribute hres:attribute:file-access-level as AccessLevel

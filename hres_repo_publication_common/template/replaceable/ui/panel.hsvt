@@ -2,11 +2,9 @@
 // WARNING: REPLACEABLE =====================================================
 
 <div class="card p-0 border-0 mb-4 rounded-0">
-  if(heading) {
-    <div class="card-header bg-transparent border-0">
-      yield:heading()
-    </div>
-  }
+  <div class="card-header bg-transparent border-0">
+    yield:heading()
+  </div>
   <div class="card-body">
     yield()
   </div>

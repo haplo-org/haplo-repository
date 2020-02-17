@@ -1,0 +1,4 @@
+std:plugin:resources(
+    "bounding_box_plugin.js"
+    "info-button.css"
+)

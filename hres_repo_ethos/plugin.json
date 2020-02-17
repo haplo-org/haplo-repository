@@ -1,6 +1,6 @@
 {
   "pluginName": "hres_repo_ethos",
-  "pluginAuthor": "Haplo Repository",
+  "pluginAuthor": "Haplo Services",
   "pluginVersion": 1,
   "displayName": "Repository EThOS metadata format",
   "displayDescription": "Exposes repository Thesis data in the EThOS uketd_dc format",

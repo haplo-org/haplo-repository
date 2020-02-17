@@ -49,6 +49,17 @@ P.implementService("hres:repository:is_author", function(person, object) {
         (object.has(person.ref, A.Editor) && object.isKindOf(T.Book)));
 });
 
+/*HaploDoc
+node: /repository/hres_repository
+title: Earliest Publication Date
+--
+h3(service). "hres:repository:earliest_publication_date"
+
+This service returns the earliest publication date for a text-based output if it has one, null if not.
+**However**
+If the output is practice-based then by definition it isn't published and returning a publication date would always be null, therefore the service should return the date associated with the output.
+*/
+
 P.implementService("hres:repository:earliest_publication_date", function(output) {
     var published;
     var publicationDates = output.every(A.PublicationDates);
@@ -88,15 +99,15 @@ P.hresWorkflowEntities.add({
 });
 
 // --------------------------------------------------------------------------
-// Shadow internal authors into A.Researcher. This allows other hres functionality to work
-// as expected, as much of it hangs off A.Researcher.
+// Shadow internal authors and editors into A.Researcher. This allows other hres
+// functionality to work as expected, as much of it hangs off A.Researcher.
 
-var shadowedAttributes = {};
+var attributesToShadow = [];
 var shadowInTypes = O.refdictHierarchical();
 
 // Configuration of shadowed fields for author values
 var shadowingConfigurationForTypes = function(types) {
-    shadowedAttributes[A.Author] = A.Researcher;
+    attributesToShadow = [A.Author, A.Editor];
     types.forEach(function(t) { shadowInTypes.set(t, true); });
 };
 shadowingConfigurationForTypes(P.REPOSITORY_TYPES);
@@ -106,17 +117,20 @@ P.hook('hComputeAttributes', function(response, object) {
     var type = object.firstType();
     if(type && shadowInTypes.get(type)) {
         var toAppend = [];
-        _.each(shadowedAttributes, function(shadowed, author) {
-            author = 1*author;  // JS keys are always strings
-            object.every(author, function(v,d,q) {
+        _.each(attributesToShadow, function(attr) {
+            object.every(attr, function(v,d,q) {
                 var person = v.load();
                 if(person.isKindOf(T.Person) && !person.isKindOf(T.ExternalResearcher)) {
                     toAppend.push(v);
                 }
             });
-            // Note this will need changing if more attributes shadow into A.Researcher
-            object.remove(shadowed);
-            toAppend.forEach((v) => object.append(v, shadowed));
+        });
+        object.remove(A.Researcher);
+        toAppend.forEach((v) => {
+            // Don't append the same person more than once
+            if(!object.has(v, A.Researcher)) {
+                object.append(v, A.Researcher);
+            }
         });
     }
 });
@@ -125,9 +139,7 @@ P.hook('hComputeAttributes', function(response, object) {
 var objectRender = function(response, object) {
     var type = object.firstType();
     if(type && shadowInTypes.get(type)) {
-        _.each(shadowedAttributes, function(shadowed, author) {
-            response.hideAttributes.push(shadowed);
-        });
+        response.hideAttributes.push(A.Researcher);
     }
 };
 P.hook('hObjectRender', objectRender);
@@ -163,4 +175,49 @@ P.onInstall = function() {
         license.append(O.text(O.T_IDENTIFIER_URL, url), A.Url);
         license.save();
     });
+    // Setup sentinel objects for reporting on uncontrolled publisher and journal entries
+    if(!O.behaviourRefMaybe("hres:object:publisher-reporting-sentinel")) {
+        var sentinel = O.object([Label.ARCHIVED]);
+        sentinel.appendType(T.IntranetPage);
+        sentinel.appendTitle("Unregistered publisher entered");
+        sentinel.append(O.text(O.T_IDENTIFIER_CONFIGURATION_NAME, "hres:object:publisher-reporting-sentinel"), A.ConfiguredBehaviour);
+        sentinel.save();
+    }
+    if(!O.behaviourRefMaybe("hres:object:journal-reporting-sentinel")) {
+        var journalSentinel = O.object([Label.ARCHIVED]);
+        journalSentinel.appendType(T.IntranetPage);
+        journalSentinel.appendTitle("Unregistered journal entered");
+        journalSentinel.append(O.text(O.T_IDENTIFIER_CONFIGURATION_NAME, "hres:object:journal-reporting-sentinel"), A.ConfiguredBehaviour);
+        journalSentinel.save();
+    }
 };
+
+//Migration task to clean up clients where P.onInstall hasn't run
+P.respond("GET,POST", "/do/hres-repository/license", [
+], function(E) {
+    if(!O.currentUser.isSuperUser) { O.stop("Not permitted"); }
+    let number = _.size(LICENSE_URLS);
+    console.log(O.query().link(TYPE["std:type:subject"], A.Type).execute()[0]);
+    _.each(LICENSE_URLS, (url, behaviour) => {
+        var license = O.behaviourRef(behaviour).load().mutableCopy();
+        if(license.first(A.Url)) { 
+            number--;
+            return; 
+        }
+        if(E.request.method === "POST") {
+            license.append(O.text(O.T_IDENTIFIER_URL, url), A.Url);
+            license.save();
+        }
+    });
+    
+    if(E.request.method === "POST") {
+        E.response.redirect("/");
+    }
+
+    E.render({
+        pageTitle: "Add License URLS",
+        backLink: "/",
+        text: "Are you sure you would like to add URLs to "+number+" licenses?",
+        options: [{label:"Confirm"}]
+    }, "std:ui:confirm");
+});

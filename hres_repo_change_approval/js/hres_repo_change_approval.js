@@ -4,9 +4,12 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.         */
 
+var CanBypassApproval = O.action("hres_repo_change_approval:bypass_change_approval").
+    title("Bypass repository change approval").
+    allow("group", Group.RepositoryEditors);
 
 P.implementService("haplo_alternative_versions:update_replacement_object", function(source, authorisingUser, authoritative) {
-    if(authorisingUser.isMemberOf(Group.RepositoryEditors)) { return; }
+    if(authorisingUser.allowed(CanBypassApproval)) { return; }
     // Don't bother with a draft version if this is a new output to the repository
     if(!authoritative) { return; }
     // TODO: Maybe make this configurable in UI
@@ -46,7 +49,7 @@ P.implementService("haplo_alternative_versions:source_for_alternative_object", f
 P.hook('hPreObjectEdit', function(response, object, isTemplate) {
     if(O.service("hres:repository:is_repository_item", object) &&
         object.labels.includes(Label.AcceptedIntoRepository) &&
-        !O.currentUser.isMemberOf(Group.RepositoryEditors)) {
+        !O.currentUser.allowed(CanBypassApproval)) {
             let draft = findExistingDraft(object);
             if(draft && !draft.labels.includes(Label.DELETED)) {
                 response.redirectPath = "/do/hres-repo-change-approval/confirm-discard-draft/"+object.ref;

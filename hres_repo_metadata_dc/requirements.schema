@@ -8,5 +8,8 @@ attribute hres:attribute:editor as Editor
 attribute hres:attribute:issn as ISSN
 attribute hres:attribute:keywords as Keywords
 attribute hres:attribute:license as License
+attribute hres:attribute:peer-review as PeerReview
+attribute std:attribute:file as File
 
 OPTIONAL attribute hres:attribute:digital-object-identifier-doi as DOI
+OPTIONAL attribute hres:attribute:contributors as Contributors

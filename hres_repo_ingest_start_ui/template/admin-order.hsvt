@@ -24,15 +24,15 @@ if(updated) {
     
     <p><input type="submit" value="Save changes"></p>
 
-    <div id="types-list">
+    <div id="types-list" role="list">
 
         each(types) {
             if(dividerType) {
-                <div class="types-item divider" data-ref=dividerType>
+                <div class="types-item divider" data-ref=dividerType role="listitem">
                     <div><span> dividerText </span></div>
                 </div>
             } else {
-                <div class="types-item" data-ref=ref>name</div>
+                <div class="types-item" data-ref=ref role="listitem">name</div>
             }
         }
 

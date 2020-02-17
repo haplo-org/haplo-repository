@@ -1,0 +1,54 @@
+std:plugin:resources(
+  "citation-matching.css"
+  "citation-matching.js"
+)
+std:layout:wide()
+
+pageTitle(i("Citation matching dashboard"))
+
+<div>
+  <p> "This page lists all citations that currently do not link to a user in the system alongside a number of possible matching users. 
+      The right hand side of each row shows the number of outputs that would be affected by linking this citation to a user and also the
+      option to hide the citation from the list (useful for 'Smith, J.' type citations that likely couldn't be attributed to one user).
+      The hidden users are listed at the bottom of the page with the option to add citations back to the list." </p>
+  <table class="tablesort">
+    <thead>
+      <tr>
+        <th>i("Citation")</th>
+        <th colspan="2">i("Possible Authors")</th>
+        <th>i("Outputs Affected")</th>
+        <th>i("Hide from list")</th>
+      </tr>
+    </thead>
+    <tbody>
+      std:form:token()
+      each(matches) {
+        <tr>
+          <td class="citation">
+            <p> citation </p>
+          </td>
+          <td class="authors" colspan="2">
+            each(authors) {
+                <div class="citation-option">
+                  <a href=["/" ref] target="_blank"> 
+                    name <i> " (" type ")" </i>
+                  </a>
+                  <a href=["/do/hres-repo-data-monitoring/citation-matching"] class="mergelink" data-citation=^{citation} data-ref=ref role="button"> i("Link citation to user") </a>
+                </div>
+            }
+          </td>
+          <td style="text-align:center;"> <a href=[ ? action="list" citation=citation ]> affected </a></td>
+          <td><a href=[ ? action="hide" citation=citation] class="hide" role="button"> i("Hide") </a></td>
+        </tr>
+      }
+    </tbody>
+  </table>
+  if(hidden) {
+    <h3> i("Hiding") </h3>
+    <p> i("Hiding the following citations from the list:") </p>
+    each(hidden) {
+      <p> . "(" <a href=[ ? action="show" citation=.] role="button"> i("Add back to list") </a> ")" </p>
+    }
+    <p>"(" <a href=[ ? action="showAll"] role="button"> i("Add all citations back to the list") </a> ")" </p>
+  }
+</div>

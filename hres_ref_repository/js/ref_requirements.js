@@ -112,8 +112,15 @@ P.willPassOnPublication = function(output) {
     );
 };
 
-const REF_ATTR_REQUIREMENTS = ["published", "deposited", "refunit", "author", "accepted", "aam"];
-const REFAttributeLookup = {
+var REF_ATTR_REQUIREMENTS = {
+    "published": "Publication date",
+    "deposited": "Deposited date",
+    "refunit": "UoA",
+    "author": "Author",
+    "accepted": "Accepted date",
+    "aam": "Accepted manuscript"
+};
+var REFAttributeLookup = {
     accepted(object) { return object.first(A.PublicationProcessDates, Q.Accepted); },
     author(object) { return object.first(A.Author); },
     published(object) { return object.first(A.PublicationDates); },
@@ -134,7 +141,7 @@ const REFAttributeLookup = {
 
 var missingREFData = function(output, checkFullRequirements) {
     let missData = [];
-    let required = _.clone(REF_ATTR_REQUIREMENTS);
+    let required = _.clone(_.keys(REF_ATTR_REQUIREMENTS));
     // Check if it will pass in future, when it has been deposited and published
     if(!checkFullRequirements) {
         if(!output.labels.includes(Label.AcceptedIntoRepository)) {
@@ -187,3 +194,67 @@ P.respond("GET", "/do/hres-ref-repo/check/detail", [
     }, "check-requirements");
 });
 
+// --------------------------------------------------------------------------
+// Metadata checks reporting
+// --------------------------------------------------------------------------
+
+P.implementService("std:reporting:collection:repository_items:setup", function(collection) {
+    _.each(REF_ATTR_REQUIREMENTS, (title, requirement) => {
+        collection.fact("refMetadataReq"+requirement,   "boolean",  title);
+    });
+});
+
+P.implementService("std:reporting:collection:repository_items:get_facts_for_object", function(object, row) {
+    _.each(REFAttributeLookup, (fn, requirement) => {
+        row["refMetadataReq"+requirement] = !!fn(object);
+    });
+});
+
+P.implementService("std:action_panel:activity:menu:repository", function(display, builder) {
+    if(O.currentUser.allowed(P.CanManageREF)) {
+        builder.panel(550).
+            link(350, "/do/hres-ref-repo/metadata-detail-checks", "Items failing REF OA metadata checks");
+    }
+});
+
+P.implementService("std:reporting:dashboard:ref_metadata_detail:setup_export", function(dashboard) {
+    dashboard.columns(50, [
+        "department",
+        "faculty",
+        "refUnitOfAssessment"
+    ]);
+});
+
+P.respond("GET,POST", "/do/hres-ref-repo/metadata-detail-checks", [
+], function(E) {
+    P.CanManageREF.enforce();
+    let dashboard = P.reporting.dashboard(E, {
+        name: "ref_metadata_detail",
+        kind: "list",
+        collection: "repository_items",
+        title: "Items failing REF metadata checks"
+    }).
+        filter((select) => {
+            select.where("refPublishedInOAPeriod", "=", true).
+                where("oaIsConfItemOrArticle", "=", true).
+                where("refMetadataCheck", "=", false).
+                or((sq) => {
+                    sq.where("oaIsGoldOA", "=", false).
+                        where("oaIsGoldOA", "=", null);
+                });
+        }).
+        use("std:row_text_filter", {facts:["title","author"], placeholder:"Search"}).
+        summaryStatistic(0, "count").
+        columns(10, [
+            {type:"linked", style:"wide", column:{fact:"title"}},
+            "author"
+        ]);
+    _.each(REF_ATTR_REQUIREMENTS, (title, requirement) => {
+        dashboard.columns(100, ["refMetadataReq"+requirement]);
+    });
+    dashboard.
+        columns(150, [
+            "refWillPassOnPublication"
+        ]).
+        respond();
+});

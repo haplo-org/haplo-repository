@@ -1013,12 +1013,14 @@ var setExternalEvent = function(cursor, intermediate, attribute) {
     }
     event.appendType(type);
     // check the same event doesn't already exist
-    let eventQuery = O.query().
-        link(T.ExternalEvent, A.Type).
-        exactTitle(eventTitle).
-        execute();
+    let eventQuery = O.withoutPermissionEnforcement(() => {
+        return O.query().
+            link(T.ExternalEvent, A.Type).
+            exactTitle(eventTitle).
+            execute();
+    });
     const matchingEvent = _.find(eventQuery, e => e.valuesEqual(event));
-    if(matchingEvent) {
+    if(matchingEvent && O.currentUser.can("read", matchingEvent.ref)) {
         event = matchingEvent;
     } else {
         saveObjectWithLogging(event, intermediate.eprintId);
@@ -1165,6 +1167,7 @@ var haploAttributeInfo = [
     {name: "GrantID",               tag: "grant",                                                       objectToIntermediate: P.textAttr},
     {name: "Project",               tag: "projects",        xmlToIntermediate: setProjects,             objectToIntermediate: P.refTitleAttr},
     {name: "OpenAccess",            tag: "hoa_gold",        xmlToIntermediate: setGoldOA},
+    {name: "EPrintsCommentsAndSuggestions", tag: "suggestions",  xmlToIntermediate: setParagraph},
     // if tag information results in change to database, not attribute, set database to true
     {database: true,                tag: "full_text_status",xmlToIntermediate: setEmbargoStatus,        objectToIntermediate: P.embargoAttrs},
     {database: true,                tag: "hoa_date_fcd",    xmlToIntermediate: setFirstFileDeposit,     objectToIntermediate: P.firstFileDepositAttr},
@@ -1288,9 +1291,11 @@ var convertXMLToIntermediate2 = function(cursor, eprintId, output, preventImport
         embargoData: [],
         output: output
     };
-    let status = cursor.firstChildElement("eprint_status").getText();
-    cursor.up();
-    intermediate.eprintStatus = status;
+    let status = cursor.firstChildElementMaybe("eprint_status");
+    if(status) {
+        intermediate.eprintStatus = cursor.getText();
+        cursor.up();
+    }
     if(preventImportFn && preventImportFn(cursor, intermediate, eprintId)) { return; } // e.g. if the object already is in the system
     // some tags are repeated in the haploAttributeInfo structure, with various combinations of import & export fns
     let tagsWithImportFunction = [];

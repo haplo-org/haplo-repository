@@ -11,7 +11,8 @@
       "hres_repo_publication_common",
       "hres_repo_irus_uk",
       "hres_repo_publication_page_parts",
-      "hres_repo_access_request_components"
+      "hres_repo_access_request_components",
+      "hres_repo_export_formats"
     ],
   "use": ["std:web-publisher"],
   "load": [

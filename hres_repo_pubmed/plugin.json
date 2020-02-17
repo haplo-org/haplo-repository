@@ -1,0 +1,17 @@
+{
+  "pluginName": "hres_repo_pubmed",
+  "pluginAuthor": "Haplo Services",
+  "pluginVersion": 1,
+  "displayName": "Haplo RM Repository PubMed",
+  "displayDescription": "Support for PubMed in repositories",
+  "installSecret": "04a0ab8ef0ae27361367248757055a99c7dbd4c2",
+  "apiVersion": 4,
+  "loadPriority": 5300,
+  "depend": [
+      "hres_repository"
+  ],
+  "load": [
+      "js/hres_repo_pubmed.js"
+    ],
+  "respond": ["/do/hres-repo-pubmed"]
+}

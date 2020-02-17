@@ -166,6 +166,7 @@ P.implementService("std:action_panel:activity:menu:repository", function(display
             link(400, "/do/hres-ref-repo/compliance-by-faculty", "REF OA compliance by "+NAME("Faculty")).
             link(400, "/do/hres-ref-repo/compliance-by-department", "REF OA compliance by "+NAME("Department")).
             link(400, "/do/hres-ref-repo/compliance-by-uoa", "REF OA compliance by Unit of Assessment");
+
     }
 });
 
@@ -387,3 +388,16 @@ P.respond("GET,POST", "/do/hres-ref-repo/open-access", [
         respond();
 });
 
+// --------------------------------------------------------------------------
+// REF process management
+
+// Add key REF OA information into REF process exports
+P.implementService("std:reporting:collection_dashboard:repository_items:setup_final", function(dashboard) {
+    if(dashboard.property("hres_ref_process") && dashboard.isExporting && (dashboard.kind === "list")) {
+        dashboard.columns(350, [
+            "refPublishedInOAPeriod",
+            "refIsOACompliant",
+            "refHasException"
+        ]);
+    }
+});

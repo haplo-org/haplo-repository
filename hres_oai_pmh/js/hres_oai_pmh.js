@@ -300,7 +300,7 @@ var queryForCommand = function(E, consume) {
             E.response.statusCode = HTTP.BAD_REQUEST;
             return;
         }
-        query.dateRange(dates.from, dates.until, A.Date);
+        query.lastUpdatedWithinDateRange(dates.from, dates.until);
     }
     // Requested as ANONYMOUS, so need to (carefully) query with the service user
     // Include the itemToXML() in this block as it will need to read items

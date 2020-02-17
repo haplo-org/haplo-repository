@@ -12,7 +12,7 @@ var CanEditEmbargoes = P.CanEditEmbargoes = O.action("hres_repo_embargoes:can_ed
 // -------------------------------------------------------------------
 
 /*HaploDoc
-node: /hres_repo_embargoes
+node: /repository/hres_repo_embargoes/implementation
 title: Embargoes
 sort: 1
 --
@@ -44,7 +44,7 @@ P.implementService("hres_repo_embargoes:get_embargo", function(output) {
 });
 
 /*HaploDoc
-node: /hres_repo_embargoes
+node: /repository/hres_repo_embargoes/implementation
 sort: 7
 --
 
@@ -57,7 +57,7 @@ P.implementService("hres_repo_embargoes:has_embargoed_files_for_user", function(
 });
 
 /*HaploDoc
-node: /hres_repo_embargoes
+node: /repository/hres_repo_embargoes/implementation
 sort: 4
 --
 

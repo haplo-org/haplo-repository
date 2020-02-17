@@ -2,7 +2,7 @@
 // WARNING: REPLACEABLE =====================================================
 
 <div class="btn-group">
-  <a href=href class="btn btn-primary btn-lg">
+  <a href=href class="btn btn-primary btn-lg" role="button">
     yield()
   </a>
 </div>

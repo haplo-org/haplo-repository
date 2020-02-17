@@ -15,6 +15,34 @@ rioxxTypeList.set(T.Report, "Working paper");
 rioxxTypeList.set(T.Thesis, "Thesis");
 
 P.implementService("hres:repository:rioxx:write-store-object-below-xml-cursor", function(item, cursor, options) {
+    writeObjectAsRIOXXXML(item, cursor, options);
+});
+
+P.implementService("hres:repository:rioxx:export-object-as-binary-data", function(item) {
+    let xmlDocument = O.xml.document();
+    let cursor = xmlDocument.cursor().
+        element("rioxx");
+    writeObjectAsRIOXXXML(item, cursor);
+    return O.binaryData(xmlDocument.toString(), {
+        filename: item.title+"_rioxx.xml",
+        mimeType: "application/xml"
+    });
+});
+
+P.implementService("hres:repository:rioxx:export-object-as-binary-data-multiple", function(items) {
+    let xmlDocument = O.xml.document();
+    let cursor = xmlDocument.cursor().
+        element("rioxx");
+    _.each(items, item => {
+        writeObjectAsRIOXXXML(item, cursor);
+    });
+    return O.binaryData(xmlDocument.toString(), {
+        filename: "search_export_rioxx.xml",
+        mimeType: "application/xml"
+    });
+});
+
+var writeObjectAsRIOXXXML = function(item, cursor, options) {
 
     let element = function(v) {
         return (O.isRef(v) ? v.load().title : v.toString());
@@ -125,4 +153,4 @@ P.implementService("hres:repository:rioxx:write-store-object-below-xml-cursor", 
             ali.element("free_to_read").up();
         }
     }
-});
+};

@@ -4,6 +4,13 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.         */
 
+P.implementService("haplo:user_roles_permissions:setup", function(setup) {
+    setup.groupRestrictionLabel(Group.RepositoryEditors, Label.ManageEPrintsAdminAttrs);
+});
+
+// --------------------------------------------------------------------------
+// Admin interface
+
 P.respond("GET", "/do/hres-repo-eprints/admin", [
 ], function(E) {
     O.action("std:action:administrator_override").enforce();
@@ -74,7 +81,7 @@ var eprintIdToRefs = function(eprintId) {
     }
 };
 
-P.implementService("hres:repository:eprints:get-object-maybe", function(eprintId) {
+P.implementService("hres:repository:eprints:get-ref-maybe", function(eprintId) {
     const objects = eprintIdToRefs(eprintId);
     return objects ? objects[0] : undefined;
 });

@@ -120,3 +120,64 @@ P.respond("GET,POST", "/do/hres-repo-collections/collect-items", [
         contents: repositoryTrayContent
     });
 });
+
+// --------------------------------------------------------------------------
+// REF Portfolio management
+
+P.implementService("hres_ref_process_repository:collect_output_ref_metadata", function(toCollect, object) {
+    if(object.isKindOf(T.Collection)) {
+        toCollect.push({
+            label: "Lead output",
+            edit: "/do/hres-repo-collections/edit-lead-output/",
+            desc: A.LeadOutput
+        });
+    }
+});
+
+var validate = function(refs) {
+    let valid = true;
+    _.each(refs, (ref) => {
+        try {
+            let object = O.ref(ref).load();     // Check is a valid refString, and current user can read object
+            if(!object.isKindOfTypeAnnotated("hres:annotation:repository-item")) {
+                valid = false;
+            }
+        } catch(e) {
+            O.stop("Not permitted.");
+        }
+    });
+    if(!valid) { O.stop("Not permitted."); }
+};
+
+var setLeadOutput = function(params, collection) {
+    let outputs = _.filter(_.keys(params), (key) => (params[key] === "on"));
+    validate(outputs);
+    let mutable = collection.mutableCopy();
+    mutable.remove(A.LeadOutput);
+    _.each(outputs, (output) => mutable.append(O.ref(output), A.LeadOutput));
+    O.withoutPermissionEnforcement(() => mutable.save());
+};
+
+P.respond("GET,POST", "/do/hres-repo-collections/edit-lead-output", [
+    {pathElement:0, as:"object"}
+], function(E, collection) {
+    if(!O.service("hres:ref_process:can_manage_ref_for_object", O.currentUser, collection)) {
+        O.stop("Not permitted.");
+    }
+    if(E.request.method === "POST") {
+        setLeadOutput(E.request.parameters, collection);
+        E.response.redirect("/do/hres-ref-process-repository/metadata/"+collection.ref);
+    }
+    let rows = [];
+    collection.every(A.CollectionItem, (v,d,q) => {
+        rows.push({
+            selected: collection.has(v, A.LeadOutput),
+            output: v
+        });
+    });
+    E.render({
+        title: "Set lead output",
+        collection: collection,
+        rows: rows
+    });
+});

@@ -1,0 +1,32 @@
+
+type hres:type:digital-or-visual-media as DigitalOrVisualMedia
+type std:type:book as Book
+type hres:type:book-chapter as BookChapter
+type hres:type:performance as Performance
+type hres:type:software as Software
+type hres:type:conference-item:conference-paper as ConferencePaper
+type hres:type:conference-item as ConferenceItem
+type hres:type:design as Design
+type hres:type:journal-article as JournalArticle
+type hres:type:dataset as Dataset
+type hres:type:patent as Patent
+type hres:type:report as Report
+type hres:type:thesis as Thesis
+type hres:type:website as Website
+
+attribute hres:attribute:authors-citation as AuthorsCitation
+attribute std:attribute:event as Event
+attribute hres:attribute:place-of-publication as PlaceOfPublication
+attribute dc:attribute:date as Date
+attribute hres:attribute:editors-citation as EditorsCitation
+attribute dc:attribute:publisher as Publisher
+attribute hres:attribute:journal as Journal
+attribute hres:attribute:keywords as Keywords
+attribute hres:attribute:page-range as PageRange
+attribute hres:attribute:journal-citation as JournalCitation
+OPTIONAL attribute hres:attribute:digital-object-identifier-doi as DOI
+attribute dc:attribute:title as Title
+attribute hres:attribute:abstract as Abstract
+attribute hres:attribute:edition as Edition
+attribute hres:attribute:issn as ISSN
+attribute std:attribute:isbn as ISBN

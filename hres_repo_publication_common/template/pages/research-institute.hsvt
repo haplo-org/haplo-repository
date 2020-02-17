@@ -22,21 +22,23 @@ pageTitle(object.title)
 </div>
 
 std:web-publisher:block("sidebar") {
-  <div class="card border-0 bg-light mb-4">
-    <div class="card-header bg-transparent border-0">
-      <h3 class="mb-0">"People"</h3>
-    </div>
+  if(researchers) {
+    <div class="card border-0 bg-light mb-4">
+      <div class="card-header bg-transparent border-0">
+        <h3 class="mb-0">"People"</h3>
+      </div>
 
-    <div class="card-body">
-      each(researchers) {
-        <p>
-          std:web-publisher:object:link(.) {
-            std:web-publisher:utils:title:name(.)
-          }
-        </p>
-      }
+      <div class="card-body">
+        each(researchers) {
+          <p>
+            std:web-publisher:object:link(.) {
+              std:web-publisher:utils:title:name(.)
+            }
+          </p>
+        }
+      </div>
     </div>
-  </div>
+  }
 }
 
 std:web-publisher:block("below") {
@@ -48,8 +50,8 @@ std:web-publisher:block("below") {
         </div>
         <div class="col-4 text-right">
           //"Sort by: "
-          //<a href="#!" class="btn btn-sm btn-primary">"Date"</a>
-          //<a href="#!" class="btn btn-sm btn-primary">"Title"</a>
+          //<a href="#!" class="btn btn-sm btn-primary" role="button">"Date"</a>
+          //<a href="#!" class="btn btn-sm btn-primary" role="button">"Title"</a>
         </div>
       </div>
     </div>

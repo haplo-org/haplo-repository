@@ -5,7 +5,7 @@
   <div class="card-body">
 
     <div class="btn-group w-100">
-      <a href=href class="btn btn-primary btn-lg">
+      <a href=href class="btn btn-primary btn-lg" role="button">
         yield()
       </a>
     </div>

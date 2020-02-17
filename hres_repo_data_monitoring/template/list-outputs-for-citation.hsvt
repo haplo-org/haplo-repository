@@ -1,0 +1,11 @@
+std:layout:standard()
+
+pageTitle("Outputs for citation: " citation)
+backLink("/do/hres-repo-data-monitoring/citation-matching") { "Back to list" }
+
+<p> "All of these outputs will have their citation for " citation " removed and replaced with a link to the account chosen on the dashboard. If you choose to do so
+    make sure that "<b>"all"</b>" of these outputs link to the correct author as this operation cannot be undone." </p>
+
+each(outputs) {
+    std:object(. "searchresultmini")
+}

@@ -22,6 +22,16 @@ restriction hres:restriction:collection-creators
     restrict-type hres:type:collection
     attribute-read-only hres:attribute:authors-citation
 
+label hres:label:collection-lead-output
+    title Collection lead output
+    category Restriction
+
+restriction hres:restriction:collection-lead-output
+    title Collection lead output
+    label-unrestricted hres:label:collection-lead-output
+    # restrict everywhere as no restrict-type specified
+    attribute-restricted hres:attribute:lead-output
+
 # ---------------------------------------------------------------------------
 
 type hres:type:collection as Collection
@@ -49,6 +59,33 @@ attribute hres:attribute:collection-item as CollectionItem
     title Portfolio items
     search-name collection-items
     search-name portfolio-items
+    qualifier std:qualifier:null
+    data-type link
+    ui-options lookup
+    # TODO: Uncomment this line when platfform support is added
+    # linked-annotated-types hres:annotation:repository-item
+    linked-type hres:type:website
+    linked-type hres:type:software
+    linked-type hres:type:other
+    linked-type hres:type:online-educational-resource
+    linked-type hres:type:digital-or-visual-media
+    linked-type hres:type:devices-and-products
+    linked-type hres:type:design
+    linked-type hres:type:composition
+    linked-type hres:type:thesis
+    linked-type hres:type:report
+    linked-type hres:type:performance
+    linked-type hres:type:patent
+    linked-type hres:type:exhibition
+    linked-type hres:type:book-chapter
+    linked-type hres:type:artefact
+    linked-type hres:type:journal-article
+    linked-type hres:type:conference-item
+    linked-type std:type:book
+
+attribute hres:attribute:lead-output as LeadOutput
+    title Lead output
+    search-name lead-output
     qualifier std:qualifier:null
     data-type link
     ui-options lookup

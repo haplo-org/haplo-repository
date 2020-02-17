@@ -225,6 +225,7 @@ P.respond("GET", "/do/repository-ingest-start-ui/new-for", [
     {pathElement:0, as:"object", optional:true}
 ], function(E, researcher) {
     var types = getTypes();
+    O.serviceMaybe("hres:repository:ingest_start_ui:add_notes", notes);
     var primaryTypes = types.primaryTypes;
     var secondaryTypes = types.secondaryTypes;
     var options = function(list) {
@@ -316,6 +317,7 @@ P.respond("GET,POST", "/do/repository-ingest-start-ui/new-for-edit", [
         researcher: researcher,
         type: type,
         typeInfo: typeInfo,
-        templateObject: templateObject
+        templateObject: templateObject,
+        successRedirect: O.serviceMaybe("hres:repo_ingest:success_redirect_for_type", type)
     }, "new-output");
 });

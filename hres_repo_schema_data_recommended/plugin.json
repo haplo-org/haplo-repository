@@ -9,7 +9,5 @@
       "hres_repo_schema_recommended",
       "hres_repo_schema_research_data"
     ],
-  "load": [
-    ],
-  "respond": []
+  "load": []
 }

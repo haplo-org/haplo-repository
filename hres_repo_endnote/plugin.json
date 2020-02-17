@@ -1,0 +1,17 @@
+{
+  "pluginName": "hres_repo_endnote",
+  "pluginAuthor": "Haplo Services",
+  "pluginVersion": 1,
+  "displayName": "Haplo Repository Endnote",
+  "displayDescription": "Endnote data format support for Haplo RM Repository",
+  "installSecret": "453b9ce62c5d8424dd9cbfeaec6305c3ee2aa309",
+  "apiVersion": 4,
+  "depend": [
+      "hres_repo_schema_outputs_recommended",
+      "hres_repository"
+    ],
+  "load": [
+      "js/hres_repo_endnote.js"
+    ],
+  "respond": ["/do/hres-repo-endnote"]
+}

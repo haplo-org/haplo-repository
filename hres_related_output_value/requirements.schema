@@ -1,0 +1,143 @@
+type std:type:book as Book
+
+schema-template hres:template-type:repository-item
+    attribute hres:attribute:related-output [sort=14000]
+
+attribute hres:attribute:related-output as RelatedOutput
+    title: Related Output
+    search-name: related output
+    data-type plugin
+    data-type-options hres:related_output
+    qualifier hres:qualifier:related-output:cites
+    qualifier hres:qualifier:related-output:continues
+    qualifier hres:qualifier:related-output:describes
+    qualifier hres:qualifier:related-output:references
+    qualifier hres:qualifier:related-output:documents
+    qualifier hres:qualifier:related-output:compiles
+    qualifier hres:qualifier:related-output:reviews
+    qualifier hres:qualifier:related-output:requires
+    qualifier hres:qualifier:related-output:obsoletes
+    qualifier hres:qualifier:related-output:has-metadata
+    qualifier hres:qualifier:related-output:has-version
+    qualifier hres:qualifier:related-output:has-part
+    qualifier hres:qualifier:related-output:cited-by
+    qualifier hres:qualifier:related-output:supplement-to
+    qualifier hres:qualifier:related-output:supplemented-by
+    qualifier hres:qualifier:related-output:continued-by
+    qualifier hres:qualifier:related-output:described-by
+    qualifier hres:qualifier:related-output:metadata-for
+    qualifier hres:qualifier:related-output:version-of
+    qualifier hres:qualifier:related-output:new-version-of
+    qualifier hres:qualifier:related-output:previous-version-of
+    qualifier hres:qualifier:related-output:part-of
+    qualifier hres:qualifier:related-output:referenced-by
+    qualifier hres:qualifier:related-output:documented-by
+    qualifier hres:qualifier:related-output:compiled-by
+    qualifier hres:qualifier:related-output:variant-form-of
+    qualifier hres:qualifier:related-output:original-form-of
+    qualifier hres:qualifier:related-output:identical-to
+    qualifier hres:qualifier:related-output:reviewed-by
+    qualifier hres:qualifier:related-output:derived-from
+    qualifier hres:qualifier:related-output:source-of
+    qualifier hres:qualifier:related-output:required-by
+    qualifier hres:qualifier:related-output:obsoleted-by
+
+qualifier hres:qualifier:related-output:cites
+    title: Cites
+    search-name: cites
+qualifier hres:qualifier:related-output:continues
+    title: Continues
+    search-name: continues
+qualifier hres:qualifier:related-output:describes
+    title: Describes
+    search-name: describes
+qualifier hres:qualifier:related-output:references
+    title: References
+    search-name: references
+qualifier hres:qualifier:related-output:documents
+    title: Documents
+    search-name: documents
+qualifier hres:qualifier:related-output:compiles
+    title: Compiles
+    search-name: compiles
+qualifier hres:qualifier:related-output:reviews
+    title: Reviews
+    search-name: reviews
+qualifier hres:qualifier:related-output:requires
+    title: Requires
+    search-name: requires
+qualifier hres:qualifier:related-output:obsoletes
+    title: Obsoletes
+    search-name: obsoletes
+qualifier hres:qualifier:related-output:has-metadata
+    title: Has metadata
+    search-name: has metadata
+qualifier hres:qualifier:related-output:has-version
+    title: Has version
+    search-name: has version
+qualifier hres:qualifier:related-output:has-part
+    title: Has part
+    search-name: has part
+qualifier hres:qualifier:related-output:cited-by
+    title: Is cited by
+    search-name: is cited by
+qualifier hres:qualifier:related-output:supplement-to
+    title: Is supplement to
+    search-name: is supplement to
+qualifier hres:qualifier:related-output:supplemented-by
+    title: Is supplemented by
+    search-name: is supplemented by
+qualifier hres:qualifier:related-output:continued-by
+    title: Is continued by
+    search-name: is continued by
+qualifier hres:qualifier:related-output:described-by
+    title: Is described by
+    search-name: is described by
+qualifier hres:qualifier:related-output:metadata-for
+    title: Is metadata for
+    search-name: is metadata for
+qualifier hres:qualifier:related-output:version-of
+    title: Is version of
+    search-name: is version of
+qualifier hres:qualifier:related-output:new-version-of
+    title: Is new version of
+    search-name: is new version of
+qualifier hres:qualifier:related-output:previous-version-of
+    title: Is previous version of
+    search-name: is previous version of
+qualifier hres:qualifier:related-output:part-of
+    title: Is part of
+    search-name: is part of
+qualifier hres:qualifier:related-output:referenced-by
+    title: Is referenced by
+    search-name: is referenced by
+qualifier hres:qualifier:related-output:documented-by
+    title: Is documented by
+    search-name: is documented by
+qualifier hres:qualifier:related-output:compiled-by
+    title: Is compiled by
+    search-name: is compiled by
+qualifier hres:qualifier:related-output:variant-form-of
+    title: Is variant form of
+    search-name: is variant form of
+qualifier hres:qualifier:related-output:original-form-of
+    title: Is original form of
+    search-name: is original form of
+qualifier hres:qualifier:related-output:identical-to
+    title: Is identical to
+    search-name: is identical to
+qualifier hres:qualifier:related-output:reviewed-by
+    title: Is reviewed by
+    search-name: is reviewed by
+qualifier hres:qualifier:related-output:derived-from
+    title: Is derived from
+    search-name: is derived from
+qualifier hres:qualifier:related-output:source-of
+    title: Is source of
+    search-name: is source of
+qualifier hres:qualifier:related-output:required-by
+    title: Is required by
+    search-name: is required by
+qualifier hres:qualifier:related-output:obsoleted-by
+    title: Is obsoleted by
+    search-name: is cited by

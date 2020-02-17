@@ -5,7 +5,7 @@
   "displayName": "Haplo RM Embargoes",
   "displayDescription": "Support for embargoes and associated licensing",
   "apiVersion": 4,
-  "privilegesRequired": ["pDatabase", "pHTTPClient"],
+  "privilegesRequired": ["pDatabase", "pHTTPClient", "pKeychainRead", "pKeychainReadSecret"],
   "use": [
       "haplo:respond-after-http-request",
       "std:reporting"

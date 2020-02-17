@@ -49,7 +49,7 @@ var ensureProperties = function() {
     propertiesForType.set(T.DigitalOrVisualMedia, ["authors", "year", "title", "place_of_pub"]);
     propertiesForType.set(T.Patent, ["authors", "year", "title", "patent_id"]);
     _.each([T.Performance, T.Exhibition], function(type) {
-        propertiesForType.set(type, ["authors", "year", "title", "event_location"]);
+        propertiesForType.set(type, ["authors", "year", "title", "event_location", "event_dates"]);
     });
     propertiesForType.set(T.Thesis, ["authors", "year", "title", "type", "institution", "department"]);
     O.serviceMaybe("hres_bibliographic_reference:extend_reference_formats", properties, propertiesForType, Values);

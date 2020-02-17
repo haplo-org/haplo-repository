@@ -10,5 +10,13 @@
             "hres:oai-pmh:metadata-namespace":  "http://www.openarchives.org/OAI/2.0/oai_dc/",
             "hres:oai-pmh:root-element":        "dc"
         }
+    },
+    "hres:repository:dc:export-object-as-binary-data": {
+        "statements": [
+            "hres:repository:exportable-metadata-format"
+        ],
+        "metadata": {
+            "hres:repository:export-format":    "DC"
+        }
     }
 }

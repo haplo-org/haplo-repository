@@ -5,52 +5,79 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.         */
 
 
+/*HaploDoc
+node: /repository/hres_repo_publication_common/replaceable-templates
+title: Replaceable templates
+sort: 1
+--
 
-// Primary button link
-//
-// Blocks:
-//    (anonymous block) -- contents of button
-// View:
-//    href -- link for button
-//
-// std:web-publisher:template("hres:repository:common:ui:button:primary")
-//   { "File access - " title }
-// with href in view
-//
+These allow you to replace the HSVT for a template in your client code, but still use common features \
+for functionality. The common functionality will pass a JS view object into your template, which must \
+accept the same view varibles and have the same blocks as the template you're replacing.
+
+h3. Primary button link
+
+The template for primary buttons within the publication.
+
+|Blocks|(anonymous block) -- contents of button |
+| View | href -- link for button |
+
+
+h4. Example
+
+<pre>
+std:web-publisher:template("hres:repository:common:ui:button:primary")
+   { "File access - " title }
+</pre>
+*/
 P.webPublication.registerReplaceableTemplate(
     "hres:repository:common:ui:button:primary",
     "replaceable/ui/button-primary"
 );
 
 
+/*HaploDoc
+node: /repository/hres_repo_publication_common/replaceable-templates
+sort: 2
+--
 
-// Secondary button link
-//
-// Blocks:
-//    (anonymous block) -- contents of button
-// View:
-//    href -- link for button
-//
-// std:web-publisher:template("hres:repository:common:ui:button:secondary")
-//   { "File access - " title }
-// with href in view
-//
+h3. Secondary button link
+
+|Blocks|(anonymous block) -- contents of button|
+|View|href -- link for button|
+
+
+h4. Example
+
+<pre>
+std:web-publisher:template("hres:repository:common:ui:button:secondary")
+  { "File access - " title }
+</pre>
+*/
 P.webPublication.registerReplaceableTemplate(
     "hres:repository:common:ui:button:secondary",
     "replaceable/ui/button-secondary"
 );
 
+/*HaploDoc
+node: /repository/hres_repo_publication_common/replaceable-templates
+sort: 4
+--
 
-// Generic panel
-//
-// Blocks:
-//    (anonymous block) -- contents of panel
-//    heading -- heading of panel
-//
-// std:web-publisher:template("hres:repository:common:ui:panel")
-//   { "Panel contents" }
-//   heading { "Panel heading" }
-//
+h3. Generic panel
+
+|Blocks|(anonymous block) -- contents of panel|
+||heading -- heading of panel|
+
+
+h4. Example
+
+<pre>
+std:web-publisher:template("hres:repository:common:ui:panel")
+  { "Panel contents" }
+  heading { "Panel heading" }
+</pre>
+*/
 P.webPublication.registerReplaceableTemplate(
     "hres:repository:common:ui:panel",
     "replaceable/ui/panel"

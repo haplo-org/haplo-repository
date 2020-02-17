@@ -1,0 +1,17 @@
+{
+  "pluginName": "hres_bulk_author_addition",
+  "pluginAuthor": "Haplo Services",
+  "pluginVersion": 1,
+  "displayName": "Hres Bulk Author Addition",
+  "displayDescription": "Plugin to facilitate the bulk adding of author citations to an output",
+  "installSecret": "58d9b55e3383bccabb116913c327937f2d7a9dd6",
+  "apiVersion": 4,
+  "depend": [
+      "hres_author_citation_value",
+      "hres_repository"
+    ],
+  "load": [
+      "js/hres_bulk_author_addition.js"
+    ],
+  "respond": ["/do/hres-bulk-author-addition"]
+}

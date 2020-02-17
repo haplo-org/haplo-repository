@@ -24,6 +24,32 @@ P.implementService("hres:repository:datacite:write-store-object-below-xml-cursor
     writeObjectAsDataciteXML(item, cursor, options);
 });
 
+// Export record as an XML file
+P.implementService("hres:repository:datacite:export-object-as-binary-data", function(item) {
+    let xmlDocument = O.xml.document();
+    let cursor = xmlDocument.cursor().
+        element("datacite");
+    writeObjectAsDataciteXML(item, cursor);
+    return O.binaryData(xmlDocument.toString(), {
+        filename: item.title+"_datacite.xml",
+        mimeType: "application/xml"
+    });
+});
+
+// Export record as an XML file
+P.implementService("hres:repository:datacite:export-object-as-binary-data-multiple", function(items) {
+    let xmlDocument = O.xml.document();
+    let cursor = xmlDocument.cursor().
+        element("datacite");
+    _.each(items, item => {
+        writeObjectAsDataciteXML(item, cursor);
+    });
+    return O.binaryData(xmlDocument.toString(), {
+        filename: "search_export_datacite.xml",
+        mimeType: "application/xml"
+    });
+});
+
 var writeObjectAsDataciteXML = function(item, cursor, options) {
     var resource = cursor.
         cursorSettingDefaultNamespace("http://datacite.org/schema/kernel-4").
@@ -51,9 +77,12 @@ var writeObjectAsDataciteXML = function(item, cursor, options) {
             simpleElement(A[descStr], elementName, modifyElement);
         }
     };
-
+    var university = O.query().link(T.University, A.Type).execute()[0];
     var personElement = function(desc, elementPrefix, modifyElement) {
         item.every(desc, function(v,d,q) {
+            var qual =  q ? SCHEMA.getQualifierInfo(q).code : null;
+            if(desc === A.Contributors && qual.indexOf("datacite") < 0) { return; }
+
             resource.element(elementPrefix);
             var ref, personName;
             if(O.isRef(v)) {
@@ -90,12 +119,17 @@ var writeObjectAsDataciteXML = function(item, cursor, options) {
                         up();
                 });
                 o.each(A.ResearchInstitute, function(v,d,q) {
-                    resource.element("affiliation").
-                        text(v.load().title).
+                    resource.element("affiliation");
+                    if("GridID" in A && university.first(A.GridID)) {
+                        resource.attribute("affiliationIdentifier", university.first(A.GridID)).
+                            attribute("affiliationIdentifierSchema", "GRID").
+                            attribute("SchemeURI", "https://www.grid.ac/institutes/");
+                    }
+                    resource.text(university.title).
                         up();
                 });
             }
-            if(modifyElement) { modifyElement(resource, v); }
+            if(modifyElement) { modifyElement(resource, v, d, q); }
             resource.up();
         });
     };
@@ -106,13 +140,70 @@ var writeObjectAsDataciteXML = function(item, cursor, options) {
         }
     });
 
-    simpleElement(A.Type, "resourceType", function(c, v) {
-        let t;
-        _.each(RESOURCE_TYPE_GENERAL, (types, resourceTypeGeneral) => {
-            _.each(types, (type) => { if(item.isKindOf(type)) { t = resourceTypeGeneral; } });
+    if("Dataset" in T && !item.isKindOf(T["Dataset"])) {
+        simpleElement(A.Type, "resourceType", function(c, v) {
+            var t;
+            _.each(RESOURCE_TYPE_GENERAL, (types, resourceTypeGeneral) => {
+                _.each(types, (type) => { if(item.isKindOf(type)) { t = resourceTypeGeneral; } });
+            });
+            c.attribute("resourceTypeGeneral", t || "Text");
         });
-        c.attribute("resourceTypeGeneral", t || "Text");
-    });
+    } else {
+        var t, 
+            text = "",
+            dataFiles = "DatasetFile" in A ? item.getAttributeGroupIds(A.DatasetFile) : [];
+
+        _.find(dataFiles, groupId => {
+            var group = item.extractSingleAttributeGroup(groupId);
+            var dataType = "DataType" in A ? group.first(A.DataType) : null;
+            if(dataType) {
+                dataType = dataType.load().title;
+                return _.find(RESOURCE_TYPE_GENERAL, (types, resourceTypeGeneral) => {
+                    return _.find(types, (type) => {
+                        if(O.isRef(type)) { type = type.load().title; }
+                        if(type === dataType) { 
+                            t = resourceTypeGeneral;
+                            if(t === "Other") {
+                                text = dataType;
+                            }
+                            return true;
+                        } 
+                    });
+                });
+            }
+        });
+        resource.element("resourceType").text(text).attribute("resourceTypeGeneral", t || "Text");
+        resource.up();
+    }
+
+    if("RelatedOutput" in A) {
+        resource.element("relatedIdentifiers");
+        item.every(A.RelatedOutput, (v, d, q) => {
+            var output = v.toString().split(": ");
+            var value = output[output.length-1];
+            var name = SCHEMA.getQualifierInfo(q).name;
+            name = name.split(" ");
+            //Put into schema format (no spaces capital start of word)
+            name = _.map(name, word => { return word[0].toUpperCase() + word.substr(1); }).join("");
+
+            var type = output.length > 1 ? output[0] : O.typecode(v);
+            if(_.isNumber(type)) {
+                if(type === O.T_IDENTIFIER_URL) { type = "URL"; }
+                else if(type === O.T_IDENTIFIER_ISBN) { type = "ISBN"; }
+                if(P.DOI.isDOI(v)) { type = "DOI"; }
+                else if(P.Handle.isHandle(v)) { type = "Handle"; }
+                else if(P.PMID.isPMID(v)) { type = "PMID"; }
+            }
+            resource.element("relatedIdenfifier").
+                attribute("relationType", name).
+                text(value);
+            if(type){
+                resource.attribute("relatedIdenfifierType", type);
+            }
+            resource.up();
+        });
+        resource.up();
+    }
 
     resource.element("creators");
     personElement(A.AuthorsCitation, "creator");
@@ -138,13 +229,31 @@ var writeObjectAsDataciteXML = function(item, cursor, options) {
             text(new XDate(item.first(A.Date).start).toString("yyyy")).
             up();
     }
+
     resource.element("subjects");
-    elementMaybe("Keywords", "subject");
+    var subjectModifier;
+    if(!O.serviceImplemented("hres:datacite:add-subjects-from-taxonomy-below-cursor")) {
+        subjectModifier = function(c, v) {
+            if(!O.isRef(v)) { return; }
+            var url = v.load().first(A.Url);
+            if(url) { c.attribute("valueURI", url.toString()); }
+        };
+    }
+    elementMaybe("Keywords", "subject", subjectModifier);
+    O.serviceMaybe("hres:datacite:add-subjects-from-taxonomy-below-cursor", resource, item);
     resource.up();
 
     resource.element("contributors");
     personElement(A.EditorsCitation, "contributor", function(c, v) {
         c.attribute("contributorType", "Editor");
+    });
+    personElement(A.Contributors, "contributor", function(c, v, d, q) {
+        var info = SCHEMA.getQualifierInfo(q);
+        if(info.code.indexOf("datacite") !== -1) {
+            var type = info.name.toString();
+            type = type.replace(/\s/g, "");
+            c.attribute("contributorType", type);
+        }
     });
     resource.up();
 
@@ -167,35 +276,115 @@ var writeObjectAsDataciteXML = function(item, cursor, options) {
     resource.up();
 
     resource.element("rightsList");
-    elementMaybe("License", "rights");
+    elementMaybe("License", "rights", function(c, v) {
+        if(!O.isRef(v)) { return; }
+        var uri = v.load().first(A.Url);
+        if(uri) { c.attribute("rightsURI", uri.toString()); }
+    });
     resource.up();
+
     resource.element("descriptions");
     elementMaybe("Abstract", "description", function(c, v) {
         c.attribute("descriptionType", "Abstract");
     });
+    elementMaybe("DataCollectionMethod", "description", function(c, v) {
+        c.attribute("descriptionType", "Methods");
+    });
+    elementMaybe("DataProcessing", "description", function(c, v) {
+        c.attribute("descriptionType", "TechnicalInfo");
+    });
     resource.up();
+
+    resource.element("geoLocations");
+    if("GeographicLocation" in A) {
+        var locations = item.getAttributeGroupIds(A.GeographicLocation);
+        _.each(locations, locationID => {
+            var location = item.extractSingleAttributeGroup(locationID);
+            var placeName = location.first(A.GeographicCoverage) || "";
+            var boundingBox = location.first(A.BoundingBox);
+
+            resource.element("geoLocation");
+            if(placeName) {
+                resource.element("geoLocationPlace").
+                    text(placeName.toString()).
+                    up();
+            }
+            if(boundingBox) {
+                boundingBox = boundingBox.toString();
+                resource.element("geoLocationBox").
+                    text(boundingBox).
+                    up();
+            }
+
+            resource.up();
+        });
+    }
+
+    if("GeographicCoverage" in A) {
+        //List deprecated geographic coverage single element
+        item.every(A.GeographicCoverage, (v,d,q,x) => {
+            if(x) { return; }
+            resource.element("geoLocationPlace").
+                text(v.toString()).
+                up();
+        });
+    }
+
+    resource.up();
+
+    let funderCount = item.every(A.Funder).length;
+    let projectCount = item.every(A.Project).length;
+    let useGrantID = (funderCount === 1) && (projectCount === 1);
+
+    item.every(A.Funder, (v,d,q) => {
+        let funderTitle = O.isRef(v) ? v.load().title : v;
+        resource.
+            element("fundingReference").
+            element("funderName").
+            text(funderTitle).
+            up();
+        if(useGrantID) {
+            let project = item.first(A.Project).load();
+            resource.
+                element("awardNumber").
+                text(project.first(A.GrantId)).
+                up();
+            resource.
+                element("awardTitle").
+                text(project.title).
+                up();
+        }
+        resource.up();
+    });
 
 };
 
+//Function to map a type to its equivalent schema type, if not returns the text
 var mapToTypesMaybe = function(typeStrings) {
     return _.compact(_.map(typeStrings, (str) => {
         if(str in T) { return T[str]; }
+        else { return str; }
     }));
 };
 // Using the default repository schema. This is not guaranteed to be installed, to allow applications 
 // to use different schemas if required
 var RESOURCE_TYPE_GENERAL = {
     "Audiovisual": mapToTypesMaybe(["DigitalOrVisualMedia", "Video"]),
+    "Collection": mapToTypesMaybe(["Archive"]),
+    "DataPaper": [],
     "Dataset": mapToTypesMaybe(["Dataset"]),
     "Event": mapToTypesMaybe(["Exhibition", "Performance"]),
+    "Image": mapToTypesMaybe(["Image"]),
     "InteractiveResource": mapToTypesMaybe(["Website", "OnlineEducationalResource"]),
     "Model": mapToTypesMaybe(["Design"]),
     "PhysicalObject": mapToTypesMaybe(["Artefact", "DevicesAndProducts"]),
+    "Service": [],
     "Software": mapToTypesMaybe(["Software"]),
     "Sound": mapToTypesMaybe(["Audio", "Composition"]),
-    "Text": mapToTypesMaybe(["JournalArticle", "Book", "BookChapter", "ConferenceItem", "Patent", "Report", "Thesis"])
+    "Text": mapToTypesMaybe(["JournalArticle", "Book", "BookChapter", "ConferenceItem", "Patent", "Report", "Thesis", "Text"]),
+    "Workflow": [],
+    "Other": mapToTypesMaybe(["Spreadsheet", "Slideshow"])
 };
-
 
 // --------------------------------------------------------------------------
 // Convert from DataCite XML to StoreObject
@@ -300,6 +489,7 @@ P.implementService("hres:repository:datacite:apply-xml-to-object", function(xml,
             if(resourceTypeGeneral) {
                 // Note: Since this is a one-to-many mapping, we pick the most likely from an ordered list
                 type = RESOURCE_TYPE_GENERAL[resourceTypeGeneral][0];
+                if(!O.isRef(type)) { type = null; }
             }
         }
         if(type) {
