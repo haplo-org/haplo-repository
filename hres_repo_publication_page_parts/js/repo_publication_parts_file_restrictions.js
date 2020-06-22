@@ -15,17 +15,18 @@ P.webPublication.pagePart({
     category: "hres:repository:output:sidebar",
     sort: 400,
     deferredRender: function(E, context, options) {
+        var ignoreDescs = options.ignoreDescs || [];
         var restrictedFileGroupDescs = [];
         var allFiles = {};
         var restricted = context.object.restrictedCopy(O.currentUser);
         restricted.every(function(v,d,q,x) {
             if(O.typecode(v) === O.T_IDENTIFIER_FILE) {
-                allFiles[v.digest] = [d,q,x];
+                allFiles[v.digest] = [d,q,x.desc,x.groupId];
             }
         });
         context.object.every(function(v,d,q,x) {
-            if(O.typecode(v) === O.T_IDENTIFIER_FILE) {
-                if(!_.isEqual([d,q,x], allFiles[v.digest])) {
+            if(O.typecode(v) === O.T_IDENTIFIER_FILE && !_.any(ignoreDescs, (desc) => desc == d || desc == x.desc)) {
+                if(!_.isEqual([d,q,x.desc,x.groupId], allFiles[v.digest])) {
                     restrictedFileGroupDescs.push(x ? x.desc : null);
                 }
             }

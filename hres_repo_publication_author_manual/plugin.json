@@ -1,0 +1,17 @@
+{
+  "pluginName": "hres_repo_publication_author_manual",
+  "pluginAuthor": "Haplo Services",
+  "pluginVersion": 1,
+  "displayName": "Author publication page creation (manual)",
+  "displayDescription": "Allows anyone of type person to be given a page on the publication site",
+  "installSecret": "0d5889fe2b8b48cd2236196b39adc5b77451311f",
+  "apiVersion": 4,
+  "depend": [
+    "hres_repository",
+    "std_action_panel"
+  ],
+  "load": [
+      "js/hres_repo_publication_author_manual.js"
+    ],
+  "respond": ["/do/hres-repo-publication-author-manual"]
+}

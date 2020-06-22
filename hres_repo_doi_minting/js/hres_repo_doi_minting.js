@@ -155,6 +155,8 @@ var mintDOIForObject = function(object) {
     // TODO: Should we check that there's a change to the xml generated before we send?
     O.httpClient(O.application.config["hres:doi:minting:service-url"]+"/metadata").
         method("POST").
+        header("Content-Type", "application/xml").
+        header("charset", "UTF-8").
         body("application/xml;charset=UTF-8", xml.toString()).
         useCredentialsFromKeychain(CREDENTIAL_NAME).
         request(HaveSetMetadata, {

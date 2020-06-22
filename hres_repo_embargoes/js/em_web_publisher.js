@@ -51,7 +51,8 @@ P.implementService("hres_repo_publication_common:collect_renders_for_file_groups
                         }
                         return {
                             multipleFiles: (number > 1) ? number : false,
-                            end: embargo.end
+                            end: embargo.end,
+                            licenseURL: embargo.licenseURL
                         };
                     })
                 })

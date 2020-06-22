@@ -9,10 +9,15 @@
   "depend": [
       "hres_repository",
       "haplo_service_registry",
-      "haplo_alternative_versions"
+      "haplo_alternative_versions",
+      "std_reporting"
     ],
+  "use": [
+    "std:reporting"
+  ],
   "load": [
-      "js/hres_repo_harvest_sources.js"
+      "js/hres_repo_harvest_sources.js",
+      "js/hs_reporting.js"
     ],
   "respond": ["/do/hres-repo-harvest-sources"]
 }

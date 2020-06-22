@@ -1,5 +1,4 @@
 
-
 attribute dc:attribute:date as Date
 attribute dc:attribute:publisher as Publisher
 attribute dc:attribute:author as Author
@@ -24,6 +23,11 @@ OPTIONAL attribute hres:attribute:geographic-coverage as GeographicCoverage
 OPTIONAL attribute hres:attribute:dataset-file as DatasetFile
 OPTIONAL attribute hres:attribute:data-type as DataType
 attribute std:attribute:url as Url
+attribute std:attribute:isbn as ISBN
+attribute hres:attribute:digital-object-identifier-doi as DOI
+attribute hres:attribute:handle as Handle
+attribute hres:attribute:pubmed-id as PubMedID
+attribute hres:attribute:pubmedcentral-id as PubMedCentralID
 type hres:type:person:external-researcher as ExternalResearcher
 type hres:type:research-institute:university as University
 # Mandatory for the Datacite schema
@@ -35,8 +39,6 @@ OPTIONAL attribute hres:attribute:grid-id as GridID
 attribute hres:attribute:contributors as Contributors
     title Contributors
     search-name contributors
-    REMOVE qualifier hres:qualifier:producer
-    REMOVE qualifier hres:qualifier:researcher
     qualifier hres:datacite:qualifier:contact-person
     qualifier hres:datacite:qualifier:data-collector
     qualifier hres:datacite:qualifier:data-curator
@@ -61,19 +63,23 @@ attribute hres:attribute:contributors as Contributors
 # -------- Qualifiers -------------------------
 
 qualifier hres:datacite:qualifier:contact-person
-    title: Contact Person
+    REMOVE title: Contact Person
+    title: Contact person
     search-name: contact person
 
 qualifier hres:datacite:qualifier:data-collector
-    title: Data Collector
+    REMOVE title: Data Collector
+    title: Data collector
     search-name: data collector
 
 qualifier hres:datacite:qualifier:data-curator
-    title: Data Curator
+    REMOVE title: Data Curator
+    title: Data curator
     search-name: data curator
 
 qualifier hres:datacite:qualifier:data-manager
-    title: Data Manager
+    REMOVE title: Data Manager
+    title: Data manager
     search-name: data manager
 
 qualifier hres:datacite:qualifier:distributor
@@ -85,7 +91,8 @@ qualifier hres:datacite:qualifier:editor
     search-name: editor
 
 qualifier hres:datacite:qualifier:hosting-institution
-    title: Hosting Institution
+    REMOVE title: Hosting Institution
+    title: Hosting institution
     search-name: hosting institution
 
 qualifier hres:datacite:qualifier:producer
@@ -93,27 +100,33 @@ qualifier hres:datacite:qualifier:producer
     search-name: producer
 
 qualifier hres:datacite:qualifier:project-leader
-    title: Project Leader
+    REMOVE title: Project Leader
+    title: Project leader
     search-name: project leader
 
 qualifier hres:datacite:qualifier:project-manager
-    title: Project Manager
+    REMOVE title: Project Manager
+    title: Project manager
     search-name: project manager
 
 qualifier hres:datacite:qualifier:project-member
-    title: Project Member
+    REMOVE title: Project Member
+    title: Project member
     search-name: project member
 
 qualifier hres:datacite:qualifier:registration-agency
-    title: Registration Agency
+    REMOVE title: Registration Agency
+    title: Registration agency
     search-name: registration agency
 
 qualifier hres:datacite:qualifier:registration-authority
-    title: Registration Authority
+    REMOVE title: Registration Authority
+    title: Registration authority
     search-name: registration authority
 
 qualifier hres:datacite:qualifier:related-person
-    title: Related Person
+    REMOVE title: Related Person
+    title: Related person
     search-name: related person
 
 qualifier hres:datacite:qualifier:researcher
@@ -121,11 +134,13 @@ qualifier hres:datacite:qualifier:researcher
     search-name: researcher
 
 qualifier hres:datacite:qualifier:research-group
-    title: Research Group
+    REMOVE title: Research Group
+    title: Research group
     search-name: research group
 
 qualifier hres:datacite:qualifier:rights-holder
-    title: Rights Holder
+    REMOVE title: Rights Holder
+    title: Rights holder
     search-name: rights holder
 
 qualifier hres:datacite:qualifier:sponsor
@@ -137,7 +152,8 @@ qualifier hres:datacite:qualifier:supervisor
     search-name: supervisor
 
 qualifier hres:datacite:qualifier:work-package-leader
-    title: Work Package Leader
+    REMOVE title: Work Package Leader
+    title: Work package leader
     search-name: work package leader
 
 qualifier hres:datacite:qualifier:other

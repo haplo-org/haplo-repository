@@ -5,12 +5,14 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.         */
 
 
+var LIVE_APPLICATION     = O.application.config['repo_standard_publication:internal_application_hostname'];
 var HOSTNAME             = O.application.config['repo_standard_publication:hostname']                   || P.webPublication.DEFAULT;
 var REPOSITORY_NAME      = O.application.config['repo_standard_publication:name']                       || O.application.name;
 var CONFIGURED_TEXT      = O.application.config['repo_standard_publication:text']                       || {}; // see DEFAULT_TEXT for keys
 var ADMIN_EMAIL          = O.application.config['repo_standard_publication:admin_email']                || 'invalid@example.org';
 var FOOTER_LINKS         = O.application.config['repo_standard_publication:footer_links']               || []; // array of objects with text and href
 var HIDE_CAROUSEL        = O.application.config['repo_standard_publication:hide_carousel']              || false;
+var HOME_TITLE           = O.application.config['repo_standard_publication:home_title']                 || "Welcome to " + REPOSITORY_NAME;
 var COPYRIGHT_LINK       = O.application.config['repo_standard_publication:copyright_link'];
 var LOGO = {
     src             : O.application.config['repo_standard_publication:logo:src'],
@@ -30,6 +32,11 @@ if(!LOGO.src) { LOGO = undefined; }
 var PIXABAY_CREDIT = false;
 
 // --------------------------------------------------------------------------
+
+// If not in deployed application, move hostname to application hostname
+if(O.application.hostname !== LIVE_APPLICATION) {
+    HOSTNAME = P.webPublication.DEFAULT;
+}
 
 // if on same hostname as internal view, move repository to subdirectory
 var BASE_PATH = ((HOSTNAME === P.webPublication.DEFAULT) || (HOSTNAME === O.application.hostname)) ? '/repository' : '';
@@ -113,8 +120,8 @@ if(Publication.featureImplemented("hres:researcher-profile:photo:permit-image-do
 }
 
 // Integration for large branding images
-if(Publication.featureImplemented("hres:repository:branding:update")) {
-    Publication.use("hres:repository:branding:update");
+if(Publication.featureImplemented("haplo:publication:branding:update")) {
+    Publication.use("haplo:publication:branding:update");
 }
 
 Publication.layout(function(E, context, blocks) {
@@ -141,6 +148,15 @@ P.implementService("std:action_panel:home_page", function(display, builder) {
         link('default', "https://"+Publication.urlHostname+HOME_PATH, NAME("hres:repository:standard_publication:link_name", REPOSITORY_NAME));
 });
 
+var addViewLink = function(display, builder) {
+    let object = display.object;
+    if(object.labels.includes(Label.ResearcherPublishedToRepository)) {
+        builder.panel(99999).
+            link('default', Publication.urlForObject(object), "View in public repository");
+    }
+};
+P.implementService("std:action_panel:researcher_past", addViewLink);
+P.implementService("std:action_panel:staff", addViewLink);
 // --------------------------------------------------------------------------
 
 // Don't display share panel
@@ -200,12 +216,13 @@ Publication.setHomePageUrlPath(HOME_PATH);
 Publication.respondToExactPath(HOME_PATH,
     function(E, context) {
         context.hint.objectKind = 'home';
-        if(O.serviceImplemented("hres:repository:update_branding")) {
-            HOME_CAROUSEL = O.service("hres:repository:update_branding", "carousel", HOME_CAROUSEL);
-            BROWSE_IMAGES = O.service("hres:repository:update_branding", "browse", BROWSE_IMAGES);
+        if(O.serviceImplemented("haplo:publication:update_branding")) {
+            HOME_CAROUSEL = O.service("haplo:publication:update_branding", "carousel", HOME_CAROUSEL);
+            BROWSE_IMAGES = O.service("haplo:publication:update_branding", "browse", BROWSE_IMAGES);
         }
         E.render({
             HOME_PATH: HOME_PATH,
+            HOME_TITLE: HOME_TITLE,
             BASE_PATH: BASE_PATH,
             SEARCH_PATH: SEARCH_PATH,
             REPOSITORY_NAME: REPOSITORY_NAME,
@@ -253,7 +270,7 @@ Publication.use("hres:repository:common:search", {
     path: SEARCH_PATH,
     // Restrict search to researchers and repository items -- other things can be read by the
     // permissions, but shouldn't be displayed in the search.
-    includeLabels: [T.Researcher, Label.RepositoryItem]
+    includeLabels: [T.Researcher, Label.RepositoryItem, Label.ResearcherPublishedToRepository]
 });
 
 Publication.use("hres:repository:common:search-by-fields", {
@@ -298,7 +315,7 @@ if(RI_BROWSE_IMAGES.length === 0) {
         '/vendor/pixabay/department/business-2846221.jpg'
     ].map((i) => P.staticDirectoryUrl+i);
 }
-Publication.use("hres:repository:common:research-institute-browse", {
+Publication.use("hres:publication-common:research-institute-browse", {
     path: BASE_PATH+'/departments',
     title: TEXT.researchInstituteBrowseTitle,
     subtitle: TEXT.researchInstituteBrowseSubtitle,
@@ -319,43 +336,47 @@ Publication.use("hres:repository:common:output", {
     onlyAttributes: attrs(A_ONLY, 'output')
 });
 
-Publication.use("hres:repository:common:research-institute", {
+Publication.use("hres:publication-common:research-institute", {
     path: BASE_PATH+'/research-institute',
     withoutAttributes: attrs(A_WITHOUT, 'research-institute'),
-    onlyAttributes: attrs(A_ONLY, 'research-institute')
+    onlyAttributes: attrs(A_ONLY, 'research-institute'),
+    query: {
+        labels: [Label.RepositoryItem]
+    }
 });
 
-Publication.use("hres:repository:common:researcher-directory", {
+Publication.use("hres:publication-common:researcher-directory", {
     path: BASE_PATH+'/researchers',
     title: TEXT.peopleDirectoryTitle,
-    subtitle: TEXT.peopleDirectorySubtitle,
-    types: [T.Researcher]
+    subtitle: TEXT.peopleDirectorySubtitle
 });
 
 var RESEARCHER_WITHOUT = [A.Type];
 if("REFUnitOfAssessment" in A) {
     RESEARCHER_WITHOUT.push(A.REFUnitOfAssessment);
-
 }
-Publication.use("hres:repository:common:simple-object", {
+Publication.use("haplo:publication-common:simple-object", {
     path: BASE_PATH+'/researcher',
-    types: [T.Researcher],
+    types: [T.Person],
+    TEMP_selectObject(object) {
+        return (object.isKindOf(T.Researcher) || object.labels.includes(Label.ResearcherPublishedToRepository));
+    },
     kind: 'person',
     withoutAttributes: attrs(A_WITHOUT, 'person', RESEARCHER_WITHOUT),
     onlyAttributes: attrs(A_ONLY, 'person'),
-    imagePagePartCategory: "hres:repository:person:photo-display"
+    imagePagePartCategory: "hres:publication:person:photo-display"
 });
 
-Publication.use("hres:repository:common:simple-object", {
+Publication.use("haplo:publication-common:simple-object", {
     path: BASE_PATH+'/event',
     types: [T.ExternalEvent],
     kind: 'event',
     withoutAttributes: attrs(A_WITHOUT, 'event'),
-    onlyAttributes: attrs(A_ONLY, 'person')
+    onlyAttributes: attrs(A_ONLY, 'event')
 });
 
 if("Impact" in T) {
-    Publication.use("hres:repository:common:simple-object", {
+    Publication.use("haplo:publication-common:simple-object", {
         path: BASE_PATH+'/impact',
         types: [T.Impact],
         kind: 'impact',
@@ -363,7 +384,7 @@ if("Impact" in T) {
         onlyAttributes: attrs(A_ONLY, 'impact')
     });
 
-    Publication.use("hres:repository:common:simple-object", {
+    Publication.use("haplo:publication-common:simple-object", {
         path: BASE_PATH+'/impact-evidence',
         types: [T.ImpactEvidence],
         kind: 'impact-evidence',

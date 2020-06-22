@@ -11,7 +11,7 @@ pageTitle(title ": " object.title)
   </div>
   <div class="card-footer text-right border-0 bg-light">
     within(button) {
-      std:web-publisher:template("hres:repository:common:ui:button:secondary")
+      std:web-publisher:template("haplo:publication-common:ui:button:secondary")
         { "Back to repository" }
     }
   </div>

@@ -20,76 +20,16 @@ P.db.table('coversheet', {
     lastGeneratedFile: {type:"file", nullable:true}
 });
 
-// Migration - TODO remove.
-// As original file and lastGeneratedFile are null in the rows where we stored the document, I
-// can't pre-fill the document with what was actually on the cover sheet because I can't think of
-// way to match it up to the latest relevant row without making assumptions like file transforms
-// not happening at the same time. The text will have to be retrieved manually from the file
-// versions. I hope that's fine - cover sheets are probably short anyway. Something is required as
-// the form cannot do text.statement from null.
-P.respond("GET,POST", "/do/hres-repo-cover-sheets/coversheet-db-single-triples", [
-    {parameter:"commit", as:"string", optional:true}
-], function(E, commit) {
-    if(!O.currentUser.isSuperUser) {
-        O.stop("Not permitted");
-    }
-    let updated = 0;
-    const descending = true;
-    const posting = E.request.method === "POST";
-    const committing = (posting && commit === "yes");
-    const fileTypes = getFileTypes();
-    const allRepositoryItems = O.query().
-        link(SCHEMA.getTypesWithAnnotation("hres:annotation:repository-item"), A.Type).
-        execute();
-    _.each(allRepositoryItems, (repositoryItem) => {
-        let repositoryItemIsUpdated = false;
-        _.each(fileTypes, (typeSpec, type) => {
-            repositoryItem.every(A.File, (fileId) => {
-                const rows = P.db.coversheet.select().
-                    where("output", "=", repositoryItem.ref).
-                    where("type", "=", type).
-                    where("lastGeneratedFile", "=", O.file(fileId)).
-                    order("id", descending).
-                    limit(1);
-                if(rows.length < 1) {
-                    return;
-                }
-                const latestRow = rows[0];
-                if(!latestRow.document) {
-                    latestRow.document = JSON.stringify(preFillCoversheetForm(repositoryItem, type));
-                    repositoryItemIsUpdated = true;
-                    if(committing) {
-                        latestRow.save();
-                    }
-                }
-            });
-        });
-        // Clean up as we're expecting single item, type and original file triples.
-        const nonMigratableCoverSheetDocumentQuery = P.db.coversheet.select().
-            where("output", "=", repositoryItem.ref).
-            where("document", "<>", null).
-            where("lastGeneratedFile", "=", null).
-            where("originalFile", "=", null);
-        const deletedNonMigratableCoverSheetDocumentRows = committing ?
-            nonMigratableCoverSheetDocumentQuery.deleteAll() :
-            nonMigratableCoverSheetDocumentQuery.count();
-        if(!repositoryItemIsUpdated && deletedNonMigratableCoverSheetDocumentRows > 0) {
-            repositoryItemIsUpdated = true;
-        }
-        if(repositoryItemIsUpdated) {
-            updated += 1;
-        }
-    });
-    if(posting) {
-        return E.response.redirect("/");
-    }
-    E.render({
-        pageTitle: "Migrate coversheet database to single row entries for each item, type and original file triple",
-        backLink: "/",
-        text: "Would you like to try to commit this change for "+updated+" repository items?",
-        options: [{ label:"Commit", parameters:{ commit:"yes" }}]
-    }, "std:ui:confirm");
+P.implementService("hres:repository:add_cover_sheet", function(row) {
+    P.db.coversheet.create({
+        output: row.output,
+        type: row.type,
+        document: row.document,
+        originalFile: row.originalFile,
+        lastGeneratedFile: row.lastGeneratedFile
+    }).save();
 });
+
 
 // --------------------------------------------------------------------------
 // UI

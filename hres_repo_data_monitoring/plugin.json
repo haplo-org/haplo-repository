@@ -5,6 +5,7 @@
   "displayName": "HRES Repo Data Monitoring",
   "displayDescription": "Data monitoring plugin for data managed by the Haplo Repository",
   "apiVersion": 4,
+  "privilegesRequired": ["pDatabase"],
   "depend": [
       "std_reporting",
       "hres_repository",

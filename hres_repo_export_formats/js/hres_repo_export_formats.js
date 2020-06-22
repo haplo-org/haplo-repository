@@ -39,7 +39,8 @@ P.respond("GET", "/do/hres-repo-export-formats/formats", [
     metadataServices().eachService((m) => {
         options.push({
             action: "/do/hres-repo-export-formats/export/"+m.metadata["hres:repository:export-format"]+"/"+object.ref,
-            label: m.metadata["hres:repository:export-format"]
+            label: m.metadata["hres:repository:export-format"],
+            indicator: "primary"
         });
     });
     E.render({
@@ -57,3 +58,37 @@ P.respond("GET", "/do/hres-repo-export-formats/export", [
     E.response.body = O.service(service.name, object);
 });
 
+P.respond("GET", "/do/hres-repo-export-formats/formats-multiple", [
+], function(E) {
+    let options = [];
+    metadataServices().eachService((m) => {
+        options.push({
+            action: "/do/hres-repo-export-formats/export-multiple/"+m.metadata["hres:repository:export-format"],
+            label: m.metadata["hres:repository:export-format"],
+            indicator: "primary"
+        });
+    });
+    E.render({
+        pageTitle: "Export outputs in tray",
+        backLink: "/do/tray",
+        options: options
+    }, "std:ui:choose");
+});
+
+P.respond("GET", "/do/hres-repo-export-formats/export-multiple", [
+    {pathElement:0, as:"string"}
+], function(E, format) {
+    let service = metadataServiceForScheme(format),
+        objects = [];
+    _.each(O.tray, objectRef => {
+        if(objectRef.load().isKindOfTypeAnnotated("hres:annotation:repository-item")) {
+            objects.push(objectRef.load());
+        }
+    });
+    E.response.body = O.service(service.name+"-multiple", objects);
+});
+
+P.hook("hTrayPage", function(response) {
+    let buttons = response.buttons || {};
+    buttons["*EXPORT-FORMATS"] = [["/do/hres-repo-export-formats/formats-multiple", "Export outputs metadata"]];
+});

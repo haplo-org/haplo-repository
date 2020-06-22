@@ -19,7 +19,7 @@
             "' tabindex=\"1\" placeholder='",
             value.placeholder,
             "'>"
-        ].join(" ");
+        ].join("");
     };
 
     var displayButton = function() {

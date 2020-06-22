@@ -21,11 +21,6 @@ var saveEmbargoToDb = function(object, extensionGroup, data) {
         // Fallback to today
         start = new Date();
     }
-    // TODO: this is to deal with bad imported data, to ensure security by default.
-    // If we need to set embargo start dates in the future review if this check is appropriate.
-    if(start.getTime() > new Date().getTime()) {
-        start = new Date();
-    }
     var end;
     if(data.end) {
         end = new Date(data.end);

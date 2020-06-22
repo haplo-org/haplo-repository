@@ -7,12 +7,6 @@
 
 (function($) {
     $(document).ready(function() {
-        $('.hide').on('click', function(event) {
-            var removeRow = $(this).closest('tr');
-            var req = $.get($(this).attr('href'));
-            removeRow.fadeOut(100);
-            event.preventDefault();
-        });
         $('.mergelink').on('click', function(event) {
             var removeRow = $(this).closest('tr');
             var token = $('input[name="__"]');

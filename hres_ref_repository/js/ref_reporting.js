@@ -70,11 +70,29 @@ P.implementService("std:reporting:collection:repository_items:setup", function(c
         }).
         filter("publishedInREFPeriod", (select) => {
             select.where("refPublishedInREFPeriod", "=", true);
+        }).
+        filter("refOANonCompliantPublishedInREFOAPeriod", (select) => {
+            select.where("refPublishedInOAPeriod", "=", true).
+                where("oaIsConfItemOrArticle", "=", true).
+                or((sq) => {
+                    sq.where("refIsOACompliant", "=", false).
+                        where("refIsOACompliant", "=", null);
+                });
         });
 });
 
 P.implementService("std:reporting:collection:repository_items:get_facts_for_object", function(object, row) {
-    row.refUnitOfAssessment = object.first(A.REFUnitOfAssessment) || null;
+    let uoa = object.first(A.REFUnitOfAssessment);
+    if("REFSubmittingAuthor" in A) {
+        let submittingAuthor = object.first(A.REFSubmittingAuthor);
+        if(submittingAuthor) {
+            let submittingAuthorUoA = submittingAuthor.load().first(A.REFUnitOfAssessment);
+            if(submittingAuthorUoA) {
+                uoa = submittingAuthorUoA;
+            }
+        }
+    }
+    row.refUnitOfAssessment = uoa;
 
     row.refEmbargoCheck = !!P.REFChecks.embargo.check(object);
     row.refDepositCheck = !!P.REFChecks.deposit.check(object);
@@ -237,16 +255,9 @@ P.respond("GET,POST", "/do/hres-ref-repo/non-compliant-items", [
         name: "ref_non_compliance",
         kind: "list",
         collection: "repository_items",
-        title: "Items failing REF OA compliance"
+        title: "Items failing REF OA compliance",
+        filter: "refOANonCompliantPublishedInREFOAPeriod"
     }).
-        filter((select) => {
-            select.where("refPublishedInOAPeriod", "=", true).
-                where("oaIsConfItemOrArticle", "=", true).
-                or((sq) => {
-                    sq.where("refIsOACompliant", "=", false).
-                        where("refIsOACompliant", "=", null);
-                });
-        }).
         use("std:row_text_filter", {facts:["title","author"], placeholder:"Search"}).
         summaryStatistic(0, "count").
         summaryStatistic(2, "countREFOADepositFail").

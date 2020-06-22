@@ -17,6 +17,7 @@ type hres:type:website as Website
 attribute hres:attribute:authors-citation as AuthorsCitation
 attribute std:attribute:event as Event
 attribute hres:attribute:place-of-publication as PlaceOfPublication
+OPTIONAL attribute hres:attribute:publication-process-dates as PublicationProcessDates
 attribute dc:attribute:date as Date
 attribute hres:attribute:editors-citation as EditorsCitation
 attribute dc:attribute:publisher as Publisher
@@ -30,3 +31,5 @@ attribute hres:attribute:abstract as Abstract
 attribute hres:attribute:edition as Edition
 attribute hres:attribute:issn as ISSN
 attribute std:attribute:isbn as ISBN
+attribute std:attribute:file as File
+OPTIONAL attribute hres:attribute:license as License

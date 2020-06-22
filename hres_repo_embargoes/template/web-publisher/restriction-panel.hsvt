@@ -10,6 +10,7 @@ each(embargoes) {
     if(multipleFiles) {
       <em> " (" multipleFiles " files)" </em>
     }
+    if(licenseURL) { " terms available at: " <a href=licenseURL class="text-lowercase"> licenseURL </a> }
   <br>
   </mark></small>
 }

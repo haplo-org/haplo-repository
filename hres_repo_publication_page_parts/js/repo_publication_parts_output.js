@@ -108,7 +108,7 @@ P.webPublication.pagePart({
                     return {
                         output: output,
                         typeInfo: SCHEMA.getTypeInfo(output.firstType()),
-                        citation: O.service("hres_bibliographic_reference:for_object", output),
+                        citation: bibliographicReferenceForObject(output),
                         file: file
                     };
                 }
@@ -120,6 +120,16 @@ P.webPublication.pagePart({
         }
     }
 });
+
+// As bib refs can be generated quite a few times when rendering a page, remove the
+// service call overhead by caching an implementation function. This function replaces
+// itself so that the callers don't need an if statement, at the expense of slightly
+// less readable code.
+var bibliographicReferenceForObject = function(object) {
+    var fn = O.service("hres_bibliographic_reference:for_object:as_function");
+    bibliographicReferenceForObject = fn;
+    return fn(object);
+};
 
 // --------------------------------------------------------------------------
 
@@ -147,6 +157,60 @@ P.webPublication.pagePart({
                     body: output.title+" "+context.publishedObjectUrl(output)
                 }
             });
+        }
+    }
+});
+
+P.webPublication.registerReplaceableTemplate(
+    "hres:repo-publication-parts:output:download-files",
+    "output/download-files"
+);
+
+P.webPublication.pagePart({
+    name: "hres:repository:output:download-files",
+    category: "hres:repository:output:sidebar",
+    sort: -1,
+    deferredRender: function(E, context, options) {
+        if(context.object) {
+            var restricted = context.object.restrictedCopy(O.currentUser);
+            var lastGroup = {};
+            var nextFile = {};
+            var files = [];
+            restricted.every(A.File, function(v,d,q,x) {
+                if(lastGroup.groupId !== x.groupId) {
+                    var isNewGroup = lastGroup.desc !== x.desc;
+                    if(!_.isEmpty(nextFile)) {
+                        if(isNewGroup) { nextFile.lastInGroup = true; }
+                        files.push(nextFile);
+                    }
+                    nextFile = {
+                        group: isNewGroup ? SCHEMA.getAttributeInfo(x.desc).name : undefined
+                    };
+                    lastGroup = x;
+                }
+                var group = restricted.extractSingleAttributeGroup(x.groupId);
+                group.every(function(v,d,q) {
+                    if(d === A.File) {
+                        nextFile.file = v;
+                        nextFile.url = context.publication.urlForFileDownload(v);
+                    }
+                    if("License" in A && d === A.License) {
+                        nextFile.license = v.load().title;
+                    }
+                    if("FileAccessLevel" in A && d === A.FileAccessLevel) {
+                        nextFile.accessLevel = v.load().title;
+                    }
+                });
+            });
+            if(!_.isEmpty(nextFile)) {
+                files.push(nextFile);
+            }
+            if(_.isEmpty(files)) { return; }
+            files[0].first = true;
+            return context.
+                publication.
+                getReplaceableTemplate("hres:repo-publication-parts:output:download-files").
+                deferredRender({files: files});
         }
     }
 });

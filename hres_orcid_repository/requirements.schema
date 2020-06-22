@@ -1,6 +1,6 @@
 
 label std:label:deleted as DELETED
-
+group hres:group:repository-editors as RepositoryEditors
 label hres:label:accepted-into-repository as AcceptedIntoRepository
 
 # ------ Attributes -------------------------

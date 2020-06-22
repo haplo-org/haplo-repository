@@ -1,0 +1,22 @@
+{
+  "pluginName": "hres_github_repository",
+  "pluginAuthor": "Haplo Services",
+  "pluginVersion": 1,
+  "displayName": "GitHub Repository",
+  "displayDescription": "Allows users to import repositories from GitHub as software records",
+  "privilegesRequired": ["pBackgroundProcessing", "pHTTPClient"],
+  "apiVersion": 4,
+  "use": ["haplo:respond-after-http-request"],
+  "depend": [
+      "haplo_respond_after_http_request",
+      "hres_repo_schema_outputs",
+      "hres_repo_harvest_claim",
+      "hres_repo_harvest_sources",
+      "hres_repository",
+      "hres_github"
+  ],
+  "load": [
+      "js/hres_github_repository.js"
+    ],
+  "respond": ["/do/hres-github-repository"]
+}

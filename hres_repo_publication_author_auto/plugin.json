@@ -1,0 +1,19 @@
+{
+  "pluginName": "hres_repo_publication_author_auto",
+  "pluginAuthor": "Haplo Services",
+  "pluginVersion": 1,
+  "displayName": "Author publication page creation (automatic)",
+  "displayDescription": "Allows anyone of type person to be given a page on the publication site, automatically when marked as an author",
+  "installSecret": "5e91e81bfd71528f045eab94e434093750a57c23",
+  "apiVersion": 4,
+  "privilegesRequired": ["pBackgroundProcessing"],
+  "depend": [
+    "hres_repository",
+    "std_action_panel",
+    "hres_author_citation_value"
+  ],
+  "load": [
+      "js/hres_repo_publication_author_auto.js"
+    ],
+  "respond": ["/do/hres-repo-publication-author-auto"]
+}

@@ -9,10 +9,12 @@
   "privilegesRequired": ["pDatabase"],
   "depend": [
       "std_workflow",
+      "std_reporting",
       "hres_file_mediated_access"
     ],
   "use": [
-      "std:workflow"
+      "std:workflow",
+      "std:reporting"
     ],
   "load": [
       "js/hres_repo_access_request_components.js",

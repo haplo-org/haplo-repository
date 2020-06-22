@@ -4,12 +4,14 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.         */
 
+var SHOULD_NOT_EXPORT_CONTRIBUTORS = O.application.config["hres:repository:datacite_should_not_export_contributors"];
+
 // --------------------------------------------------------------------------
 
 // Provide DataCite OAI-PMH interface. Records are wrapped with some further metadata
 P.implementService("hres:repository:datacite:oai-pmh:write-store-object-below-xml-cursor", function(item, cursor, options) {
     cursor.
-        element("schemaVersion").text("4.0").up().  // The datacite schmema version implemented here
+        element("schemaVersion").text("4.3").up().  // The datacite schmema version implemented here
         // TODO: Add datacentreSymbol - from the specification: "The symbol of the datacentre that registered this record."
         // For a UK institution this will look something like BL.NAME
         // Might need to restrict records in this format to objects where the DOI has been minted by this repository
@@ -54,7 +56,7 @@ var writeObjectAsDataciteXML = function(item, cursor, options) {
     var resource = cursor.
         cursorSettingDefaultNamespace("http://datacite.org/schema/kernel-4").
         element("resource").
-        addSchemaLocation("http://datacite.org/schema/kernel-4", "http://schema.datacite.org/meta/kernel-4/metadata.xsd");
+        addSchemaLocation("http://datacite.org/schema/kernel-4", "https://schema.datacite.org/meta/kernel-4.3/metadata.xsd");
 
     var simpleElement = function(desc, elementName, modifyElement) {
         item.every(desc, function(v,d,q) {
@@ -78,10 +80,9 @@ var writeObjectAsDataciteXML = function(item, cursor, options) {
         }
     };
     var university = O.query().link(T.University, A.Type).execute()[0];
-    var personElement = function(desc, elementPrefix, modifyElement) {
+    var personElement = function(desc, elementPrefix, modifyElement, validateElement) {
         item.every(desc, function(v,d,q) {
-            var qual =  q ? SCHEMA.getQualifierInfo(q).code : null;
-            if(desc === A.Contributors && qual.indexOf("datacite") < 0) { return; }
+            if(validateElement && !validateElement(v, d, q)) { return; }
 
             resource.element(elementPrefix);
             var ref, personName;
@@ -176,31 +177,46 @@ var writeObjectAsDataciteXML = function(item, cursor, options) {
         resource.up();
     }
 
+    var identifierDescs = [A.Url, A.ISBN, A.DOI, A.Handle, A.PubMedID, A.PubMedCentralID];
     if("RelatedOutput" in A) {
         resource.element("relatedIdentifiers");
         item.every(A.RelatedOutput, (v, d, q) => {
             var output = v.toString().split(": ");
             var value = output[output.length-1];
             var name = SCHEMA.getQualifierInfo(q).name;
+            var identifier = v;
             name = name.split(" ");
             //Put into schema format (no spaces capital start of word)
             name = _.map(name, word => { return word[0].toUpperCase() + word.substr(1); }).join("");
 
-            var type = output.length > 1 ? output[0] : O.typecode(v);
+            var type;
+            if(O.isRef(v)) {
+                // If link is to item in repository then find a DataCite compliant identifier to use
+                var linkedObj = v.load();
+                var identifierDesc = _.find(identifierDescs, (desc) => !!linkedObj.first(desc));
+                if(identifierDesc) {
+                    value = linkedObj.first(identifierDesc);
+                    type = O.typecode(value);
+                    identifier = value;
+                }
+            } else {
+                type = output.length > 1 ? output[0] : O.typecode(identifier);
+            }
+
             if(_.isNumber(type)) {
                 if(type === O.T_IDENTIFIER_URL) { type = "URL"; }
                 else if(type === O.T_IDENTIFIER_ISBN) { type = "ISBN"; }
-                if(P.DOI.isDOI(v)) { type = "DOI"; }
-                else if(P.Handle.isHandle(v)) { type = "Handle"; }
-                else if(P.PMID.isPMID(v)) { type = "PMID"; }
+                if(P.DOI.isDOI(identifier)) { type = "DOI"; }
+                else if(P.Handle.isHandle(identifier)) { type = "Handle"; }
+                else if(P.PMID.isPMID(identifier)) { type = "PMID"; }
             }
-            resource.element("relatedIdenfifier").
-                attribute("relationType", name).
-                text(value);
-            if(type){
-                resource.attribute("relatedIdenfifierType", type);
+            if(value && type) {
+                resource.element("relatedIdentifier").
+                    attribute("relationType", name).
+                    text(value).
+                    attribute("relatedIdentifierType", type).
+                    up();
             }
-            resource.up();
         });
         resource.up();
     }
@@ -247,14 +263,24 @@ var writeObjectAsDataciteXML = function(item, cursor, options) {
     personElement(A.EditorsCitation, "contributor", function(c, v) {
         c.attribute("contributorType", "Editor");
     });
-    personElement(A.Contributors, "contributor", function(c, v, d, q) {
-        var info = SCHEMA.getQualifierInfo(q);
-        if(info.code.indexOf("datacite") !== -1) {
-            var type = info.name.toString();
-            type = type.replace(/\s/g, "");
-            c.attribute("contributorType", type);
-        }
-    });
+    if(!SHOULD_NOT_EXPORT_CONTRIBUTORS) {
+        personElement(A.Contributors, "contributor",
+            // Modify element
+            function(c, v, d, q) {
+                var info = SCHEMA.getQualifierInfo(q);
+                // Non-DataCite compliant qualifier should be exported as type 'Other'
+                var type = info.code.indexOf("datacite") !== -1 ? info.name.toString() : "Other";
+                var typeWords = type.split(" ");
+                type = _.map(typeWords, (word) => word.charAt(0).toUpperCase() + word.slice(1)).join("");
+                c.attribute("contributorType", type);
+            },
+            // Validate element
+            function(v, d, q) {
+                var qual =  q ? SCHEMA.getQualifierInfo(q).code : null;
+                return !!qual;
+            }
+        );
+    }
     resource.up();
 
     if("PublicationProcessDates" in A) {
@@ -295,6 +321,8 @@ var writeObjectAsDataciteXML = function(item, cursor, options) {
     });
     resource.up();
 
+    // DataCite XML Elements in order of their attribute string representation
+    var boundingBoxElements = ["southBoundLatitude", "westBoundLongitude", "northBoundLatitude", "eastBoundLongitude"];
     resource.element("geoLocations");
     if("GeographicLocation" in A) {
         var locations = item.getAttributeGroupIds(A.GeographicLocation);
@@ -311,9 +339,17 @@ var writeObjectAsDataciteXML = function(item, cursor, options) {
             }
             if(boundingBox) {
                 boundingBox = boundingBox.toString();
-                resource.element("geoLocationBox").
-                    text(boundingBox).
-                    up();
+                var coordinates = boundingBox.split(" ");
+                // Every coordinate is required for DataCite schema
+                if(coordinates.length === 4) {
+                    resource.element("geoLocationBox");
+                    _.each(coordinates, (coordinate, i) => {
+                        resource.element(boundingBoxElements[i]).
+                            text(coordinate).
+                            up();
+                    });
+                    resource.up();
+                }
             }
 
             resource.up();
@@ -324,8 +360,10 @@ var writeObjectAsDataciteXML = function(item, cursor, options) {
         //List deprecated geographic coverage single element
         item.every(A.GeographicCoverage, (v,d,q,x) => {
             if(x) { return; }
-            resource.element("geoLocationPlace").
+            resource.element("geoLocation").
+                element("geoLocationPlace").
                 text(v.toString()).
+                up().
                 up();
         });
     }
@@ -336,6 +374,7 @@ var writeObjectAsDataciteXML = function(item, cursor, options) {
     let projectCount = item.every(A.Project).length;
     let useGrantID = (funderCount === 1) && (projectCount === 1);
 
+    resource.element("fundingReferences");
     item.every(A.Funder, (v,d,q) => {
         let funderTitle = O.isRef(v) ? v.load().title : v;
         resource.
@@ -356,6 +395,7 @@ var writeObjectAsDataciteXML = function(item, cursor, options) {
         }
         resource.up();
     });
+    resource.up();
 
 };
 

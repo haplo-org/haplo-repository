@@ -74,7 +74,7 @@ var createExportXls = function() {
             cell(row.issn).
             cell(row.type).
             cell(output.title).
-            cell(row.onlinePublicationDate ? new XDate(row.onlinePublicationDate).toString("yyyy-MM-dd") : "").
+            cell(row.publishedDate ? new XDate(row.publishedDate).toString("yyyy-MM-dd") : "").
             cell(row.apcFund).
             cell(""). //TODO: APC Fund 2
             cell(""). //TODO: APC Fund 3

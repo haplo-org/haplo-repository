@@ -10,6 +10,7 @@ type std:type:journal as Journal
 type hres:type:organisation:publisher as Publisher
 type hres:type:organisation:funder as Funder
 type hres:type:project:past as ProjectPast
+type hres:type:license as License
 
 # -------- Attributes ------------------------------
 
@@ -41,6 +42,8 @@ attribute hres:attribute:published-file as PublishedFile
 attribute std:attribute:project as Project
 attribute dc:attribute:date as Date
 attribute hres:attribute:pages as Pages
+attribute std:attribute:notes as Notes
+attribute std:attribute:url as Url
 OPTIONAL attribute hres:attribute:pubmed-id as PubmedId
 OPTIONAL attribute hres:attribute:pubmedcentral-id as PubMedCentralID
 OPTIONAL attribute hres:attribute:nlm-id as NLMID

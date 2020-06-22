@@ -20,5 +20,9 @@
                 e.preventDefault();
             }
         });
+        $(".search-results").prepend('<a id="select-all"> Select all outputs </a>');
+        $("#select-all").on("click", function() {
+            $(".search-checkbox").prop("checked", true);
+        });
     });
 }) (jQuery);

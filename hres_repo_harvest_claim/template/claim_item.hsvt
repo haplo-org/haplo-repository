@@ -6,3 +6,7 @@
     }
     "has been harvested from " source " for you to review"
 </p>
+
+if(note) {
+    <p> note </p>
+}

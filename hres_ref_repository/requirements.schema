@@ -52,4 +52,5 @@ attribute hres:attribute:ref-panel as REFPanel
 attribute hres:attribute:ref-unit-of-assessment as REFUnitOfAssessment
 attribute hres:attribute:researcher as Researcher
 attribute hres:attribute:issn as ISSN
+OPTIONAL attribute hres:attribute:ref-submitting-author as REFSubmittingAuthor
 

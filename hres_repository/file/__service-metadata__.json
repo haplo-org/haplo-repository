@@ -1,0 +1,8 @@
+{
+    "hres:email:match-to-existing-record-in-list": {
+        "statements": [
+            "conforms-to hres:repository:match-item-to-existing-in-list",
+            "list-of people"
+        ]
+    }
+}

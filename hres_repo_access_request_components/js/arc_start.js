@@ -87,7 +87,7 @@ P.respond("GET,POST", "/do/hres-repo-access-request/start", [
     let document = {};
     let form = spec.form.handle(document, E.request);
     if(form.complete) {
-        let M = workflow.create(item);
+        let M = workflow.create({ref: item.ref});
         M.workUnit.tags["audience"] = "internal";
         M.workUnit.save();
         M.workflowService("ar:save_request_document", document);

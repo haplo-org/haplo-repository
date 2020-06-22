@@ -15,20 +15,20 @@ var ensureProperties = function() {
     if(properties) { return; }
     properties = {
         "authors": {key:"authors"},
-        "year": {after:".", key:"year"},
-        "chapter_title": {after:" in:", key:"title"},
+        "year": {after:'"."', key:"year"},
+        "chapter_title": {after:'" in:"', key:"title"},
         "book_title": {desc:A.BookTitle},
         "title": {before:"<i>", after:"</i>", key:"title"},
         "title_no_italic": {key:"title"},
-        "editors": {key:"editors", after:" (ed.)"},
-        "event_title": {before:"<i>", after:".</i>", key:"event"},
+        "editors": {key:"editors", after:'" (ed.)"'},
+        "event_title": {before:"<i>", after:'"."</i>', desc:A.Event},
         "event_location": {key:"event_location"},
         "event_dates": {key:"event_dates"},
         "place_of_pub": {desc:A.PlaceOfPublication},
-        "publisher": {after:".", key:"publisher"},
-        "journal": {before:"<i>", after:".</i>", key:"journal"},
-        "journal_citation": {after:".", desc:A.JournalCitation},
-        "pagerange": {before: "pp. ", desc:A.PageRange},
+        "publisher": {after:'"."', desc:A.Publisher},
+        "journal": {before:"<i>", after:'"."</i>', desc:A.Journal},
+        "journal_citation": {after:'"."', desc:A.JournalCitation},
+        "pagerange": {before: '"pp. "', desc:A.PageRange},
         "issn": {desc:A.Issn},
         "doi": {key:"doi"},
         "patent_id": {desc:A.PatentId},
@@ -59,6 +59,18 @@ var DEFAULT_PROPERTIES = ["authors", "year", "title", "place_of_pub", "publisher
 
 // ---------------------------------------------------------------------------------------------------------------------
 
+// As citations can be generated quite a few times when rendering a page, remove the
+// service call overhead by caching an implementation function. This function replaces
+// itself so that the callers don't need an if statement, at the expense of slightly
+// less readable code.
+var citationStringFromObject = function(a,b) {
+    var fn = O.service("hres:author_citation:citation_string_from_object:as_function");
+    citationStringFromObject = fn;
+    return fn(a,b);
+};
+
+// ---------------------------------------------------------------------------------------------------------------------
+
 var TITLE_ENDS_IN_PUNCTUATION = /[\.\?\!\;\:]\s*$/;
 
 var Values = function(object) {
@@ -71,28 +83,13 @@ Values.prototype.__defineGetter__('year', function() {
     return date ? date.start.getFullYear() : null;
 });
 Values.prototype.__defineGetter__('authors', function() {
-    return O.service("hres:author_citation:citation_string_from_object", this.object, A.AuthorsCitation);
+    return citationStringFromObject(this.object, A.AuthorsCitation);
 });
 Values.prototype.__defineGetter__("type", function() {
     return SCHEMA.getTypeInfo(this.object.firstType()).name;
 });
 Values.prototype.__defineGetter__("editors", function() {
-    return O.service("hres:author_citation:citation_string_from_object", this.object, A.EditorsCitation);
-});
-Values.prototype.__defineGetter__("publisher", function() {
-    var v = this.object.first(A.Publisher);
-    if(!v) { return null; }
-    return O.isRef(v) ? v.load().title : v.toString();
-});
-Values.prototype.__defineGetter__("journal", function() {
-    var v = this.object.first(A.Journal);
-    if(!v) { return null; }
-    return O.isRef(v) ? v.load().title : v.toString();
-});
-Values.prototype.__defineGetter__("event", function() {
-    var v = this.object.first(A.Event);
-    if(!v) { return null; }
-    return O.isRef(v) ? v.load().title : v.toString();
+    return citationStringFromObject(this.object, A.EditorsCitation);
 });
 Values.prototype.__defineGetter__("event_location", function() {
     var v = this.object.first(A.Event);
@@ -162,32 +159,47 @@ var precisionFormatString = function(precision) {
 
 // ---------------------------------------------------------------------------------------------------------------------
 
- var bibRefHtml = function(object) {
+var bibRefHtmlTemplateCache = {};
+
+// TODO: Platform interface for on-the fly compliation of templates, requiring a privilege? Remove from developer.json when this is available.
+// NOTE: Don't use this constructor elsewhere, it may be removed at any time.
+var HaploTemplate = $HaploTemplate;
+
+var bibRefHtmlDeferred = function(object) {
     ensureProperties();
     var values = new Values(object);
-    var html = [];
     var fields = propertiesForType.get(object.firstType()) || DEFAULT_PROPERTIES;
-    _.each(fields, function(f) {
-        var instruction = properties[f];
-        var value, desc = instruction.desc;
-        if(desc) {
-            var v = object.first(desc);
-            if(v) {
-                value = v.toString();
-            }
-        } else {
-            value = values[instruction.key];
-        }
-        if(value) {
-            html.push(
-                instruction.before || '',
-                _.escape(value),
-                instruction.after || '',
-                " "
+    var cacheKey = fields.join(',');
+    var template = bibRefHtmlTemplateCache[cacheKey];
+    if(!template) {
+        var src = [];
+        _.each(fields, function(f) {
+            var instruction = properties[f];
+            src.push(
+                "ifContent() {\n",
+                    instruction.before || '', "\n",
+                    "markContent() {\n"
             );
-        }
-    });
-    return html.join('');
+                    if(instruction.desc) {
+                        src.push('__OPTIMISE__:text:object-first-value:desc-int-as-string(object "'+instruction.desc+'")\n');
+                    } else {
+                        src.push("values."+instruction.key+"\n");
+                    }
+            src.push(
+                    "}\n",
+                    instruction.after || '',
+                    '" "\n',
+                "}\n"
+            );
+        });
+        template = new HaploTemplate(src.join(''));
+        bibRefHtmlTemplateCache[cacheKey] = template;
+    }
+    return template.deferredRender({object:object, values:values});
+};
+
+var bibRefHtml = function(object) {
+    return bibRefHtmlDeferred(object).toString();   // use toString() rather than the 'proper' way to avoid unnnecessary code
 };
 
 var bibRefPlainText = function(object) {
@@ -220,10 +232,12 @@ P.implementService("std:reporting:dashboard:outputs_in_progress:setup_export", f
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-var GenericDeferredRender = $GenericDeferredRender; // developer.json needs deleting when this goes
 P.implementService("hres_bibliographic_reference:for_object", function(object) {
-    var html = bibRefHtml(object);
-    return new GenericDeferredRender(function() { return html; });
+    return bibRefHtmlDeferred(object);
+});
+
+P.implementService("hres_bibliographic_reference:for_object:as_function", function() {
+    return bibRefHtmlDeferred;
 });
 
 P.implementService("hres_bibliographic_reference:plain_text_for_object", function(object) {

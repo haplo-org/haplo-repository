@@ -165,11 +165,11 @@ attribute hres:attribute:contributors as Contributors
     qualifier hres:qualifier:performer
     qualifier hres:qualifier:photographer
     qualifier hres:qualifier:printmaker
-    qualifier hres:qualifier:producer
+    REMOVE qualifier hres:qualifier:producer
     qualifier hres:qualifier:production-personnel
     qualifier hres:qualifier:programmer
     qualifier hres:qualifier:recording-engineer
-    qualifier hres:qualifier:researcher
+    REMOVE qualifier hres:qualifier:researcher
     qualifier hres:qualifier:set-designer
     qualifier hres:qualifier:singer
     qualifier hres:qualifier:translator

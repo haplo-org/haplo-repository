@@ -1,6 +1,7 @@
 
 label hres:label:accepted-into-repository as AcceptedIntoRepository
 label hres:label:repository-item as RepositoryItem
+label hres:label:researcher-published-to-repository as ResearcherPublishedToRepository
 
 type std:type:person as Person
 type hres:type:license as License

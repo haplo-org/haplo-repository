@@ -28,6 +28,10 @@ label hres:label:accepted-as-closed-deposit as AcceptedClosedDeposit
     title: Accepted closed deposit
     category: Repository
 
+label hres:label:researcher-published-to-repository as ResearcherPublishedToRepository
+    title: Researcher published to repository
+    category: Repository
+
 restriction hres:restriction:citation-attribute:calculated
     # TODO: Uncomment when this is added to the platform
     # restrict-if-type-annotated hres:annotation:repository-item
@@ -42,6 +46,7 @@ group hres:group:public-repository-access as PublicRepositoryAccess
 
 group std:group:everyone as Everyone
 group hres:group:admin-staff as AdminStaff
+group hres:group:it-support as ITSupport
 
 # ---------------------------------------------------------------------------
 #   Standard schema
@@ -58,6 +63,7 @@ attribute dc:attribute:publisher as Publisher
 attribute std:attribute:configured-behaviour as ConfiguredBehaviour
 attribute std:attribute:project as Project
 attribute std:attribute:url as Url
+attribute std:attribute:email as Email
 
 type std:type:intranet-page as IntranetPage
 type std:type:person as Person
@@ -72,6 +78,8 @@ label std:label:archived as ARCHIVED
 attribute hres:attribute:editor as Editor
 attribute hres:attribute:researcher as Researcher
 attribute hres:attribute:research-institute as ResearchInstitute
+attribute hres:attribute:keywords as Keywords
+
 
 type hres:type:person:external-researcher as ExternalResearcher
 type hres:type:research-institute:faculty as Faculty
@@ -281,12 +289,6 @@ attribute hres:attribute:journal-citation as JournalCitation
     qualifier std:qualifier:null
     data-type plugin
     data-type-options hres:journal_citation
-
-attribute hres:attribute:keywords as Keywords
-    title: Keywords
-    search-name: keywords
-    qualifier std:qualifier:null
-    data-type text
 
 attribute hres:attribute:license as License
     title License

@@ -15,18 +15,25 @@ P.webPublication.pagePart({
     sort: 2000,
     deferredRender: function(E, context, options) {
         if(context.object) {
-            var outputs = [];
-            if(O.serviceImplemented("hres:repo-publication-parts-person:get-ordered-outputs-for-researcher")) {
-                outputs = O.service("hres:repo-publication-parts-person:get-ordered-outputs-for-researcher", context.object.ref);
-            } else {
+            var outputs = O.serviceMaybe("hres:repo-publication-parts-person:get-ordered-outputs-for-researcher", context.object.ref);
+            if(!outputs) {
                 outputs = O.query().
-                link(SCHEMA.getTypesWithAnnotation('hres:annotation:repository-item'), A.Type).
-                or(function(subquery) {
-                    subquery.link(context.object.ref, A.Author).
-                             link(context.object.ref, A.Editor);
-                }).
-                sortByDate().
-                execute();
+                    link(SCHEMA.getTypesWithAnnotation('hres:annotation:repository-item'), A.Type).
+                    anyLabel([Label.AcceptedIntoRepository]).
+                    or(function(subquery) {
+                        subquery.link(context.object.ref, A.Author).
+                                 link(context.object.ref, A.Editor);
+                    }).
+                    sortByDate().
+                    execute();
+                outputs = _.sortBy(outputs, (o) => {
+                    var date = O.service("hres:repository:earliest_publication_date", o) ||
+                        o.first(A.PublicationProcessDates, Q.Deposited) ||
+                        o.first(A.Date) ||
+                        o.creationDate;
+                    if(date.start) { date = date.start; }
+                    return -1*date.getTime();
+                });
             }
             var types = [],
                 seen = [];

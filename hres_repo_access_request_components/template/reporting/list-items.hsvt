@@ -1,0 +1,44 @@
+thirdparty:client_side_ui:resources("tablesort" "0")
+std:layout:wide()
+<table class="tablesort">
+    <tr> 
+        unless(isOutput) { <th> "Output" </th> }
+        <th> "Task created" </th>
+        unless(isOpen) { <th> "Task closed" </th> }
+        ifAny(isOpen showAll) { <th> "Waiting on" </th> }
+        <th> "Internal/External" </th>
+        <th> "Created by" </th>
+        <th> "View request" </th>
+    </tr>
+    each(wus) {
+        <tr>
+            unless(^{isOutput}) {
+                <td> std:object:link(object) </td>
+            }
+            <td> std:date(opened) </td>
+            unless(^{isOpen}) {
+                <td>
+                    std:date(closed)
+                </td>
+            }
+            ifAny(^{isOpen} ^{showAll}) {
+                <td> 
+                    unless(closed) {
+                        if(actionableByRef) { std:object:link(actionableByRef) }
+                        else { actionableByName }
+                    } 
+                </td>
+            }
+            <td> audience </td>
+            <td> 
+                if(createdByRef) { std:object:link(createdByRef) }
+                else { createdByEmail} 
+            </td>
+            <td>
+                <a href=["/do/hres-repo-access-request/application/" id] role="button"> 
+                    "View"
+                </a>
+            </td>
+        </tr>
+    }
+</table>

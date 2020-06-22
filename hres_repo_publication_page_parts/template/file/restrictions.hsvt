@@ -1,7 +1,7 @@
 
 // WARNING: REPLACEABLE =====================================================
 
-std:web-publisher:template("hres:repository:common:ui:panel") {
+std:web-publisher:template("haplo:publication-common:ui:panel") {
   each(files) {
     <div class="card border-0 bg-light">
       <div class="card-body">

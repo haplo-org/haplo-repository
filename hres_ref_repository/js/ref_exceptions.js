@@ -4,6 +4,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.         */
 
+var REMOVE_INDICATORS = O.application.config["hres_ref_repository:remove_indicators_on_exceptions"];
 
 var EXCEPTIONS = P.EXCEPTIONS = {
     "access-a": {
@@ -55,7 +56,7 @@ var EXCEPTIONS = P.EXCEPTIONS = {
         indicator: "primary"
     },
     "technical-a": {
-        title: "Ouput outside definition",
+        title: "Output outside definition",
         details: "Output is a conference proceeding, but not within definition (i.e., it does not have an ISSN, or the proceedings are published as part of book series).",
         evidence: "None.",
         indicator: "primary"
@@ -104,7 +105,7 @@ P.respond("GET", "/do/hres-ref-repo/choose-exception", [
                 return {
                     action: "/do/hres-ref-repo/exception-evidence/"+exception+"/"+output.ref,
                     label: spec.title,
-                    indicator: spec.indicator || "default",
+                    indicator: REMOVE_INDICATORS ? "default" : spec.indicator || "default",
                     notes: spec.details,
                     highlight: !!(existing && (existing.exception === exception))
                 };

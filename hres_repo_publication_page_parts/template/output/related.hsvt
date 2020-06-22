@@ -2,11 +2,9 @@
 // WARNING: REPLACEABLE =====================================================
 
 if(related.length) {
-  std:web-publisher:template("hres:repository:common:ui:panel") {
-    <h2>"Related outputs"</h2>
-
+  std:web-publisher:template("haplo:publication-common:ui:panel") {
     each(related) {
-      <div class="media my-4 pt-4">
+      <div class="media mb-4">
         if(file) {
           std:web-publisher:object:link(output) { 
             std:web-publisher:file:thumbnail(file)
@@ -28,5 +26,5 @@ if(related.length) {
         </div>
       </div>
     }
-  } heading {"Related outputs" }
+  } heading { "Related outputs" }
 }

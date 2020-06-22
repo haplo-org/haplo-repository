@@ -77,6 +77,9 @@ var REFChecks = P.REFChecks = {
                 } else if(name === "published") {
                     let status = output.first(A.OutputStatus);
                     data.expected = !(status && status.behaviour === "hres:list:output-status:in-press");
+                } else if(name === "accepted") {
+                    let published = O.service("hres:repository:earliest_publication_date", output);
+                    data.expected = published >= new Date("2018-04-01");
                 }
                 view[name] = data;
             });
@@ -151,6 +154,10 @@ var missingREFData = function(output, checkFullRequirements) {
         if(status && status.behaviour === "hres:list:output-status:in-press") {
             required = _.without(required, "published");
         }
+    }
+    let published = O.service("hres:repository:earliest_publication_date", output);
+    if(published < new Date("2018-04-01")) {
+        required = _.without(required, "accepted");
     }
     _.each(required, function(r) {
         let fn = REFAttributeLookup[r];

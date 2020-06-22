@@ -61,6 +61,7 @@ P.implementService("haplo:user_roles_permissions:setup", function(setup) {
     setup.groupPersonalRole(Group.Everyone, "Is: Repository Item Author");
     setup.roleOversightPermission("Is: Repository Item Author", "read-edit", [Label.RepositoryItem]);
     setup.roleOversightPermission("Is: Repository Item Author", "read-edit", [T.ExternalEvent]);
+    setup.groupPermission(Group.ITSupport, "read", Label.ActivityRepository);
 });
 
 P.hook("hUserLabelStatements", function(response, user) {

@@ -45,7 +45,7 @@ type hres:type:organisation:funder
     attribute-hide hres:attribute:author-manuscript-statement
     attribute-hide hres:attribute:publishers-version-statement
 
-type std:type:organisation:this-organisation
+OPTIONAL type std:type:organisation:this-organisation
     attribute-hide hres:attribute:author-manuscript-statement
     attribute-hide hres:attribute:publishers-version-statement
 

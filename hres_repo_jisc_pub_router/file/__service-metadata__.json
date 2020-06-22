@@ -2,6 +2,10 @@
     "hres:repository:harvest-source:jisc-pub-router": {
         "statements": [
             "hres:repository:harvest-source"
-        ]
+        ],
+        "metadata": {
+            "source": "jisc_publications_router",
+            "name": "Publications Router"
+        }
     }
 }

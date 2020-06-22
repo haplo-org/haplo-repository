@@ -2,7 +2,7 @@
 // WARNING: REPLACEABLE =====================================================
 
 if(items.length) {
-  std:web-publisher:template("hres:repository:common:ui:panel") {
+  std:web-publisher:template("haplo:publication-common:ui:panel") {
     <div class="card border-0 bg-light">
       <div class="card-header border-0 bg-transparent">
           <h2> title </h2>

@@ -8,7 +8,7 @@
 (function($) {
 
     var PubmedEditorValue = function(value) {
-        this.pmid = value || "";
+        this.pmid = value[0] || "";
     };
     _.extend(PubmedEditorValue.prototype, {
         generateHTML: function() {
@@ -19,12 +19,8 @@
         attach: function(container) {
         },
         getValue: function(container) {
-            var pmid = this.pmid, have;
-            $('input', container).each(function() {
-                var x = $.trim(this.value || '');
-                if(x) { have = true; pmid = x; }
-            });
-            return have ? pmid : null;
+            var pmid = $.trim(($('input', container)[0].value || ''));
+            return pmid.length ? [pmid] : null;
         }
     });
 

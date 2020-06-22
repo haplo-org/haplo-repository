@@ -1,0 +1,44 @@
+std:layout:wide()
+std:plugin:resources("harvest-reporting.css")
+thirdparty:client_side_ui:resources("tablesort" "0")
+
+pageTitle(title)
+backLink("/do/activity/repository")
+
+if(multipleSources) {
+    template:std:ui:tabs:links()
+}
+<table class="tablesort harvest-sources-report">
+    <tr>
+        <th> i("Output") </th>
+        <th> i("Primary author") </th>
+        <th> i("Source") </th>
+        <th> i("Harvested on") </th>
+        <th> i("Matched object") </th>
+        if(hasClaimed) {
+            <th> i("Status") </th>
+        }
+    </tr>
+    each(rows) {
+        <tr> 
+            <td> std:object:link(object) </td>
+            <td> if(primaryAuthor) { std:object:link(primaryAuthor) } </td>
+            <td> hres_repo_harvest_sources:source_to_name(source subSource) </td>
+            <td> std:date(harvestDate) </td>
+            <td> if(authoritativeVersion) { std:object:link(authoritativeVersion) } </td>
+            if(^{hasClaimed}) {
+                <td>
+                    ifAny(claimed disclaimed) {
+                        if(claimed) {
+                            "Claimed"
+                        } else {
+                            "Disclaimed"
+                        }
+                    } else {
+                        "Unclaimed"
+                    }
+                </td>
+            }
+        </tr>
+    }
+</table>

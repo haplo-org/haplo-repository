@@ -1,0 +1,15 @@
+std:plugin:resources(
+    "github-repository.css"
+    "github-repository.js"
+)
+std:layout:wide()
+pageTitle("Repositories for " user)
+
+std:form:token()
+each(repositories) {
+    <div class="repository">
+        <p>name " - " <i>"Owned by: " owner.login</i></p>
+        <p><i>description</i></p>
+        <button class="createRecord" data-repo=name data-owner=owner.login> "Create software record from repository" </button>
+    </div>
+}

@@ -12,3 +12,7 @@
 .search-checkbox {
     float: right;
 }
+#select-all {
+    float: right;
+    cursor: pointer;
+}

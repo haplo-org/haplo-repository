@@ -2,3 +2,13 @@
 attribute hres:attribute:abstract as Abstract
 attribute dc:attribute:author as Author
 attribute hres:attribute:editor as Editor
+attribute std:attribute:file as File
+attribute dc:attribute:date as Date
+attribute hres:attribute:publication-process-dates as PublicationProcessDates
+
+OPTIONAL attribute hres:attribute:file-access-level as FileAccessLevel
+OPTIONAL attribute hres:attribute:license as License
+
+qualifier hres:qualifier:deposited as Deposited
+
+label hres:label:accepted-into-repository as AcceptedIntoRepository

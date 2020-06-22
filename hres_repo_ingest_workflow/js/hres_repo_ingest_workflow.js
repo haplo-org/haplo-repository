@@ -4,9 +4,11 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.         */
 
+var SubmitToWorkflowOnBehalf = O.action("hres_repo_ingest_workflow:submit_on_behalf").
+    title("Ingest workflow start");
 
 var canSubmitForIngest = function(user, item) {
-    return ((O.serviceMaybe("hres:repository:is_author", user, item) || item.has(user.ref, A.Editor)) &&
+    return ((O.serviceMaybe("hres:repository:is_author", user, item) || user.allowed(SubmitToWorkflowOnBehalf)) &&
         !P.Ingest.instanceForRef(item.ref));
 };
 
@@ -121,7 +123,6 @@ P.respond("GET,POST", "/do/hres-repo-ingest-workflow/deposit-admin-bypass", [
         }
         if(M) {
             M.workUnit.deleteObject();
-            M.workUnit.save();
         }
         return E.response.redirect(object.url());
     }

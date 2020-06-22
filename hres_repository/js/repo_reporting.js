@@ -119,6 +119,10 @@ P.implementService("std:reporting:collection:repository_items:get_facts_for_obje
     if(journal){
         row.journal = O.isRef(journal) ? journal : O.behaviourRef("hres:object:journal-reporting-sentinel");
     }
+    var license = object.first(A.License);
+    if(license){
+        row.license = O.isRef(license) ? license : O.behaviourRef("hres:object:license-reporting-sentinel");
+    }
 
     var issn = object.first(A.ISSN);
     if(issn) {
@@ -126,7 +130,6 @@ P.implementService("std:reporting:collection:repository_items:get_facts_for_obje
     }
 
     row.created = object.creationDate;
-    row.license = object.first(A.License) || null;
 
     var onlinePublicationDate = object.first(A.PublicationDates, Q.Online);
     if(onlinePublicationDate) {

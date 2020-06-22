@@ -1,0 +1,15 @@
+label hres:label:repository-item as RepositoryItem
+
+group hres:group:repository-editors as RepositoryEditors
+
+type hres:type:software as Software
+
+attribute dc:attribute:author as Author
+attribute dc:attribute:title as Title
+attribute hres:attribute:abstract as Abstract
+attribute std:attribute:url as Url
+attribute hres:attribute:keywords as Keywords
+OPTIONAL attribute hres:attribute:output-file as OutputFile
+attribute std:attribute:file as File
+
+qualifier std:qualifier:null as Null

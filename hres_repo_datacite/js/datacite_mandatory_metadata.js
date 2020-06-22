@@ -8,7 +8,7 @@
 var DATACITE_MANDATORY_ELEMENTS = [
     // So far only use of this is for Minting, at which point DOI is not expected
     // { name: "Identifier", requires: A.DOI },
-    { name: "Creator", requires: A.Author },
+    { name: "Creator", requires: A.AuthorsCitation },
     { name: "Title", requires: A.Title },
     { name: "Publisher", requires: A.Publisher, label(object) {
         if(object.isKindOfTypeAnnotated("hres:annotation:repository:practice-based-research")) {

@@ -1,0 +1,22 @@
+/* Haplo Research Manager                            https://haplo.org
+ * (c) Haplo Services Ltd 2006 - 2020            https://www.haplo.com
+ * This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.         */
+
+table.harvest-sources-report {
+    table-layout: fixed;
+}
+
+table.harvest-sources-report tr td,
+table.harvest-sources-report tr th {
+    vertical-align:top;
+    overflow-wrap: break-word;
+    word-wrap: break-word;
+}
+
+table.harvest-sources-report tr:not(:hover) td {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}

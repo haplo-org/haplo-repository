@@ -76,7 +76,7 @@ OAI-PMH support. Should be rendered on the homepage of the repository publicatio
             return refToOAIIdentifier(object.ref);
         };
 
-        publication.respondToExactPath(endpoint,
+        publication.respondToExactPathAllowingPOST(endpoint,
             function(E, context) {
                 let responder = responders[publication.urlHostname];
                 if(!responder) {

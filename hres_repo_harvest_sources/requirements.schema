@@ -13,3 +13,6 @@ schema-template hres:template-type:repository-item
     element: std:group:everyone right std:action_panel {"panel":"alternative_versions"}
 
 attribute haplo:attribute:authoritative-version as AuthoritativeVersion
+attribute dc:attribute:author as Author
+
+group hres:group:repository-editors as RepositoryEditors

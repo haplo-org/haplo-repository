@@ -1,0 +1,6 @@
+
+group hres:group:repository-editors as RepositoryEditors
+
+attribute dc:attribute:author as Author
+attribute hres:attribute:prepared-file as PreparedFile
+attribute std:attribute:file as File

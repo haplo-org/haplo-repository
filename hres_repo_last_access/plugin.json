@@ -1,0 +1,14 @@
+{
+  "pluginName": "hres_repo_last_access",
+  "pluginAuthor": "Haplo Services",
+  "pluginVersion": 1,
+  "displayName": "Last Access Tracking",
+  "displayDescription": "Keeps track of the last access dates for repository items.",
+  "installSecret": "64f9c85733e916fead5253fc0ac0779c163e849b",
+  "apiVersion": 4,
+  "privilegesRequired": ["pDatabase", "pBackgroundProcessing"],
+  "load": [
+      "js/hres_repo_last_access.js"
+    ],
+  "respond": ["/do/hres-repo-last-access"]
+}

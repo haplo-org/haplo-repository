@@ -224,7 +224,8 @@ var getXMLDocumentForObject = function(object) {
 
 var orcidActivity = O.application.config["hres_orcid_obtain:activity"] || "repository";
 
-var CanViewORCIDProgress = O.action("hres:action:can-view-orcid-progress");
+var CanViewORCIDProgress = O.action("hres:action:can-view-orcid-progress").
+    allow("group", Group.RepositoryEditors);
 
 P.implementService("std:action_panel:activity:menu:"+orcidActivity.replace(/-/g,'_'), function(display, builder) {
     if(O.currentUser.allowed(CanViewORCIDProgress)) {

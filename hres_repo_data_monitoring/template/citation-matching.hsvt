@@ -2,6 +2,7 @@ std:plugin:resources(
   "citation-matching.css"
   "citation-matching.js"
 )
+thirdparty:client_side_ui:resources("tablesort" "0")
 std:layout:wide()
 
 pageTitle(i("Citation matching dashboard"))

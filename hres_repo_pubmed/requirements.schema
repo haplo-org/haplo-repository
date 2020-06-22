@@ -3,13 +3,17 @@ attribute hres:attribute:pubmedcentral-id as PubMedCentralID
     title PubMed Central ID
     search-name pubmed-central-id
     qualifier std:qualifier:null
-    data-type text
+    REMOVE data-type text
+    data-type plugin
+    data-type-options hres_repository:output_identifier_pmid
 
 attribute hres:attribute:pubmed-id as PubMedID
     title: PubMed ID
     search-name: pubmed-id
     qualifier: std:qualifier:null
-    data-type text
+    REMOVE data-type text
+    data-type plugin
+    data-type-options hres_repository:output_identifier_pmid
 
 schema-template hres:template-type:repository:output
     attribute hres:attribute:pubmed-id [sort=11150]

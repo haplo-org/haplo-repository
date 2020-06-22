@@ -49,6 +49,17 @@ P.implementService("hres:repository:is_author", function(person, object) {
         (object.has(person.ref, A.Editor) && object.isKindOf(T.Book)));
 });
 
+P.implementService("hres:email:match-to-existing-record-in-list", function(object, list) {
+    var emails = object.every(A.Email);
+    if(emails.length) {
+        return _.find(list, function(listObject) {
+            return _.any(emails, function(email) {
+                return listObject.has(email, A.Email);
+            });
+        });
+    }
+});
+
 /*HaploDoc
 node: /repository/hres_repository
 title: Earliest Publication Date
@@ -172,10 +183,11 @@ var LICENSE_URLS = {
 P.onInstall = function() {
     _.each(LICENSE_URLS, (url, behaviour) => {
         var license = O.behaviourRef(behaviour).load().mutableCopy();
-        license.append(O.text(O.T_IDENTIFIER_URL, url), A.Url);
-        license.save();
+        if(!license.has(O.text(O.T_IDENTIFIER_URL, url), A.Url)) {
+            license.append(O.text(O.T_IDENTIFIER_URL, url), A.Url);
+            license.save();
+        }
     });
-    // Setup sentinel objects for reporting on uncontrolled publisher and journal entries
     if(!O.behaviourRefMaybe("hres:object:publisher-reporting-sentinel")) {
         var sentinel = O.object([Label.ARCHIVED]);
         sentinel.appendType(T.IntranetPage);
@@ -190,6 +202,13 @@ P.onInstall = function() {
         journalSentinel.append(O.text(O.T_IDENTIFIER_CONFIGURATION_NAME, "hres:object:journal-reporting-sentinel"), A.ConfiguredBehaviour);
         journalSentinel.save();
     }
+    if(!O.behaviourRefMaybe("hres:object:license-reporting-sentinel")) {
+        var licenseSentinel = O.object([Label.ARCHIVED]);
+        licenseSentinel.appendType(T.IntranetPage);
+        licenseSentinel.appendTitle("Unregistered license entered");
+        licenseSentinel.append(O.text(O.T_IDENTIFIER_CONFIGURATION_NAME, "hres:object:license-reporting-sentinel"), A.ConfiguredBehaviour);
+        licenseSentinel.save();
+    }
 };
 
 //Migration task to clean up clients where P.onInstall hasn't run
@@ -197,7 +216,6 @@ P.respond("GET,POST", "/do/hres-repository/license", [
 ], function(E) {
     if(!O.currentUser.isSuperUser) { O.stop("Not permitted"); }
     let number = _.size(LICENSE_URLS);
-    console.log(O.query().link(TYPE["std:type:subject"], A.Type).execute()[0]);
     _.each(LICENSE_URLS, (url, behaviour) => {
         var license = O.behaviourRef(behaviour).load().mutableCopy();
         if(license.first(A.Url)) { 
@@ -211,13 +229,21 @@ P.respond("GET,POST", "/do/hres-repository/license", [
     });
     
     if(E.request.method === "POST") {
+        if(!O.behaviourRefMaybe("hres:object:license-reporting-sentinel")) {
+            var licenseSentinel = O.object([Label.ARCHIVED]);
+            licenseSentinel.appendType(T.IntranetPage);
+            licenseSentinel.appendTitle("Unregistered license entered");
+            licenseSentinel.append(O.text(O.T_IDENTIFIER_CONFIGURATION_NAME, "hres:object:license-reporting-sentinel"), A.ConfiguredBehaviour);
+            licenseSentinel.save();
+        }
         E.response.redirect("/");
     }
 
     E.render({
         pageTitle: "Add License URLS",
         backLink: "/",
-        text: "Are you sure you would like to add URLs to "+number+" licenses?",
+        text: "Are you sure you would like to add URLs to "+number+" licenses?\n"+
+            "Unknown sentinel ref: "+O.behaviourRefMaybe("hres:object:license-reporting-sentinel"),
         options: [{label:"Confirm"}]
     }, "std:ui:confirm");
 });

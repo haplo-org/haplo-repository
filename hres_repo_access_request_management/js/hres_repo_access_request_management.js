@@ -11,7 +11,7 @@ P.implementService("std:action_panel:category:hres:repository_item", function(di
         tag("ref", display.object.ref.toString()).
         isEitherOpenOrClosed();
     if(wus.length) {
-        var panel = builder.panel(1000);
+        var panel = builder.panel(1100);
         var anyVisible = false;
         _.each(wus, function(wu) {
             var workflow = O.service("std:workflow:definition_for_name", wu.workType);

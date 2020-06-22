@@ -16,3 +16,7 @@
 .mergelink {
     float:right;
 }
+
+.mergelink:visited {
+    color: #1175d5;
+}

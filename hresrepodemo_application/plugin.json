@@ -58,13 +58,14 @@
       "hres_researcher_profile_biography",
       "hres_researcher_profile_photo",
       "hres_researcher_profile_extended",
-      "hresrepodemo_access_request",
-      "hresrepodemo_request_a_copy",
+      "hres_repo_access_request",
+      "hres_repo_request_a_copy",
       "hres_repo_standard_publication",
       "hresrepodemo_test_harvest_source",
       "hres_repo_web_profiles",
       "hres_user_sync_generic",
-      "hresdemo_login"
+      "hresdemo_login",
+      "hres_repo_publication_author_manual"
     ],
   "load": [
       "js/hresrepodemo_application.js"

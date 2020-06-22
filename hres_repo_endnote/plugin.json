@@ -8,6 +8,7 @@
   "apiVersion": 4,
   "depend": [
       "hres_repo_schema_outputs_recommended",
+      "hres_repo_publication_common",
       "hres_repository"
     ],
   "load": [

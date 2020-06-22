@@ -97,10 +97,8 @@ var createTextType = function(relatedOutput) {
 };
 
 
-var canAddRelatedOutput = function(user, output) {
-    let object = output.load();
-    if(!object || !object.isKindOfTypeAnnotated("hres:annotation:repository-item")) { return false; }
-    return user.canUpdate(output) || user.canCreateObjectOfType(output);
+var canAddRelatedOutput = function(user, outputOrType) {
+    return user.canUpdate(outputOrType) || user.canCreateObjectOfType(outputOrType);
 };
 
 
@@ -142,7 +140,7 @@ P.hook("hPreObjectEdit", function(response, object) {
     if(object.isKindOfTypeAnnotated("hres:annotation:repository-item")) {
         P.template("include_related_output_plugin").render();
 
-        //Hack to include clientside for attributes not included in output normally
+        // Workaround to include clientside support for attributes not normally included in output
         hres_handle_identifier.template("include_editor_plugin").render();
         hres_repo_pubmed.template("include_editor_plugin").render();
     }

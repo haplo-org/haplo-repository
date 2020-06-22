@@ -1,0 +1,27 @@
+{
+  "pluginName": "hres_repo_access_request",
+  "pluginAuthor": "Haplo Services",
+  "pluginVersion": 1,
+  "displayName": "Haplo RM Repository Generic Access Request",
+  "displayDescription": "Generic implementation of access request workflow",
+  "apiVersion": 4,
+  "loadPriority": 10000,
+  "privilegesRequired": ["pDatabase"],
+  "use": [
+      "std:workflow"
+    ],
+  "depend": [
+      "std_workflow",
+      "hres_repository",
+      "hres_repo_access_request_management",
+      "hres_repo_access_request_components",
+      "hres_repo_access_level_policy",
+      "hres_repo_schema_recommended"
+    ],
+  "load": [
+      "js/hres_repo_access_request.js",
+      "js/ar_workflow.js",
+      "js/ar_text.js"
+    ],
+  "respond": ["/do/hres-repo-access-request"]
+}

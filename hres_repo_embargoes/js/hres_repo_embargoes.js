@@ -85,8 +85,8 @@ P.implementService("haplo:user_roles_permissions:setup", function(setup) {
     setup.groupRestrictionLabel(Group.RepositoryEditors, Label.LiftAllEmbargoRestrictions);
 });
 
-P.hook("hObjectAttributeRestrictionLabelsForUser", function(response, user, object) {
-    if(O.serviceMaybe("hres:repository:is_author", user, object)) {
+P.hook("hObjectAttributeRestrictionLabelsForUser", function(response, user, object, container) {
+    if(O.serviceMaybe("hres:repository:is_author", user, container)) {
         response.userLabelsForObject.add(Label.LiftAllEmbargoRestrictions);
     }
 });

@@ -6,7 +6,8 @@
   "displayDescription": "Basic schema for repository research data",
   "apiVersion": 4,
   "depend": [
-      "hres_repository"
+      "hres_repository",
+      "hres_repo_last_access"
     ],
   "load": [
       "js/hres_repo_schema_research_data.js"

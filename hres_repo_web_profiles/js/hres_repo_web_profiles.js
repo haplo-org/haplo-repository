@@ -10,26 +10,23 @@ P.db.table("outputsOrder", {
 });
 
 P.orderedOutputsForResearcherYieldingLookup = function(researcher, preferredOutputsOrder, yieldTo) {
-
-    var outputObjects = [], orderedOutputs = [];
-
+    var outputObjects = [];
+    var orderedOutputs = [];
     outputObjects = O.query().
-                link(SCHEMA.getTypesWithAnnotation('hres:annotation:repository-item'), A.Type).
-                or(function(subquery) {
-                    subquery.link(researcher, A.Author).
-                             link(researcher, A.Editor);
-                }).
-                execute();
-
+        link(SCHEMA.getTypesWithAnnotation('hres:annotation:repository-item'), A.Type).
+        or(function(subquery) {
+            subquery.link(researcher, A.Author).
+                 link(researcher, A.Editor);
+        }).
+        sortByDate().
+        execute();
     var outputsLookup = {};
     _.each(outputObjects, function(output) {
         outputsLookup[output.ref.toString()] = output;
     });
-
     if(yieldTo) {
         yieldTo(outputsLookup);
     }
-
     _.each(preferredOutputsOrder, function(refStr) {
         var output = outputsLookup[refStr];
         if(output) {
@@ -37,11 +34,9 @@ P.orderedOutputsForResearcherYieldingLookup = function(researcher, preferredOutp
             delete outputsLookup[refStr];
         }
     });
-
     _.each(outputsLookup, function(output) {
         orderedOutputs.push(output);
     });
-    
     return orderedOutputs;
 };
 
@@ -93,11 +88,9 @@ P.respond("GET,POST", "/do/hres-repo-web-profiles/edit-outputs-preferred-order",
 
 P.implementService("hres:repo-publication-parts-person:get-ordered-outputs-for-researcher", function(researcher) {
     var outputsOrderRow = P.db.outputsOrder.select().where("researcher","=",researcher)[0];
-    var outputsOrder;
     if(outputsOrderRow) {
-        outputsOrder = JSON.parse(outputsOrderRow.order);
+        return P.orderedOutputsForResearcherYieldingLookup(researcher, JSON.parse(outputsOrderRow.order));
     }
-    return P.orderedOutputsForResearcherYieldingLookup(researcher, outputsOrder);
 });
 
 P.implementService("hres_repo_navigation:repository_item_page", function(object, builder) {

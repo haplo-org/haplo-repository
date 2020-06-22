@@ -1,0 +1,11 @@
+{
+    "hres:repository:harvest-source:github": {
+        "statements": [
+            "hres:repository:harvest-source"
+        ],
+        "metadata": {
+            "source": "github",
+            "name": "GitHub"
+        }
+    }
+}

@@ -97,6 +97,21 @@ P.implementService("hres:oai-pmh:create-responder", function(spec) {
 
 // --------------------------------------------------------------------------
 
+var ERROR_CODES = {
+    BAD_ARGUMENT: "badArgument",
+    BAD_RESUMPTION_TOKEN: "badResumptionToken",
+    BAD_VERB: "badVerb",
+    CANNOT_DISSEMINATE_FORMAT: "cannotDisseminateFormat",
+    UNKNOWN_ID: "idDoesNotExist",
+    NO_RECORDS: "noRecordsMatch",
+    NO_FORMATS: "noMetadataFormats",
+    NO_SETS: "noSetHierarchy"
+};
+
+var addOAIErrorCode = function(cursor, errorCode, text) {
+    cursor.element("error").attribute("code", errorCode).text(text).up();
+};
+
 var OAIPMHResponder = function(spec) {
     this._refToOAIIdentifier = spec.refToOAIIdentifier;
     this._objectToURL = spec.objectToURL || function(){};
@@ -111,7 +126,6 @@ var OAIPMHResponder = function(spec) {
 
 OAIPMHResponder.prototype.respond = function(E) {
     var verb = E.request.parameters.verb;
-    if(!verb) { verb = 'Identify'; }
 
     ensureTypeInfoGathered();
 
@@ -120,12 +134,15 @@ OAIPMHResponder.prototype.respond = function(E) {
         cursorSettingDefaultNamespace("http://www.openarchives.org/OAI/2.0/").
         element("OAI-PMH").
             addSchemaLocation("http://www.openarchives.org/OAI/2.0/", "http://www.openarchives.org/OAI/2.0/OAI-PMH.xsd").
-            element("responseDate").text((new XDate()).toString('i')).up().
-            element("request").attribute("verb", verb).text(this._attributes.baseURL).up();
+            element("responseDate").text((new XDate()).toUTCString("yyyy-MM-dd'T'HH:mm:ssz")).up();
 
-    var command = COMMANDS[verb];
-    if(command) {
-        command(this, E, cursor.cursor().element(verb));
+    if(verb in COMMANDS) {
+        cursor.element("request").attribute("verb", verb).text(this._attributes.baseURL).up();
+        var command = COMMANDS[verb];
+        command(this, E, cursor.cursor());
+    } else {
+        cursor.element("request").text(this._attributes.baseURL).up();
+        addOAIErrorCode(cursor, ERROR_CODES.BAD_VERB, "Illegal OAI verb.");
     }
     if(E.response.body) { return; } // Error condition - command has set body with appropriate error message
     E.response.body = xmlDocument;
@@ -142,6 +159,8 @@ const IDENTIFY_ATTRIBUTE_ORDER = [
 ];
 
 COMMANDS.Identify = function(responder, E, cursor) {
+    if(errorForInvalidArguments(E, cursor)) { return; }
+    cursor.element("Identify");
     // Get object to find a sample identifier which works
     var q = O.service("hres:repository:store_query").limit(1).sortByDateAscending().execute();
 
@@ -166,6 +185,8 @@ COMMANDS.Identify = function(responder, E, cursor) {
 // --------------------------------------------------------------------------
 
 COMMANDS.ListMetadataFormats = function(responder, E, cursor) {
+    if(errorForInvalidArguments(E, cursor, { optional: ["identifier"] })) { return; }
+    cursor.element("ListMetadataFormats");
     metadataServices().eachService((metadataService) => {
         var m = metadataService.metadata;
         cursor.
@@ -180,6 +201,9 @@ COMMANDS.ListMetadataFormats = function(responder, E, cursor) {
 // --------------------------------------------------------------------------
 
 COMMANDS.ListSets = function(responder, E, cursor) {
+    if(errorForInvalidArguments(E, cursor, { exclusive: "resumptionToken" })) { return; }
+    if(errorForUnexpectedResumptionToken(E, cursor)) { return; }
+    cursor.element("ListSets");
     O.service("hres:repository:each_repository_item_type", function(type) {
         var info = SCHEMA.getTypeInfo(type);
         cursor.
@@ -193,6 +217,14 @@ COMMANDS.ListSets = function(responder, E, cursor) {
 // --------------------------------------------------------------------------
 
 COMMANDS.ListIdentifiers = function(responder, E, cursor) {
+    if(errorForInvalidArguments(E, cursor, {
+        required: ["metadataPrefix"],
+        optional: ["from", "until", "set"],
+        exclusive: "resumptionToken"
+    })) { return; }
+    if(errorForInvalidDateArguments(E, responder, cursor)) { return; }
+    if(errorForInvalidResumptionToken(E, cursor)) { return; }
+    cursor.element("ListIdentifiers");
     var resume = queryForCommand(E, function(item, metadataPrefix) {
         writeItemHeader(responder, cursor, item);
     });
@@ -202,6 +234,14 @@ COMMANDS.ListIdentifiers = function(responder, E, cursor) {
 // --------------------------------------------------------------------------
 
 COMMANDS.ListRecords = function(responder, E, cursor) {
+    if(errorForInvalidArguments(E, cursor, {
+        required: ["metadataPrefix"],
+        optional: ["from", "until", "set"],
+        exclusive: "resumptionToken"
+    })) { return; }
+    if(errorForInvalidDateArguments(E, responder, cursor)) { return; }
+    if(errorForInvalidResumptionToken(E, cursor)) { return; }
+    cursor.element("ListRecords");
     var resume = queryForCommand(E, function(item, metadataPrefix) {
         cursor.element("record");
         writeItemHeader(responder, cursor, item);
@@ -214,14 +254,22 @@ COMMANDS.ListRecords = function(responder, E, cursor) {
 // --------------------------------------------------------------------------
 
 COMMANDS.GetRecord = function(responder, E, cursor) {
-    var metadataPrefix = E.request.parameters.metadataPrefix || 'oai_dc';
-    var e = (E.request.parameters.identifier || '').split(':');
+    if(errorForInvalidArguments(E, cursor, {
+        required: ["metadataPrefix", "identifier"]
+    })) { return; }
+    var metadataPrefix = E.request.parameters.metadataPrefix;
+    var identifier = E.request.parameters.identifier;
+    var e = identifier.split(':');
     var refStr = e[e.length-1];
     var ref = O.ref(refStr);
-    if(!ref) { O.stop("Bad ref"); }
+    if(!ref) {
+        addOAIErrorCode(cursor, ERROR_CODES.UNKNOWN_ID, "Identifier not found in this repository.");
+        return;
+    }
     // Load object, doing our own security on top of the service user's permissions
     var object = ref.load();
     if(!(O.service("hres:repository:is_repository_item", object))) { O.stop("Not permitted"); }
+    cursor.element("GetRecord");
     cursor.element("record");
     writeItemHeader(responder, cursor, object);
     writeItemRecord(responder, cursor, object, metadataPrefix);
@@ -229,6 +277,43 @@ COMMANDS.GetRecord = function(responder, E, cursor) {
 };
 
 // --------------------------------------------------------------------------
+
+var errorForInvalidArguments = function(E, cursor, expectation) {
+    var providedArguments = _.keys(E.request.parameters);
+    expectation = _.defaults(expectation || {}, { required: [], optional: [] });
+    expectation.required.push("verb"); // Verb always required
+
+    var exclusive = expectation.exclusive;
+    var allValidArguments = expectation.optional.concat(expectation.required);
+    if(exclusive) { allValidArguments.push(exclusive); }
+
+    var onlyValidArguments = _.every(providedArguments, (argument) => _.contains(allValidArguments, argument));
+    if(!onlyValidArguments) {
+        addOAIErrorCode(cursor, ERROR_CODES.BAD_ARGUMENT, "Contains invalid argument.");
+        return true;
+    }
+
+    // Exclusive arguments (if provided) must be the only argument except the verb
+    if(exclusive && _.contains(providedArguments, exclusive)) {
+        var isExclusive = _.every(providedArguments, (argument) => _.contains([exclusive, "verb"], argument));
+        if(!isExclusive) {
+            addOAIErrorCode(cursor, ERROR_CODES.BAD_ARGUMENT, "Exclusive argument was not provided exclusively.");
+            return true;
+        }
+        return; // no more checks as exclusive argument provided
+    }
+
+    if(E.request.parameters.metadataPrefix && !metadataServiceForScheme(E.request.parameters.metadataPrefix)) {
+        addOAIErrorCode(cursor, ERROR_CODES.CANNOT_DISSEMINATE_FORMAT, "Bad metadataPrefix requested.");
+        return true;
+    }
+
+    var hasAllRequired = _.every(expectation.required, (key) => _.contains(providedArguments, key));
+    if(!hasAllRequired) {
+        addOAIErrorCode(cursor, ERROR_CODES.BAD_ARGUMENT, "Missing required argument.");
+    }
+    return !hasAllRequired;
+};
 
 var ensureTypeInfoGathered = function() {
     if(P.typeToSet) { return; }
@@ -244,11 +329,50 @@ var ensureTypeInfoGathered = function() {
     });
 };
 
+// Valid formats either "Complete date" or "Complete date plus hours, minutes and seconds" (ISO8601 variants)
+var DATETIME_REGEX = /T\d\d:\d\d:\d\dZ/;
+
+var errorForInvalidDateArguments = function(E, responder, cursor) {
+    var params = E.request.parameters;
+    if("until" in params) {
+        var until = new XDate(params.until);
+        if("from" in params) {
+            var from = new XDate(params.from);
+            // .match() returns undefined if no matches or an array of matches
+            var fromFormat = !!params.from.match(DATETIME_REGEX);
+            var untilFormat = !!params.until.match(DATETIME_REGEX);
+            if(fromFormat !== untilFormat) {
+                addOAIErrorCode(cursor, ERROR_CODES.BAD_ARGUMENT,
+                    "The request has different granularities for the from and until parameters.");
+                return true;
+            }
+            if(from.diffDays(until) < 0) {
+                addOAIErrorCode(cursor, ERROR_CODES.BAD_ARGUMENT, "'from' parameter must be less than 'until' parameter");
+                return true;
+            }
+        }
+        var earliestDatestamp = new XDate(responder._attributes.earliestDatestamp);
+        if(earliestDatestamp.diffDays(until) < 0) {
+            addOAIErrorCode(cursor, ERROR_CODES.NO_RECORDS, "No records match.");
+            return true;
+        }
+    }
+    var dates = datesFromParams(params);
+    if(dates.error) {
+        addOAIErrorCode(cursor, ERROR_CODES.BAD_ARGUMENT, "A date in the request was badly formed.");
+        return true;
+    }
+};
+
 var datesFromParams = function(params) {
     var dates = {};
     ["from", "until"].forEach((d) => {
         if(!(d in params)) { return; }
         var xd = new XDate(params[d]);
+        // If time not specified for until date move to end of day
+        if(d === "until" && !params[d].match(DATETIME_REGEX)) {
+            xd.addDays(1).addMilliseconds(-1);
+        }
         if(!xd.valid()) {
             dates.error = true;
             return;
@@ -258,6 +382,35 @@ var datesFromParams = function(params) {
     return dates;
 };
 
+var errorForUnexpectedResumptionToken = function(E, cursor) {
+    if("resumptionToken" in E.request.parameters) {
+        addOAIErrorCode(cursor, ERROR_CODES.BAD_RESUMPTION_TOKEN, "Invalid resumption token.");
+        return true;
+    }
+};
+
+var resumptionTokenSignature = function(msg) {
+    var secret = P.data.resumptionTokenSecret;
+    if(!secret) {
+        P.data.resumptionTokenSecret = secret = O.security.random.base64(128);
+    }
+    // Use a truncated signature, because it's not a security sensitive application of signatures
+    return O.security.hmac.sign("SHA256", secret, msg).substring(0,24);
+};
+
+var errorForInvalidResumptionToken = function(E, cursor) {
+    if("resumptionToken" in E.request.parameters) {
+        var [msg, sig] = E.request.parameters.resumptionToken.split(',');
+        // Only need to check the signature. If the signature matches, it was generated by the
+        // server using a JSON encoder from parameters which worked, so it's known to be valid.
+        var expectedSig = resumptionTokenSignature(msg);
+        if(expectedSig !== sig) {
+            addOAIErrorCode(cursor, ERROR_CODES.BAD_RESUMPTION_TOKEN, "Invalid resumption token.");
+            return true;
+        }
+    }
+};
+
 var RESUMPTION_COMPONENTS = ['__offset','metadataPrefix','from','until','set'];
 
 var queryForCommand = function(E, consume) {
@@ -265,7 +418,8 @@ var queryForCommand = function(E, consume) {
     var params = E.request.parameters;
     var startIndex = 0;
     if(params.resumptionToken) {
-        var parts = params.resumptionToken.split(',');
+        var [msg,sig] = params.resumptionToken.split(',');
+        var parts = O.base64.decode(msg, "url").readAsJSON(); // signature already checked
         params = {};        // ignore params from the URL, as resumptionToken is an 'exclusive' parameter
         for(var l = 0; l < RESUMPTION_COMPONENTS.length; ++l) {
             if(parts[l]) {
@@ -294,12 +448,6 @@ var queryForCommand = function(E, consume) {
     // Date range?
     if("from" in params || "until" in params) {
         var dates = datesFromParams(params);
-        if(dates.error) {
-            E.response.body = 'A date in the request was badly formed.';
-            E.response.kind = 'text';
-            E.response.statusCode = HTTP.BAD_REQUEST;
-            return;
-        }
         query.lastUpdatedWithinDateRange(dates.from, dates.until);
     }
     // Requested as ANONYMOUS, so need to (carefully) query with the service user
@@ -319,12 +467,13 @@ var queryForCommand = function(E, consume) {
         newParams.__offset = ''+endIndex;
         for(var p = 1 /* not offset */; p < RESUMPTION_COMPONENTS.length; ++p) {
             var v = newParams[RESUMPTION_COMPONENTS[p]];
-            tokenParts[p] = v ? encodeURIComponent(v) : '';
+            tokenParts[p] = v ? v : null;
         }
-        var resumptionToken = tokenParts.join(','); // , is encoded by encodeURIComponent(), so safe to use as separator
+        var resumptionTokenMsg = O.base64.encode(JSON.stringify(tokenParts), "url");
+        var resumptionToken = resumptionTokenMsg+','+resumptionTokenSignature(resumptionTokenMsg);
         resume = function(cursor) {
             cursor.element("resumptionToken").
-                attribute("expirationDate", (new XDate()).addHours(2).toString("i")).
+                attribute("expirationDate", (new XDate(true)).addHours(2).toUTCString("yyyy-MM-dd'T'HH:mm:ssz")).
                 attribute("completeListSize", items.length).
                 attribute("cursor", startIndex).
                 text(resumptionToken).
@@ -338,7 +487,7 @@ var writeItemHeader = function(responder, cursor, item) {
     cursor.
         element("header").
             element("identifier").text(responder._refToOAIIdentifier(item.ref)).up().
-            element("datestamp").text((new XDate(item.lastModificationDate)).toString('yyyy-MM-dd')).up();
+            element("datestamp").text((new XDate(item.lastModificationDate)).toUTCString("yyyy-MM-dd'T'HH:mm:ssz")).up();
     item.everyType(function(v,d,q) {
         var name = P.typeToSet.get(v);
         if(name) { cursor.element("setSpec").text(name).up(); }

@@ -28,13 +28,6 @@ h3(property). action (required)
 An "Action":https://docs.haplo.org/dev/plugin/interface/action object, defining roles and groups that can view this application.
 Authors and (internal) submitting users can see the application by default.
 
-h3(property). path (required)
-
-The consuming plugin's handler response path.
-
-h3(property). pageTitle
-
-A custom page title for the application page. If not specified the default is @M.getTextMaybe("workflow-process-name")+": "+item.title@.
 */
 P.db.table("requestDocuments", {
     workUnit: { type: "int" },
@@ -199,3 +192,265 @@ P.workflow.registerWorkflowFeature("hres:repository:access_requests:default_text
     
 });
 
+
+/*HaploDoc
+title: Reporting
+sort: 1
+node: /hres_repo_access_request_components/reporting
+--
+
+h3(feature). .use("hres:repository:access_requests:default_reporting")
+
+This feature provides default basic reporting on an implementation by implementation basis for access requests. Creates and includes links to dashboards \
+showing the in progress and completed access request numbers by output or author for each workflow using the feature. The numbers on the dashboards link to \
+an information table displaying some key information about the requests (internal/external, creation date, completion date, who the workflow is waiting on, etc).
+
+The specification provided must include 2 properties for it's use
+ @acceptedSelector@ and @rejectedSelector@ : These are the workflow state selectors for when the workflow has ended in either an accepted or rejected state.
+
+The dashboard permissions are enforced by action "hres:repository_access_requests:can_view_reporting" (if you need to change permissions).
+
+*/
+P.workflow.registerWorkflowFeature("hres:repository:access_requests:default_reporting", function(workflow, spec) {
+    var CanViewAccessRequestReporting = O.action("hres_repository_access_requests:can_view_reporting").
+        title("Can view access request reporting dashboards").
+        allow("group", Group.RepositoryEditors);
+
+    var updateRelevantFacts = function(outputRef) {
+        O.service("std:reporting:update_required", "repository_items", [outputRef]);
+        let output = outputRef.load();
+        let researchers = output.every(A.Author);
+        if("Editor" in A) { researchers.concat(output.every(A.Editor)); }
+        O.service("std:reporting:update_required", "researchers", researchers);
+    };
+
+    workflow.start(function(M, initial, properties) {
+        updateRelevantFacts(properties.ref);
+    });
+
+    workflow.observeFinish({}, function(M) {
+        updateRelevantFacts(O.ref(M.workUnit.tags["ref"]));
+    });
+
+    // --------------------------------------------------------------------------
+    // Reporting
+    // --------------------------------------------------------------------------
+
+    P.implementService("std:reporting:gather_collection_update_rules", function(rule) {
+        _.each(SCHEMA.getTypesWithAnnotation("hres:annotation:repository-item"), type => {
+            rule("researchers", type, A.Author);
+            if("Editor" in A) { rule("researchers", type, A.Editor); }
+        });
+    });
+
+    P.implementService("std:reporting:collection:repository_items:setup", function(collection) {
+        collection.fact("inProgressAccessRequests"+workflow.name,   "int",  "In progress access requests").
+            fact("completeAccessRequests"+workflow.name,            "int",  "Completed access requests").
+            fact("totalAccessRequests"+workflow.name,               "int",  "Total access requests").
+            fact("acceptedRequests"+workflow.name,                  "int",  "Accepted requests").
+            fact("rejectedRequests"+workflow.name,                  "int",  "Rejected requests").
+            statistic({
+                name: "totalAcceptedRequests"+workflow.name,
+                description: "Accepted requests",
+                aggregate: "SUM",
+                fact: "acceptedRequests"+workflow.name
+            }).
+            statistic({
+                name: "totalRejectedRequests"+workflow.name,
+                description: "Rejected requests",
+                aggregate: "SUM",
+                fact: "rejectedRequests"+workflow.name
+            });
+    });
+
+    P.implementService("std:reporting:collection:repository_items:get_facts_for_object", function(object, row) {
+        let wus = O.work.query(workflow.fullName).
+            tag("hres:repository:is_ar_workflow", "1").
+            tag("ref", object.ref.toString());
+
+        row["inProgressAccessRequests"+workflow.name] = wus.count();
+        row["completeAccessRequests"+workflow.name] = wus.isClosed().count();
+        row["totalAccessRequests"+workflow.name] = wus.isEitherOpenOrClosed().count();
+
+        let accepted = 0;
+        let rejected = 0;
+        _.each(wus.isClosed(), (closedWu) => {
+            let M = workflow.instance(closedWu);
+            if(M.selected(spec.acceptedSelector)) { accepted++; }
+            if(M.selected(spec.rejectedSelector)) { rejected++; }
+        });
+        row["acceptedRequests"+workflow.name] = accepted;
+        row["rejectedRequests"+workflow.name] = rejected;
+    });
+
+    P.implementService("std:reporting:collection:researchers:setup", function(collection) {
+        collection.fact("inProgressAccessRequests"+workflow.name,   "int",  "In progress access requests").
+            fact("completeAccessRequests"+workflow.name,            "int",  "Completed access requests").
+            fact("totalAccessRequests"+workflow.name,               "int",  "Total access requests").
+            fact("acceptedRequests"+workflow.name,                  "int",  "Accepted requests").
+            fact("rejectedRequests"+workflow.name,                  "int",  "Rejected requests");
+    });
+
+    P.implementService("std:reporting:collection:researchers:get_facts_for_object", function(object, row) {
+        let wus = O.work.query(workflow.fullName).
+                tag("hres:repository:is_ar_workflow", "1").
+                isEitherOpenOrClosed(),
+            inProgress = 0,
+            complete = 0;
+        let accepted = 0;
+        let rejected = 0;
+
+        _.each(wus, wu => {
+            let ref = O.ref(wu.tags.ref),
+                user = O.user(object.ref);
+            let isAuthor = user ? O.serviceMaybe("hres:repository:is_author", user, ref.load()) : false;
+            if(isAuthor) {
+                if(wu.closed) {
+                    complete++;
+                    let M = workflow.instance(wu);
+                    if(M.selected(spec.acceptedSelector)) { accepted++; }
+                    if(M.selected(spec.rejectedSelector)) { rejected++; }
+                } else {
+                    inProgress++;
+
+                }
+            }
+        });
+        row["inProgressAccessRequests"+workflow.name] = inProgress;
+        row["completeAccessRequests"+workflow.name] = complete;
+        row["totalAccessRequests"+workflow.name] = inProgress+complete;
+        row["acceptedRequests"+workflow.name] = accepted;
+        row["rejectedRequests"+workflow.name] = rejected;
+    });
+
+    P.implementService("std:action_panel:activity:menu:repository", function(display, builder) {
+        if(O.currentUser.allowed(CanViewAccessRequestReporting)) {
+            builder.panel(575).
+                title("Access Requests").
+                link(20, "/do/hres-repo-access-request/requests-by-output-"+workflow.name, workflow.description+" by output").
+                link(30, "/do/hres-repo-access-request/requests-by-author-"+workflow.name, workflow.description+" by author");
+        }
+    });
+
+    // --------------------------------------------------------------------------
+    // Dashboard utility functions
+    // --------------------------------------------------------------------------
+
+    var dashboardFilterAndColumns = function(dashboard) {
+        return dashboard.filter(select => { select.or(sq => {
+                sq.where("completeAccessRequests"+workflow.name, ">", 0).
+                    where("inProgressAccessRequests"+workflow.name, ">", 0);
+                });
+            }).
+            columns(30, [
+                {
+                    type: "linked",
+                    column: "completeAccessRequests"+workflow.name,
+                    link(row) { return "/do/hres-repo-access-request/list-items-"+workflow.name+"/"+row.ref+"?display=closed"; }
+                },
+                "acceptedRequests"+workflow.name,
+                "rejectedRequests"+workflow.name,
+                {
+                    type: "linked",
+                    column: "inProgressAccessRequests"+workflow.name,
+                    link(row) { return "/do/hres-repo-access-request/list-items-"+workflow.name+"/"+row.ref+"?display=open"; }
+                },
+                {
+                    type: "linked",
+                    column: "totalAccessRequests"+workflow.name,
+                    link(row) { return "/do/hres-repo-access-request/list-items-"+workflow.name+"/"+row.ref+"?display=all"; }
+                }
+            ]);
+    };
+
+    var getListedItems = function(object, display) {
+        let isOutput = object.isKindOfTypeAnnotated("hres:annotation:repository-item"),
+            wus = O.work.query(workflow.fullName).
+                tag("hres:repository:is_ar_workflow", "1");
+        let displayMap = {
+            "all": "All",
+            "open": "In progress",
+            "closed": "Completed"
+        };
+
+        if(display === "closed") { wus = wus.isClosed(); }
+        if(display === "all") { wus = wus.isEitherOpenOrClosed(); }
+        if(isOutput) { wus = wus.tag("ref", object.ref.toString()); }
+        else {
+            wus = _.filter(wus, wu => {
+                let ref = O.ref(wu.tags.ref),
+                    user = O.user(object.ref);
+                return ref && user && O.serviceMaybe("hres:repository:is_author", user, ref.load());
+            });
+        }
+        let backLinkEnd = isOutput ? "output-"+workflow.name : "author-"+workflow.name;
+        return {
+            pageTitle: displayMap[display] + " access requests linked to " + object.title,
+            object: object,
+            isOutput: isOutput,
+            workflow: workflow.name,
+            backLink: "/do/hres-repo-access-request/requests-by-"+backLinkEnd,
+            isOpen: display === "open",
+            showAll: display === "all",
+            wus: _.map(wus, wu => {
+                let row = P.db.requestDocuments.select().where("workUnit", "=", wu.id)[0],
+                    document = row ? JSON.parse(row.document) : {};
+                return {
+                    id: wu.id,
+                    object: isOutput ? object : O.ref(wu.tags.ref),
+                    opened: wu.openedAt,
+                    closed: wu.closed ? wu.closedAt : undefined,
+                    actionableByRef: wu.actionableBy.ref,
+                    actionableByName: wu.actionableBy.name,
+                    audience: wu.tags.audience,
+                    createdByEmail: document.email,
+                    createdByRef: wu.createdBy.ref
+                };
+            })
+        };
+    };
+
+    // --------------------------------------------------------------------------
+    // Dashboards
+    // --------------------------------------------------------------------------
+
+    P.respond("GET,POST", "/do/hres-repo-access-request/requests-by-output-"+workflow.name, [
+    ], function(E) {
+        CanViewAccessRequestReporting.enforce();
+        let dashboard = P.reporting.dashboard(E, {
+            kind: "list",
+            collection: "repository_items",
+            name: "access_requests_by_output",
+            title: workflow.description + " by output"
+        }).
+            summaryStatistic(1, "totalAcceptedRequests"+workflow.name).
+            summaryStatistic(2, "totalRejectedRequests"+workflow.name);
+        dashboardFilterAndColumns(dashboard).
+            columns(10, [{fact:"ref", heading: "Output", link:true}]).
+            columns(20, [{fact:"author", link:true}]).
+            respond();
+    });
+
+    P.respond("GET,POST", "/do/hres-repo-access-request/requests-by-author-"+workflow.name, [
+    ], function(E) {
+        CanViewAccessRequestReporting.enforce();
+        let dashboard = P.reporting.dashboard(E, {
+            kind: "list",
+            collection: "researchers",
+            name: "access_requests_by_author",
+            title: workflow.description + " by author"
+        });
+        dashboardFilterAndColumns(dashboard).
+            columns(10, [{fact:"ref", heading: "Author", link:true}]).
+            respond();
+    });
+
+    P.respond("GET", "/do/hres-repo-access-request/list-items-"+workflow.name, [
+        {pathElement: 0, as: "object"},
+        {parameter: "display", as: "string"}
+    ], function(E, object, display) {
+        CanViewAccessRequestReporting.enforce();
+        if(!_.contains(["all","open","closed"], display)) { return; }
+        E.render(getListedItems(object, display), "reporting/list-items");
+    });
+});

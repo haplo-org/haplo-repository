@@ -1,5 +1,6 @@
 {
     "formId": "changeType",
+    "formTitle": "Change output type",
     "elements": [
         {
             "type": "choice",

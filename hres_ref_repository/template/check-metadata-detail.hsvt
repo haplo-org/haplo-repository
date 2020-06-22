@@ -10,7 +10,11 @@
         <tr><td> "Author" </td> <td> "&#10003;" </td> <td> if(value) { std:object:title(value) } </td></tr>
     }
     within(accepted) {
-        <tr><td> "Acceptance date" </td> <td> "&#10003;" </td> <td> value </td></tr>
+        <tr>
+            <td> "Acceptance date" </td>
+            <td> if(expected) { "&#10003;" } </td>
+            <td> value </td>
+        </tr>
     }
     within(published) {
         <tr>
@@ -38,4 +42,5 @@
 <p><i> "Please note: "
     <li> "a deposit date is only expected for items that have been deposited into the public repository"</li>
     <li> "a publication date is not expected for an 'In press' item" </li>
+    <li> "an acceptance date is not expected for an item published before 1st April 2018" </li>
 </i></p>

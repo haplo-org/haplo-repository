@@ -7,16 +7,16 @@
 
 var createPubmedValue = P.implementTextType("hres_repository:output_identifier_pmid", "Repository Output Identifier Pubmed Id", {
         string: function(value) {
-            return value;
+            return value[0];
         },
         indexable: function(value) {
             return this.string(value);
         },
         render: function(value) {
-            return value;
+            return value[0];
         },
         $setupEditorPlugin: function(value) {
-            P.template("include_editor_plugin").render();   // hack to include client side support
+            P.template("include_editor_plugin").render();   // workaround to include client side support
         }
     });
 // --------------------------------------------------------------------------------------------------------------------

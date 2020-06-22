@@ -11,7 +11,8 @@ P.respond("GET,POST", "/do/hres-repo-harvest-claim/claim", [
     {pathElement:0, as:"workUnit"}
 ], function(E, workUnit) {
     let harvested = workUnit.ref.load();
-    if(E.request.method === "POST") {
+    // If current document is edited they will have had to have confirmed before.
+    if(E.request.method === "POST" || ClaimDocstore.instance(workUnit.id).currentDocumentIsEdited) {
         return E.response.redirect("/do/hres-repo-harvest-claim/review/"+workUnit.id);
     }
     E.render({
@@ -21,6 +22,17 @@ P.respond("GET,POST", "/do/hres-repo-harvest-claim/claim", [
         options: [{label:"Yes"}]
     }, "std:ui:confirm");
 });
+
+var closeRelatedWorkUnits = function(actionedWu, disclaimed) {
+    let relatedWus = O.work.query("hres_repo_harvest_claim:claim_item").ref(actionedWu.ref);
+    _.each(relatedWus, (wu) => {
+        // Prevent work units without a docstore entry showing in queries
+        if(wu.id !== actionedWu.id) { wu.visible = false; }
+        if(disclaimed) { wu.tags["disclaimed"] = "1"; }
+        wu.close(O.currentUser);
+        wu.save();
+    });
+};
 
 P.respond("GET,POST", "/do/hres-repo-harvest-claim/disclaim", [
     {pathElement:0, as:"workUnit"}
@@ -38,9 +50,7 @@ P.respond("GET,POST", "/do/hres-repo-harvest-claim/disclaim", [
                 source.save(labelChanges);
             });
         }
-        workUnit.tags["disclaimed"] = "1";
-        workUnit.close(O.currentUser);
-        workUnit.save();
+        closeRelatedWorkUnits(workUnit, true);
         return E.response.redirect("/");
     }
     E.render({
@@ -54,13 +64,101 @@ P.respond("GET,POST", "/do/hres-repo-harvest-claim/disclaim", [
 // --------------------------------------------------------------------------
 // Docstore and forms for further claiming questions
 
+var moveIdentifiersAndDeleteMaybe = function(actionLater, oldPerson, newPerson) {
+    let i = P.locale().text("template");
+    let newMutable = newPerson.mutableCopy();
+    let oldMutable = oldPerson.mutableCopy();
+
+    if("ORCID" in A && oldPerson.first(A.ORCID)) {
+        // Move ORCID iDs to prevent further false matches
+        oldMutable.remove(A.ORCID, (v) => {
+            // Stop if new author has an ORCID that isn't the same as this one
+            if(newMutable.first(A.ORCID) && !newMutable.has(v, A.ORCID)) {
+                O.stop(O.interpolateString(i["The old author {oldPerson} has a different ORCID iD to amended author "+
+                    "{newPerson} please check this amendment and contact support if these details are incorrect"], {
+                  oldPerson: oldPerson.title,
+                  newPerson: newPerson.title
+                }));
+            }
+            if(!newMutable.has(v, A.ORCID)) {
+                newMutable.append(v, A.ORCID);
+            }
+            return true;
+        });
+    }
+    if(!newPerson.valuesEqual(newMutable)) {
+        actionLater.push({ object:newMutable, action:"save" });
+    }
+    if(!oldPerson.valuesEqual(oldMutable)) {
+        // Saving to remove false identifiers regardless of whether to be deleted
+        actionLater.push({ object:oldMutable, action:"save" });
+
+        // Harvested objects aren't indexed so search will be empty if only linked to harvested items
+        actionLater.push({
+            object:oldPerson,
+            action:"delete",
+            condition(object) { return !O.query().link(object.ref).limit(1).execute().length; }
+        });
+    }
+
+};
+
+var updateProject = function(mutableProject, oldAuthors, newAuthors) {
+    let researchers = [];
+    mutableProject.remove(A.Researcher, (v, d, q) => {
+        let researcherRef = v;
+        let found = false;
+        // Old and new author lists map directly so can work with index
+        _.each(oldAuthors, (oldAuthor, index) => {
+            if(found) { return; }
+            if(oldAuthor.toFields().value.ref === v.toString()) {
+                found = true;
+                let newAuthor = newAuthors[index];
+                if(newAuthor.linkTo) {
+                    researcherRef = O.ref(newAuthor.linkTo);
+                }
+            }
+        });
+        researchers.push({ value: researcherRef, qualifier: q });
+        return true; // Remove value
+    });
+
+    // If there are any new matched authors add them to the project
+    let researcherRefs = _.pluck(researchers, "value");
+    _.each(newAuthors, (newAuthor) => {
+        if(!newAuthor.linkTo) { return; }
+        let newAuthorRef = O.ref(newAuthor.linkTo);
+        if(!_.any(researcherRefs, (ref) => ref == newAuthorRef)) {
+            researchers.push({ value: newAuthorRef, qualifier: null });
+        }
+    });
+    _.each(researchers, (researcher) => {
+        mutableProject.append(researcher.value, A.Researcher, researcher.qualifier);
+    });
+};
+
 var replaceAuthorCitations = function(object, authors) {
     let toAdd = [];
     let index = 0;
+    let actionLater = [];
+    _.each(object.every(A.Project), (project) => {
+        let mProject = project.load().mutableCopy();
+        updateProject(mProject, object.every(A.AuthorsCitation), authors);
+        actionLater.push({ object:mProject, action:"save" });
+    });
     object.remove(A.AuthorsCitation, (v,d,q) => {
         let spec = { cite: v.toString() };
         if(authors[index].linkTo) {
-            spec.ref = O.ref(authors[index].linkTo);
+            let newAuthor = O.ref(authors[index].linkTo).load();
+            spec.ref = newAuthor.ref;
+
+            let oldAuthorRef = v.toFields().value.ref;
+            if(oldAuthorRef && O.ref(oldAuthorRef) != newAuthor.ref) {
+                let oldAuthor = O.ref(oldAuthorRef).load();
+                if(oldAuthor.isKindOf(T.ExternalResearcher)) {
+                    moveIdentifiersAndDeleteMaybe(actionLater, oldAuthor, newAuthor);
+                }
+            }
         }
         toAdd.push(spec);
         index++;
@@ -69,6 +167,7 @@ var replaceAuthorCitations = function(object, authors) {
     _.each(toAdd, (citeSpec) => {
         O.service("hres:author_citation:append_citation_to_object", object, A.Author, undefined, citeSpec);
     });
+    return actionLater;
 };
 
 P.respond("GET,POST", "/do/hres-repo-harvest-claim/review", [
@@ -78,15 +177,14 @@ P.respond("GET,POST", "/do/hres-repo-harvest-claim/review", [
     let harvested = workUnit.ref;
     instance.handleEditDocument(E, {
         finishEditing: function(instance, E, complete) {
+            let workUnit = O.work.load(instance.key);
+            let harvested = workUnit.ref.load();
             if(complete) {
                 let document = instance.currentDocument;
-                let workUnit = O.work.load(instance.key);
-                let harvested = workUnit.ref.load();
-                workUnit.close(O.currentUser);
-                workUnit.save();
+                let auth = harvested.first(A.AuthoritativeVersion);
                 let shouldUpdateAuth = (!harvested.first(A.AuthoritativeVersion) || document.update);
                 let updated = harvested.mutableCopy();
-                replaceAuthorCitations(updated, document.authors);
+                let actionLaterMaybe = replaceAuthorCitations(updated, document.authors);
                 if(!document.correctMatchFound) {
                     updated.remove(A.AuthoritativeVersion);
                     if(document.manualAuthorityMatch) {
@@ -98,11 +196,25 @@ P.respond("GET,POST", "/do/hres-repo-harvest-claim/review", [
                     harvested = updated;
                 }
                 if(shouldUpdateAuth) {
+                    if(auth && !O.currentUser.canUpdate(auth.load())) {
+                        O.stop("Not permitted to change that record.");
+                    }
                     O.service("haplo_alternative_versions:copy_data_to_authoritative", harvested);
+                    _.each(actionLaterMaybe, (toAction) => {
+                        O.impersonating(O.SYSTEM, () => {
+                            if(toAction.condition && !toAction.condition(toAction.object)) { return; }
+                            if(toAction.action === "save") {
+                                toAction.object.save();
+                            } else if(toAction.action === "delete") {
+                                toAction.object.deleteObject();
+                            }
+                        });
+                    });
                 }
+                closeRelatedWorkUnits(workUnit, false);
                 instance.commit(O.currentUser);
-                return E.response.redirect(harvested.url());
             }
+            return E.response.redirect(harvested.url());
         },
         gotoPage: function(instance, E, formId) {
             E.response.redirect("/do/hres-repo-harvest-claim/review/"+workUnit.id+"/"+formId);
@@ -146,7 +258,7 @@ var AuthorityMatch = P.form("authorityMatch", "form/authority-match.json");
 var ManualAuthorityMatch = P.form("manualAuthorityMatch", "form/manual-authority-match.json");
 var UseUpdatedFields = P.form("useUpdatedFields", "form/use-updated-fields.json");
 
-var ClaimDocstore = P.defineDocumentStore({
+var ClaimDocstore = P.ClaimDocstore = P.defineDocumentStore({
     name: "claimDetails",
     formsForKey(key, instance, document) {
         if(instance.hasCommittedDocument) {
@@ -156,7 +268,7 @@ var ClaimDocstore = P.defineDocumentStore({
             let workUnit = O.work.load(key);
             let harvested = workUnit.ref.load();
             let forms = [];
-            if(harvested.every(A.AuthorsCitation).length > 1) {
+            if(harvested.every(A.AuthorsCitation).length > 1 || (harvested.first(A.Author) != O.currentUser.ref)) {
                 forms.push(AuthorMatch);
             }
             let authorityMaybe = harvested.first(A.AuthoritativeVersion);
@@ -177,7 +289,7 @@ var ClaimDocstore = P.defineDocumentStore({
                 }
             }
             let changedAttributes = O.service("haplo_alternative_versions:changed_attributes", harvested);
-            if(changedAttributes.length) {
+            if(changedAttributes.length || document.manualAuthorityMatch) {
                 forms.push(UseUpdatedFields);
             }
             return forms;
@@ -201,6 +313,8 @@ var ClaimDocstore = P.defineDocumentStore({
                 linkTo: refStrMaybe ? refStrMaybe : undefined
             });
         });
+        let authority = harvested.first(A.AuthoritativeVersion);
+        document.authority = authority ? renderObjectHelper(authority.load()) : undefined;
         return document;
     },
     getAdditionalUIForEditor(key, instance, document, form) {
@@ -211,6 +325,11 @@ var ClaimDocstore = P.defineDocumentStore({
                 let authority = document.correctMatchFound ?
                     harvested.first(A.AuthoritativeVersion).load() :
                     O.ref(document.manualAuthorityMatch).load();
+                if(!O.currentUser.canUpdate(authority)) { O.stop("Not permitted to change that record."); }
+                if(!harvested.has(authority, A.AuthoritativeVersion)) {
+                    harvested = harvested.mutableCopy();
+                    harvested.append(authority, A.AuthoritativeVersion);
+                }
                 let changed = O.service("haplo_alternative_versions:changed_attributes", harvested);
                 let original = O.object().appendType(authority.firstType()),
                     updated = O.object().appendType(harvested.firstType());
@@ -218,6 +337,7 @@ var ClaimDocstore = P.defineDocumentStore({
                     authority.every(d, (v,d,q) => original.append(v,d,q));
                     harvested.every(d, (v,d,q) => updated.append(v,d,q));
                 });
+                replaceAuthorCitations(updated, document.authors);
                 return {
                     formTop: P.template("show_updated_values").deferredRender({
                         original: original,

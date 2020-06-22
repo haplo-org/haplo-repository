@@ -4,10 +4,23 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.         */
 
+P.implementService("std:action_panel_priorities", function(priorities) {
+    _.extend(priorities, {
+        "hres:repository_menu:data_monitoring": 9999,
+    });
+});
 
 var CanViewDataMonitoringDashboards = O.action("hres-repo-data-monitoring:view-reports").
     title("View repository data monitoring reports").
     allow("group", Group.RepositoryEditors);
+
+P.implementService("std:action_panel:activity:menu:repository", function(display, builder) {
+    if(!O.currentUser.allowed(CanViewDataMonitoringDashboards)) { return; }
+    let i = P.locale().text("template");
+    builder.panel("hres:repository_menu:data_monitoring").
+        title(i["Data monitoring"]).
+        link("default", "/do/hres-repo-data-monitoring/citation-matching", "Citation to author matching");
+});
 
 var REPOSITORY_TYPES = SCHEMA.getTypesWithAnnotation('hres:annotation:repository-item');
 var statistics = [];
@@ -71,23 +84,38 @@ P.respond("GET,POST", "/do/hres-repo-data-monitoring/outputs-missing-authors", [
 // Citation Matching
 // --------------------------------------------------------------------------
 
+P.db.table("hiddenCitations", {
+    citation: { type: "text" }
+});
+
+var _citeToOutputs;
 var getCitationToOutputMap = function() {
-    let outputs = O.query().link(REPOSITORY_TYPES, A.Type).execute();
-    let citeToOutputs = {};
-    _.each(outputs, output => {
-        output.every(A.AuthorsCitation, v => {
-            //If linked to an author skip
-            if(v.toFields().value.ref) { return; }
-            let cite = v.toString();
-            if(citeToOutputs[cite] !== undefined) {
-                citeToOutputs[cite].push(output.ref);
-            } else {
-                citeToOutputs[cite] = [output.ref];
-            }
+    if(!_citeToOutputs) {
+        _citeToOutputs = {};
+        let outputs = O.query().link(REPOSITORY_TYPES, A.Type).execute();
+        _.each(outputs, output => {
+            output.every(A.AuthorsCitation, v => {
+                //If linked to an author skip
+                if(v.toFields().value.ref) { return; }
+                let cite = v.toString();
+                if(_citeToOutputs[cite] !== undefined) {
+                    _citeToOutputs[cite].push(output.ref);
+                } else {
+                    _citeToOutputs[cite] = [output.ref];
+                }
+            });
         });
-    });
-    return citeToOutputs;
+    }
+    return _citeToOutputs;
 };
+
+P.hook("hPostObjectChange", function(response, object, operation, previous) {
+    // Reset cache on potential invalidation
+    if(_citeToOutputs &&
+        (_.contains(["create", "erase"], operation) || !object.valuesEqual(previous, A.AuthorsCitation))) {
+            _citeToOutputs = undefined;
+    }
+});
 
 P.respond("POST", "/do/hres-repo-data-monitoring/citation-matching", [
 ], function(E) {
@@ -95,7 +123,7 @@ P.respond("POST", "/do/hres-repo-data-monitoring/citation-matching", [
     let citation = E.request.parameters.citation,
         ref = O.ref(E.request.parameters.ref),
         citeToOutputs = getCitationToOutputMap(),
-        hiddenCitations = P.data.hidden || [],
+        hiddenCitations = _.pluck(P.db.hiddenCitations.select(), "citation"),
         outputs = citeToOutputs[citation];
 
     _.each(outputs, output => {
@@ -130,17 +158,18 @@ P.respond("GET", "/do/hres-repo-data-monitoring/citation-matching", [
 ], function(E, action, citation) {
     if(!O.currentUser.allowed(CanViewDataMonitoringDashboards)) { O.stop("Not permitted"); }
     let citeToOutputs = getCitationToOutputMap();
-    let hiddenCitations = P.data.hidden || [];
+    let hiddenCitations = _.pluck(P.db.hiddenCitations.select(), "citation");
     switch(action) {
-        case "hide":
-            hiddenCitations.push(citation);
-            P.data.hidden = hiddenCitations;
-            break;
         case "show":
-            P.data.hidden = _.without(hiddenCitations, citation);
+            P.db.hiddenCitations.select().where("citation", "=", citation).deleteAll();
+            return E.response.redirect("/do/hres-repo-data-monitoring/citation-matching");
+        case "hide":
+            if(!P.db.hiddenCitations.select().where("citation", "=", citation).limit(1).count()) {
+                P.db.hiddenCitations.create({citation: citation}).save();
+            }
             return E.response.redirect("/do/hres-repo-data-monitoring/citation-matching");
         case "showAll":
-            P.data.hidden = [];
+            P.db.hiddenCitations.select().deleteAll();
             return E.response.redirect("/do/hres-repo-data-monitoring/citation-matching");
         case "list": 
             return E.render({
@@ -178,5 +207,8 @@ P.respond("GET", "/do/hres-repo-data-monitoring/citation-matching", [
             });
         }
     });
-    E.render({matches: matches, hidden: hiddenCitations});
+    E.render({
+        matches: _.sortBy(matches, "affected").reverse(),
+        hidden: hiddenCitations
+    });
 });

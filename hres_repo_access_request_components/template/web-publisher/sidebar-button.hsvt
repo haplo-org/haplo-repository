@@ -1,5 +1,5 @@
 
 // WARNING: REPLACEABLE =====================================================
 
-std:web-publisher:template("hres:repository:common:ui:button:primary")
+std:web-publisher:template("haplo:publication-common:ui:button:primary")
   { "File access - " title }

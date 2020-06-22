@@ -2,9 +2,7 @@
 // WARNING: REPLACEABLE =====================================================
 
 if(outputs.length) {
-  std:web-publisher:template("hres:repository:common:ui:panel") {
-    <h2>"Research outputs"</h2>
-
+  std:web-publisher:template("haplo:publication-common:ui:panel") {
     each(outputs) {
       <div class="media mb-3 output-result-entry" data-type=type>
         <div class="media-body">

@@ -14,7 +14,24 @@ P.db.table("downloadedFiles", {
 var END_POINT = O.application.config["hres_repo_jisc_pub_router:end_point"];
 var PAGE_SIZE = 100; // max page size
 
+var ensureSafeHarvest = function() {
+    if(!END_POINT) {
+        throw new Error("No JISC pub router end point specified.");
+    }
+    let lastImport = P.data.jiscPubRouterOverrideSince || P.data.jiscPubRouterLastImport;
+    if(!lastImport) {
+        throw new Error("No date of last import, please run the first import manually.");
+    }
+    if(isNaN(new Date(lastImport))) {
+        throw new Error("Invalid last import date.");
+    }
+    if(new XDate(lastImport).diffDays(new XDate()) < 1) {
+        throw new Error("Attempting to import from before the last import.");
+    }
+};
+
 var requestPage = function(pageNumber) {
+    ensureSafeHarvest();
     let since = P.data.jiscPubRouterOverrideSince || P.data.jiscPubRouterLastImport;
     let client = O.httpClient(END_POINT).
         method("GET").
@@ -24,18 +41,14 @@ var requestPage = function(pageNumber) {
         client.queryParameter("page", pageNumber.toString());
     }
     client.request(jiscCallback);
+
+    delete P.data.jiscPubRouterOverrideSince;
+    P.data.jiscPubRouterLastImport = new XDate().toString("yyyy-MM-dd");
 };
 
 P.implementService("hres:repository:harvest-source:jisc-pub-router", function() {
-    // TODO: how to determine date?
-    if(!END_POINT) { throw new Error("No JISC pub router end point specified"); }
-    if(!(P.data.jiscPubRouterOverrideSince || P.data.jiscPubRouterLastImport)) {
-        throw new Error("No date of last import, please run the first import manually.");
-    }
     requestPage();
 });
-
-// TODO: hook using P.data.jiscPubRouterLastImport
 
 var jiscCallback = P.callback("get-notifications", function(data, client, result) {
     if(result.successful) {
@@ -55,6 +68,8 @@ var jiscCallback = P.callback("get-notifications", function(data, client, result
             P.data.jiscPubRouterOverrideSince = null;
             P.data.jiscPubRouterLastImport = new XDate().toString("yyyy-MM-dd");
         }
+    } else {
+        throw new Error("Get notifications returned error - "+result.errorMessage);
     }
 });
 
@@ -64,18 +79,23 @@ P.backgroundCallback("download_files_then_harvest", function(data) {
     _.each(notifications, n => {
         let hasPdfs = false;
         _.each(n.links, link => {
-            // TODO: zip and files requiring API key?
+            // JISC don't have any providers that only provide a zip, if we need to import zip files
+            // this will need a platform update and use of the client PubRouter API key
             if(link.url && link.format === "application/pdf") {
                 linksRemaining.push(link.url);
                 hasPdfs = true;
             }
         });
         if(n.links && !hasPdfs) {
-            throw new Error("No PDF formatted links for notification with id: "+n.id);
+            // throw new Error("No PDF formatted links for notification with id: "+n.id);
         }
     });
     data.linksRemaining = _.uniq(linksRemaining);
-    O.httpClient(data.linksRemaining[0]).request(Download, data);
+    if(data.linksRemaining[0]) {
+        O.httpClient(data.linksRemaining[0]).request(Download, data);
+    } else {
+        harvest(data);
+    }
 });
 
 var Download = P.callback("download", function(data, client, response) {
@@ -121,9 +141,7 @@ var saveLater = function(object) {
         object.preallocateRef();
     }
     let refKey = object.ref.toString();
-    if(!objectsToSave[refKey]) {
-        objectsToSave[refKey] = object;
-    }
+    objectsToSave[refKey] = object;
 };
 
 var harvest = function(json) {
@@ -140,12 +158,11 @@ var harvest = function(json) {
         }
         if(!object) { return {}; }
         let identifier = n.id;
-        let source = (n.provider && n.provider.agent) ?
-            n.provider.agent + " (Publications Router)" : "Publications Router";
         return {
             object: object,
             identifier: identifier || null,
-            source: source,
+            source: "jisc_publications_router",
+            subSource: n.provider.agent,
             embargo: embargo
         };
     });
@@ -156,22 +173,9 @@ var harvest = function(json) {
             harvest.length+"/"+totalNotifications+" items queued for harvest.\n"+
             errors.join("\n"));
     }
-    _.each(objectsToSave, o => o.save());
-    O.service("hres_repo_harvest_sources:update", harvest);
-};
 
-var exampleResearcher = function(ref) {
-    if(ref) {
-        P.data.exampleResearcher = ref.toString();
-    }
-    if(!P.data.exampleResearcher) {
-        _.find(O.query().link(T.Researcher, A.Type).execute(), (r) => {
-            if(O.user(r.ref)) {
-                P.data.exampleResearcher = r.ref.toString();
-            }
-        });
-    }
-    return P.data.exampleResearcher;
+    _.each(objectsToSave, o => o.save());
+    O.service("hres_repo_harvest_sources:push_updates_from_source", harvest);
 };
 
 var OUTPUT_STATUS_MAP = {
@@ -192,9 +196,7 @@ var DATE_TYPE_MAP = {
     "epub": [A.PublicationDates, Q.Online],
     "ppub": [A.PublicationDates, Q.Print],
     "accepted": [A.PublicationProcessDates, Q.Accepted],
-    "issued": [A.PublicationProcessDates, Q.Accepted], // TODO: is this correct?
-    "received": [A.PublicationProcessDates, Q.Submitted],
-    "issue cover date": [A.PublicationDates, Q.Print] // TODO: is this correct?
+    "pub-electronic": [A.PublicationDates, Q.Online]
 };
 
 var normalise = function(text) {
@@ -231,6 +233,7 @@ var updateNormalisedTitleLists = function(object) {
 
 var createObject = function(notification) {
     let object = O.object();
+    object.preallocateRef();
     object.appendType(T.JournalArticle);
 
     let metadata = notification.metadata;
@@ -279,10 +282,6 @@ var createObject = function(notification) {
         }
     });
 
-    // TODO: remove when not testing anymore
-    O.service("hres:author_citation:append_citation_to_object", object, A.Author, null, {
-        ref: O.ref(exampleResearcher())
-    });
     let authors = [];
     _.each(metadata.author, (author) => {
         if(_.isEmpty(author)) { return; }
@@ -306,12 +305,14 @@ var createObject = function(notification) {
             object.append(O.behaviourRef(statusBehaviour), A.OutputStatus);
         }
     }
+    let dateStr = "";
     if(metadata.accepted_date) {
         object.append(new Date(metadata.accepted_date), A.PublicationProcessDates, Q.Accepted);
+        dateStr += "Publications router: Date " + metadata.accepted_date + " of type 'accepted_date' included in notification.\n";
     }
     let pub = metadata.publication_date;
     let pubDate;
-    if(pub) {
+    if(pub && pub.date) {
         let q;
         if(pub.publication_format === "print") { q = Q.Print; }
         else if(pub.publication_format === "electronic") { q = Q.Online; }
@@ -319,6 +320,9 @@ var createObject = function(notification) {
         object.append(new Date(pubDate), A.PublicationDates, q);
         let pubYear = pub.year || pubDate;
         object.append(O.datetime(new Date(pubYear), undefined, O.PRECISION_YEAR), A.Date);
+        dateStr += "Publications router: Date " + pub.date + " of type 'publication_date'";
+        dateStr += pub.publication_format ? " with format '" + pub.publication_format +"'" : "";
+        dateStr += " included in notification\n";
     }
     _.each(metadata.funding, funding => {
         let funder = O.object().appendType(T.Funder).appendTitle(funding.name);
@@ -326,7 +330,7 @@ var createObject = function(notification) {
         if(funding.identifier) {
             existingFunder = appendIdentifiers(funder, funding.identifier, true);
         }
-        // TODO: update funder obj once have examples of funders with identifiers
+        // TODO: update funder obj once FundRef support exists for identifying them
         if(!existingFunder) {
             existingFunder = matchOnNormalisedTitle(funding.name, T.Funder);
         }
@@ -337,21 +341,22 @@ var createObject = function(notification) {
             updateNormalisedTitleLists(funder);
         }
         object.append(funder, A.Funder);
-        // TODO: should I really be creating projects if they might disclaim the output?
         _.each(funding.grant_numbers, gn => {
             let existingProject = matchOnNormalisedTitle(gn, T.ProjectPast);
             let project;
             if(!existingProject) {
                 project = O.object().appendType(T.ProjectPast).appendTitle(gn);
+                project.preallocateRef();
             } else {
-                project = existingProject.mutableCopy();
+                if(!existingProject.isMutable()) {
+                    project = existingProject.mutableCopy();
+                }
             }
             _.each(authors, a => {
                 if(a.ref && !project.has(a.ref, A.Researcher)) {
                     project.append(a.ref, A.Researcher);
                 }
             });
-            // TODO: editors?
             if(!project.has(funder, A.Funder)) {
                 project.append(funder, A.Funder);
             }
@@ -359,7 +364,9 @@ var createObject = function(notification) {
                 saveLater(project);
                 if(!existingProject) { updateNormalisedTitleLists(project); }
             }
-            object.append(project, A.Project);
+            if(!object.has(project.ref, A.Project)) {
+                object.append(project, A.Project);
+            }
         });
     });
 
@@ -368,55 +375,84 @@ var createObject = function(notification) {
         if(_.isEmpty(historyDate)) { return; }
         let date = new Date(historyDate.date);
         let dateInfo = DATE_TYPE_MAP[historyDate.date_type];
-        if(!dateInfo) { throw new Error("Unknown date_type in "+JSON.stringify(historyDate)); }
-        if(!object.has(date, dateInfo[0], dateInfo[1])) {
-            object.append(date, dateInfo[0], dateInfo[1]);
-        }
-        // need to determine earliest publication date for embargo now so end date can be calculated
-        // since duration may be given in days, not months as is normal in hres_repo_embargoes
-        if(metadata.embargo && dateInfo[0] === A.PublicationDates) {
-            if(!earliestPublicationDate || earliestPublicationDate.getTime() > date.getTime()) {
-                earliestPublicationDate = date;
+        // date_type is a free text field so isn't completely mappable
+        if(dateInfo) {
+            if(!object.has(date, dateInfo[0], dateInfo[1])) {
+                object.append(date, dateInfo[0], dateInfo[1]);
+            }
+            // need to determine earliest publication date for embargo now so end date can be calculated
+            // since duration may be given in days, not months as is normal in hres_repo_embargoes
+            if(metadata.embargo && dateInfo[0] === A.PublicationDates) {
+                if(!earliestPublicationDate || earliestPublicationDate.getTime() > date.getTime()) {
+                    earliestPublicationDate = date;
+                }
             }
         }
+        dateStr += "Publications router: Date " + historyDate.date + " of type '" + historyDate.date_type +
+            "' included in notification\n";
     });
+    if(dateStr) {
+        object.append(O.text(O.T_TEXT_PARAGRAPH, dateStr), A.Notes);
+    }
 
     let embargoEnd, embargoSpec;
     if(metadata.embargo) {
         embargoSpec = metadata.embargo;
+        embargoSpec.customStart = embargoSpec.start;
         embargoEnd = embargoSpec.end;
-        if(!embargoSpec.start && earliestPublicationDate) {
-            embargoSpec.start = earliestPublicationDate.toString();
+        if(!embargoSpec.customStart && earliestPublicationDate) {
+            embargoSpec.customStart = earliestPublicationDate.toString();
         }
-        let embargoStart = embargoSpec.start;
+        let embargoStart = embargoSpec.customStart;
         if(embargoSpec.duration && (!embargoStart || !embargoEnd)) {
             let duration = parseInt(embargoSpec.duration, 10);
             if(embargoStart) {
                 embargoSpec.end = new XDate(embargoStart).addDays(duration).toDate();
             } else if(embargoEnd) {
-                embargoSpec.start = new XDate(embargoEnd).addDays(-duration).toDate();
+                embargoSpec.customStart = new XDate(embargoEnd).addDays(-duration).toDate();
             }
          }
     }
-    _.each(metadata.license_ref, licenseInfo => {
-        if(licenseInfo.start) {
-            if((licenseInfo.start !== pubDate) && (licenseInfo.start !== embargoEnd)) {
+    
+    let bestLicense = _.find(metadata.license_ref, licenseInfo => {
+        return licenseInfo.best;
+    });
+    if(bestLicense) {
+        if(bestLicense.start) {
+            if((bestLicense.start !== pubDate) && (bestLicense.start !== embargoEnd)) {
                 throw new Error("License start date does not match publication or embargo date");
             }
         }
-        if(licenseInfo.type && LICENSE_MAP[licenseInfo.type]) {
-            let licenseBehaviour = licenseInfo.type;
-            if(licenseInfo.version && (licenseInfo.version === "3" || licenseInfo.version === "4")) {
-                licenseBehaviour += ":"+licenseInfo.version;
+        if(bestLicense.type && LICENSE_MAP[bestLicense.type]) {
+            let licenseBehaviour = LICENSE_MAP[bestLicense.type];
+            if(bestLicense.version && (bestLicense.version === "3" || bestLicense.version === "4")) {
+                licenseBehaviour += ":"+bestLicense.version;
             }
-            object.append(O.behaviourRef(LICENSE_MAP[licenseBehaviour]), A.License);
-        } else if(licenseInfo.url) {
-            // TODO: reporting fact license requires licenses to be a ref, figure out how to do this
-            // TODO: check if it is mappable first (e.g. http://creativecommons.org/licenses/by-nc-nd/4.0/)
-            // object.append(licenseInfo.url, A.License);
+            object.append(O.behaviourRef(licenseBehaviour), A.License);
+        } else if(bestLicense.url) {
+            // Reporting fact license fills with license reporting sentinel object if not an existing license
+            let url = O.text(O.T_IDENTIFIER_URL, bestLicense.url);
+            let licenses = O.query().link(T.License, A.Type).identifier(url, A.Url).execute();
+            if(licenses.length) {
+                _.each(licenses, (license) => {
+                    object.append(license.ref, A.License);
+                });
+            } else {
+                object.append(url, A.License);
+            }
         }
-        // TODO: title? end?
+    }
+    let licenseStr = "";
+    _.each(metadata.license_ref, (license) => {
+        licenseStr += "Publications router: License for ";
+        licenseStr += metadata.article.version ? metadata.article.version+" version of " : "";
+        licenseStr += "this article";
+        licenseStr += license.start ? " starting on "+license.start : "";
+        licenseStr += ": "+(license.url || license.title)+" included in notification\n";
     });
+    if(licenseStr) {
+        object.append(O.text(O.T_TEXT_PARAGRAPH, licenseStr), A.Notes);
+    }
 
     let journal = O.object().appendType(T.Journal);
     let existingJournal;
@@ -444,13 +480,13 @@ var createObject = function(notification) {
                         saveLater(publisher);
                         updateNormalisedTitleLists(publisher);
                     }
-                    // TODO: should publisher be appended to output?
                     journal.append(publisher, A.Publisher);
+                    object.append(publisher, A.Publisher);
                 });
                 break;
             case "identifier":
-                // TODO: should the ids be appended on the output as well?
                 existingJournal = appendIdentifiers(journal, value, true);
+                appendIdentifiers(object, value);
                 break;
             default:
                 throw new Error("Unknown journal key: " + key + " with value " + JSON.stringify(value));
@@ -471,7 +507,9 @@ var createObject = function(notification) {
             existingJournal = matchOnNormalisedTitle(journal.title, T.Journal);
         }
         if(existingJournal) {
-            existingJournal = existingJournal.mutableCopy();
+            if(!existingJournal.isMutable()) {
+                existingJournal = existingJournal.mutableCopy();
+            }
             journal.every((v,d,q) => {
                 // update with all new info except the title
                 if(d !== A.Title && !existingJournal.has(v,d,q)) {
@@ -520,14 +558,21 @@ var matchPeopleServices = function() {
     return _matchPeopleServices;
 };
 
-// TODO: namespace this?
-var INTERNAL_EMAIL_SUFFIXES = O.application.config["internal_email_suffixes"] || [];
+// This may need to be moved up the plugin stack later
+var INTERNAL_EMAIL_SUFFIXES = O.application.config["hres:repository:jisc_pub_router:internal_email_suffixes"] || [];
 
 var createPersonCitation = function(data) {
     let person;
     let personCitation = {};
-    // TODO: may be organisation
+
+    if(data.organisation_name) {
+        return {
+            cite: data.organisation_name
+        };
+    }
+
     if(data.identifier && data.identifier.length > 0) {
+        let hasNonEmailIdentifier = _.any(data.identifier, (id) => id.type !== "email");
         let email, orcid, personType = T.ExternalResearcher;
         let testPerson = O.object();
         _.each(data.identifier, id => {
@@ -552,26 +597,34 @@ var createPersonCitation = function(data) {
             if(matchObject) { return; }
             matchObject = O.service(matcher.name, testPerson, allPeople);
         });
-        // TODO: update person?
-        if(matchObject) { person = matchObject; }
+        if(matchObject) { person = matchObject.mutableCopy(); }
         if(!person) {
             person = O.object();
             person.appendType(personType);
             if(!data.name || !data.name.surname || !data.name.firstname) {
                 throw new Error("Missing first name and/or surname for in "+JSON.stringify(data));
             }
+
+            // Don't create person if only identifier is external email
+            if(personType == T.ExternalResearcher && !hasNonEmailIdentifier) {
+                return {
+                    cite: data.name.surname + ", " + data.name.firstname
+                };
+            }
+
             person.append(O.text(O.T_TEXT_PERSON_NAME, {
                 first: data.name.firstname,
                 last: data.name.surname
             }), A.Title);
-            if(email) { person.append(email, A.Email); }
-            if(orcid) { person.append(orcid, A.ORCID); }
             if(data.affiliation) {
                 if(personType == T.ExternalResearcher) {
                     person.append(data.affiliation, A.InstitutionName);
                 }
             }
-            // TODO: use save later?
+        }
+        if(email && !person.has(email, A.Email)) { person.append(email, A.Email); }
+        if(orcid && !person.has(orcid, A.ORCID)) { person.append(orcid, A.ORCID); }
+        if(!matchObject || !matchObject.valuesEqual(person)) {
             O.impersonating(O.SYSTEM, function() {
                 person.save();
             });
@@ -604,6 +657,7 @@ var appendIdentifiers = function(object, identifiers, tryMatch) {
     _.each(identifiers, id => {
         let value, desc;
         switch(id.type) {
+            case "pii":
             case "doi":
                 value = P.DOI.create(id.id);
                 desc = A.DOI;
@@ -617,12 +671,14 @@ var appendIdentifiers = function(object, identifiers, tryMatch) {
                 desc = A.ISSN;
                 queryableIds.push([value, desc]);
                 break;
+            case "pubmed":
             case "pmid":
                 if("PubmedId" in A) {
                     desc = A.PubmedId;
                     value = id.id;
                 }
                 break;
+            case "pmc":
             case "pmcid":
                 if("PubMedCentralID" in A) {
                     desc = A.PubMedCentralID;
@@ -665,32 +721,32 @@ var appendIdentifiers = function(object, identifiers, tryMatch) {
     }
 };
 
-// TODO: the below is just for testing, remove it when it is not needed anymore
+// --------------------------------------------------------------------------
+// Administrative functions
+// --------------------------------------------------------------------------
 
-P.respond("GET,POST", "/do/hres-repo-jisc-pub-router/test", [
-    {"pathElement":0, as:"ref", optional:true},
-    {"parameter":"since", as:"string"}
-], function(E, researcher, since) {
-    if(!END_POINT) { throw new Error("No JISC pub router end point specified"); }
-    if(isNaN(new Date(since))) { throw new Error("Invalid date given in since parameter"); }
+P.respond("GET,POST", "/do/hres-repo-jisc-pub-router/import", [
+    {"parameter":"since", as:"string", optional: true}
+], function(E, since) {
+    if(!O.currentUser.isSuperUser) { O.stop("Not permitted."); }
     if(E.request.method === "POST") {
-        P.data.jiscPubRouterOverrideSince = since;
-        O.service("hres_repo_harvest_sources:get_updates_from_sources");
-        return E.response.redirect(O.ref(exampleResearcher(researcher)).load().url());
+        if(since) {
+            P.data.jiscPubRouterOverrideSince = since;
+        }
+        O.withoutPermissionEnforcement(() => { requestPage(); });
+        return E.response.redirect("/");
     }
     E.render({
-        pageTitle: "Test harvesting items into the repository",
-        text: "This will harvest a record into the repository from a dummy external source.\n"+
-            "Clicking 'Confirm' will redirect to the profile page of the author of the record, "+
-            "who will have received a task and email notifying them that the item has been "+
-            "harvested and requires review.\n For instructions on impersonating users, see "+
-            "the home page of this application.",
+        pageTitle: "Run manual import from Publications Router",
+        text: "This will harvest records into the repository from the configured Jisc Publications Router endpoint.\n"+
+            "Last import ran on: "+P.data.jiscPubRouterLastImport,
         options: [{label:"Confirm"}]
     }, "std:ui:confirm");
 });
 
-P.respond("GET", "/do/hres-repo-jisc-pub-router/files", [
+P.respond("GET", "/do/hres-repo-jisc-pub-router/downloaded-files-status", [
 ], function(E) {
+    if(!O.currentUser.isSuperUser) { O.stop("Not permitted."); }
     let json = [];
     _.each(P.db.downloadedFiles.select(), file => {
         json.push({

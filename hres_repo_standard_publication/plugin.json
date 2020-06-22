@@ -9,6 +9,8 @@
       "std_web_publisher",
       "hres_oai_pmh",
       "hres_repo_publication_common",
+      "haplo_publication_common",
+      "hres_publication_common",
       "hres_repo_irus_uk",
       "hres_repo_publication_page_parts",
       "hres_repo_access_request_components",

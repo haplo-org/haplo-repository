@@ -16,7 +16,7 @@
             "hres:repository:exportable-metadata-format"
         ],
         "metadata": {
-            "hres:repository:export-format":    "DC"
+            "hres:repository:export-format":    "DublinCore"
         }
     }
 }

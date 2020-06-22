@@ -1,5 +1,5 @@
 
-pageTitle("Welcome to " REPOSITORY_NAME)
+pageTitle(HOME_TITLE)
 
 if(TEXT.description) {
   <p class="lead pb-3 mb-0"> TEXT.description </p>

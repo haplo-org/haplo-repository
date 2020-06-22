@@ -39,10 +39,47 @@ var ENDNOTE_FIELDS = [
     {name:"%@",  value(obj) {
         return obj.first(A.ISSN) || obj.first(A.ISBN);
     }},
+    {name:"%>", value(obj) {
+        let files = [];
+        obj.every(A.File, v => {
+            files.push(O.service("hres:repository:common:public-url-for-file", v)); 
+        });
+        return files.length > 0 ? files.join(" ") : undefined;
+    }},
+    // Additional notes field, used for anything without a specific field
+    {name:"%Z", value(obj) {
+        let additionalInfo,
+            dates = [];
+        if("PublicationProcessDates" in A) {
+            obj.every(A.PublicationProcessDates, (v,d,q) => {
+                let qual = SCHEMA.getQualifierInfo(q);
+                dates.push(qual.name + " " + v.toString());
+            });
+            additionalInfo = dates.length > 0 ? "Publication process dates: " + dates.join(", ") : undefined;
+        }
+        if("License" in A) {
+            let licenses = [];
+            obj.every(A.License, v => {
+                if(O.isRef(v)) {
+                    licenses.push(O.ref(v).load().title);
+                }
+                if(!additionalInfo && licenses.length > 0) {
+                    additionalInfo = "Licenses: " + licenses.join(", ");
+                } else {
+                    additionalInfo += dates.length > 0 ? "| Licenses: " + licenses.join(", ") : "";
+                }
+            });
+        }
+
+        return additionalInfo;
+    }},
     {name:"%~",  value(obj) { return O.service("hres:repository:common:public-url-hostname"); }}
 ];
 if("DOI" in A) {
-    ENDNOTE_FIELDS.push({name:"%R", attr:A.DOI});
+    ENDNOTE_FIELDS.push({name:"%R", value(obj) {
+            return obj.first(A.DOI) ? obj.first(A.DOI).toString().substr(4) : "";
+        }
+    });
 }
 
 var TYPE_MAP = {
