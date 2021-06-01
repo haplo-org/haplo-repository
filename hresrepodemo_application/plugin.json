@@ -15,6 +15,7 @@
       "haplo_help_feedback_form",
       "hres_bibliographic_reference",
       "hres_development_test_data",
+      "hres_development_activity_impersonation",
       "hres_data_monitoring",
       "hres_file_mediated_access",
       "hres_orcid_repository",
@@ -65,7 +66,9 @@
       "hres_repo_web_profiles",
       "hres_user_sync_generic",
       "hresdemo_login",
-      "hres_repo_publication_author_manual"
+      "hres_repo_publication_author_manual",
+      "hres_repo_duplicate_detection",
+      "hres_repo_export_excel"
     ],
   "load": [
       "js/hresrepodemo_application.js"

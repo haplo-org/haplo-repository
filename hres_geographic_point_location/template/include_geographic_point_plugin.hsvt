@@ -1,0 +1,4 @@
+std:plugin:resources(
+    "point_location_plugin.js"
+    "info-button.css"
+)

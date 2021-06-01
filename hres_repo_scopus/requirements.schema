@@ -1,0 +1,11 @@
+
+attribute hres:attribute:scopus-eid
+    title: Scopus EID
+    search-name: scopus-eid
+    qualifier: std:qualifier:null
+    data-type plugin
+    data-type-options hres_repository:output_identifier_scopus
+
+schema-template hres:template-type:repository:output
+    attribute hres:attribute:scopus-eid [sort=11150]
+

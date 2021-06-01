@@ -4,6 +4,8 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.         */
 
+var PREVENT_CREATOR_COMPUTING_FROM_COLLECTION_ITEMS = O.application.config["hres_repo_schema_collections:prevent_creator_computing_from_collection_items"];
+var PREVENT_DEFAULT_TRAY_ITEM_ADDITION = O.application.config["hres_repo_schema_collections:prevent_default_tray_item_addition"];
 
 var addCreators = function(collection, creators, seenVQs) {
     _.each(creators, (vq) => {
@@ -44,7 +46,9 @@ var recalculateCreators = function(collection) {
 
 P.hook('hComputeAttributes', function(response, object) {
     if(object.isKindOfTypeAnnotated('hres:annotation:repository:collection')) {
-        recalculateCreators(object);
+        if(!PREVENT_CREATOR_COMPUTING_FROM_COLLECTION_ITEMS) {
+            O.withoutPermissionEnforcement(() => recalculateCreators(object));
+        }
     }
 });
 
@@ -95,6 +99,7 @@ P.hook("hTrayPage", function(response) {
 });
 
 P.hook("hPreObjectEdit", function(response, object, isTemplate) {
+    if(PREVENT_DEFAULT_TRAY_ITEM_ADDITION) { return; }
     if(isTemplate && object.isKindOfTypeAnnotated('hres:annotation:repository:collection')) {
         if(O.session["hres_repo_collections:tray_contents"]) {
             let r = response.replacementObject || object.mutableCopy();

@@ -1,7 +1,7 @@
 
 
 <table>
-    <tr><th> "Datacite property" </th> <th> "Missing field" </th></tr>
+    <tr><th> "DataCite property" </th> <th> "Missing field" </th></tr>
     each(missing) {
         <tr>
             <td> name </td>

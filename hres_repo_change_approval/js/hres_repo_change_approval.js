@@ -101,17 +101,14 @@ var findExistingDraft = function(authoritative) {
 var copyDataToDraft = function(authority, draft) {
     // Platform handles permissions for editing
     if(!draft) {
-        draft = O.object();
+        draft = O.object([Label.AlternativeVersion, Label.RequiresApproval]);
     }
     // Delete all data from the draft version
     if(!draft.isMutable()) { draft = draft.mutableCopy(); }
-    let descs = [];
-    draft.every((v,d,q) => { descs.push(d); });
-    _.each(_.uniq(descs), (d) => draft.remove(d));
-    // Replace it with the data from the authoritative version
-    authority.every((v,d,q) => draft.append(v,d,q));
     draft.append(authority.ref, A.AuthoritativeVersion);
-    draft.save(O.labelChanges([Label.AlternativeVersion, Label.RequiresApproval]));
+    // Replace it with the data from the authoritative version
+    O.service("haplo_alternative_versions:copy_data_from_alternative_to_other", authority, draft);
+    draft.save();
     // Re-use the service required by haplo_alternative_versions for updating any associated databases
     O.serviceMaybe("haplo_alternative_versions:update_database_information", authority, draft.ref.load());
     return draft;
@@ -151,19 +148,22 @@ P.implementService("std:action_panel:alternative_versions", function(display, bu
         let panel = builder.panel('top');
         panel.element(100, {label: "This record has changes that are not yet on the authoritative version"});
         if(O.currentUser.isMemberOf(Group.RepositoryEditors)) {
-            panel.link(110, "/do/hres-repo-change-approval/approve/"+wu.id, "Approve changes to record");
+            panel.link(110, "/do/hres-repo-change-approval/action-changes/"+wu.id, "Approve/reject changes to record");
         }
     }
 });
 
-P.respond("GET,POST", "/do/hres-repo-change-approval/approve", [
-    {pathElement:0, as:"workUnit"}
-], function(E, workUnit) {
+P.respond("GET,POST", "/do/hres-repo-change-approval/action-changes", [
+    {pathElement:0, as:"workUnit"},
+    {parameter:"reject", as:"int", optional:true}
+], function(E, workUnit, reject) {
     if(!O.currentUser.isMemberOf(Group.RepositoryEditors)) { O.stop("Not permitted"); }
     let object = workUnit.ref.load();
     if(E.request.method === "POST") {
         let authoritative = object.first(A.AuthoritativeVersion).load();
-        O.service("haplo_alternative_versions:copy_data_to_authoritative", object);
+        if(!reject) {
+            O.service("haplo_alternative_versions:copy_data_to_authoritative", object);
+        }
         workUnit.close(O.currentUser).save();
         object.relabel(O.labelChanges(Label.DELETED));
         return E.response.redirect(authoritative.url());
@@ -172,7 +172,10 @@ P.respond("GET,POST", "/do/hres-repo-change-approval/approve", [
         pageTitle: "Approve",
         backLink: object.url(),
         text: "Approve the update to this record.",
-        options: [{label:"Approve"}]
+        options: [
+            { label: "Approve" },
+            { label: "Reject", parameters: { reject: 1 } }
+        ]
     }, "std:ui:confirm");
 });
 

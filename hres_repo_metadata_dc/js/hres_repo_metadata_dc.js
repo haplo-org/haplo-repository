@@ -122,4 +122,7 @@ var writeObjectAsDCXML = function(item, cursor, options) {
     item.every(A.ISSN, (v,d,q) => {
         dc.element("relation").text("ISSN:"+v.toString()).up();
     });
+    item.every(A.ISBN, (v,d,q) => {
+        dc.element("relation").text("ISBN:"+v.toString()).up();
+    });
 };

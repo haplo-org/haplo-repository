@@ -50,6 +50,11 @@ P.Ingest.text({
     "transition-notes:reject": "Reject the item. The item is not suitable for the repository, and should not be deposited.",
     "transition-confirm:reject": "Reject the item. This item is not suitable for the repository, and should not be deposited.",
     "transition-indicator:reject": "terminal",
+
+    "transition:withdraw": "Withdraw deposit",
+    "transition-notes:withdraw": "Withdraw the item from its current deposit state and return it to the library staff for further review.",
+    "transition-confirm:withdraw": "Withdraw the item. This item requires further review by library staff.",
+    "transition-indicator:withdraw": "secondary",
     
     "timeline-entry:START": "submitted the item for review",
     "timeline-entry:publish": "published the item to the institutional repository",
@@ -58,6 +63,7 @@ P.Ingest.text({
     "timeline-entry:place_on_hold": "placed the deposit process on hold",
     "timeline-entry:submit": "resubmitted the item for review",
     "timeline-entry:reject": "rejected the item as unsuitable for deposit",
+    "timeline-entry:withdraw": "withdrew the item from the institutional repository for further review",
 
     "notes-explanation-everyone": "Notes can be seen by the submitter and all staff reviewing this request",
     "notes-explanation-private": "Seen only by staff reviewing this request, not seen by the submitter"

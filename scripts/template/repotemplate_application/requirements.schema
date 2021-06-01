@@ -1,0 +1,5 @@
+
+feature std:configuration-data
+    property: {"applicationRootPlugin":"repotemplate_application"}
+
+

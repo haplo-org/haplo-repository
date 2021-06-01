@@ -1,7 +1,7 @@
 
 std:plugin:resources("reference-links.js" "embargoes.css")
 
-pageTitle("SHERPA/RoMEO archiving guidance")
-backLink(std:object:url(output))
+pageTitle("Sherpa Romeo archiving guidance")
+backLink(std:object:url(output)) { "Back to output" }
 
-<div class="sherpa-links" data-ref=output></div>
+<div class="sherpa-links" data-ref=output data-for-version=forVersion></div>

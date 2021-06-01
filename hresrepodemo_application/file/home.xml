@@ -1,7 +1,7 @@
 <doc>
   <p>This demonstration system contains:</p>
     <li>Randomly generated data about people and repository items.</li>
-    <li>The recommended Haplo RM Repository schema for a range of output types, (including datasets, collections, and practice-based research outputs) based on the Datacite and Dublin Core metadata standards.</li>
+    <li>The recommended Haplo RM Repository schema for a range of output types, (including datasets, collections, and practice-based research outputs) based on the DataCite and Dublin Core metadata standards.</li>
     <li>Standard features for item upload, mediated deposit review, harvesting from external sources, embargoes, open access monitoring, the UK Research Excellence Framework (REF), RIOXX data quality checks, OAI-PMH, request-a-copy functionality for publications under embargo, and managed access requests for other restricted items.</li>
     <li>Reporting dashboards for day to day overview and management of repository items and processes.</li>
     <li>A generically branded example public interface to the repository.</li>

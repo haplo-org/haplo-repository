@@ -107,6 +107,16 @@ P.webPublication.feature("hres:repository:common:search-results", function(publi
         }
     );
 
+    P.globalTemplateFunction("hres:repository:common:search-result:output", function(output) {
+        var template = publication.getReplaceableTemplate("hres:repo-publication-common:search-result:output");
+        this.render(template.deferredRender({
+            object: output,
+            typeInfo: SCHEMA.getTypeInfo(output.firstType()),
+            citation: O.service("hres_bibliographic_reference:for_object", output),
+            file: output.restrictedCopy(O.currentUser).first(A.File)
+        }));
+    });
+
     publication.searchResultRendererForTypes(
         [T.Person],
         function(object, context) {

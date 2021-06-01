@@ -21,12 +21,16 @@ P.webPublication.pagePart({
         var restricted = context.object.restrictedCopy(O.currentUser);
         restricted.every(function(v,d,q,x) {
             if(O.typecode(v) === O.T_IDENTIFIER_FILE) {
-                allFiles[v.digest] = [d,q,x.desc,x.groupId];
+                var location = [d,q];
+                if(x) { location.push(x.desc, x.groupId); }
+                allFiles[v.digest] = location;
             }
         });
         context.object.every(function(v,d,q,x) {
-            if(O.typecode(v) === O.T_IDENTIFIER_FILE && !_.any(ignoreDescs, (desc) => desc == d || desc == x.desc)) {
-                if(!_.isEqual([d,q,x.desc,x.groupId], allFiles[v.digest])) {
+            if(O.typecode(v) === O.T_IDENTIFIER_FILE && !_.any(ignoreDescs, (desc) => { return (desc == d || (x && desc == x.desc)); })) {
+                var location = [d,q];
+                if(x) { location.push(x.desc, x.groupId); }
+                if(!_.isEqual(location, allFiles[v.digest])) {
                     restrictedFileGroupDescs.push(x ? x.desc : null);
                 }
             }

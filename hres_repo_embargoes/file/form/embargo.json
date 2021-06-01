@@ -34,7 +34,9 @@
                 {
                     "type":"text",
                     "path":"licenseURL",
-                    "label":"License URL (if available)"
+                    "label":"License URL (if available)",
+                    "placeholder": "https://example.org",
+                    "inlineGuidanceNote": "Please include the https:// prefix, to enable the license terms to be linked directly in the public repository"
                 }
             ]
         },
@@ -80,7 +82,9 @@
                 {
                     "type":"text",
                     "path":"licenseURL",
-                    "label":"License URL (if available)"
+                    "label":"License URL (if available)",
+                    "placeholder": "https://example.org",
+                    "inlineGuidanceNote": "Please include the https:// prefix, to enable the license terms to be linked directly in the public repository"
                 }
             ]
         }

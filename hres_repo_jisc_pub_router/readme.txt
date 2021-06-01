@@ -9,13 +9,18 @@ Can be found on Github:"https://github.com/jisc-services/Public-Documentation/bl
 
 h3. Configuration
 
-All that needs to be configured in the client system is to set config data:
+All that needs to be configured in the client system is to add a Username/Password keychain entry with the same name as the config data below.
 
-@"hres_repo_jisc_pub_router:end_point": "https://pubrouter.jisc.ac.uk/api/v3/routed/<client_account_id>"@
+h3(config). "hres_repo_jisc_pub_router:credential_name"
 
-where @client_account_id@ is the "Account ID" for the repository. This will have been supplied to the client when they signed up for Publicatios Router with Jisc.
+h4. Default value: Publications Router
 
-They will also have been supplied with an API key. This is not needed for the configuration of the integration, as it gives access to additional endpoints not required for our purposes.
+The @Name@ of the keychain entry containing the publications router account information for the client.
+
+h4. Adding the keychain entry
+
+The keychain entry must be added as a Username/Password combo where @Username@ is the client's @client id@ for Publications Router and @Password@ is their API key. This will have been supplied to the client when they signed up for Publications Router with Jisc.
+
 
 h3. Admin
 

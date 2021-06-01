@@ -1,0 +1,39 @@
+{
+    "specificationVersion": 0,
+    "formId": "research-data-checks",
+    "formTitle": "Research data checks",
+    "renderDocumentOmitEmpty": true,
+    "elements": [
+        {
+            "type": "boolean",
+            "style": "checkbox",
+            "path": "appropriateMetadata",
+            "label": "I confirm that the dataset is accompanied by appropriate metadata."
+        },
+        {
+            "type": "boolean",
+            "style": "checkbox",
+            "path": "appropriateAccessLevel",
+            "label": "I confirm that I have considered the appropriate access level to provide to users."
+        },
+        {
+            "type": "boolean",
+            "style": "checkbox",
+            "path": "metadataListedInFinalReport",
+            "label": "I confirm that I have listed the metadata in the final report for the project."
+        },
+        {
+            "type": "boolean",
+            "style": "radio",
+            "path": "secondaryDataUsed",
+            "label": "I have used secondary data in this project.",
+            "showNextElementWhen": true
+        },
+        {
+            "type": "boolean",
+            "style": "checkbox",
+            "path": "acknowledgedTeamAndCited",
+            "label": "I have used acknowledged the original research team and provided a citation to the original data source."
+        }
+    ]
+}

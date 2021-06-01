@@ -12,6 +12,8 @@ var canSubmitForIngest = function(user, item) {
         !P.Ingest.instanceForRef(item.ref));
 };
 
+P.implementService("hres_repo_ingest_workflow:can_submit_item_for_ingest", canSubmitForIngest);
+
 var AdminBypass = O.action("hres_repo_ingest_workflow:admin_bypass").
     title("Ingest administrator bypass").
     allow("group", Group.RepositoryEditors);
@@ -27,8 +29,22 @@ var fillPanel = function(display, builder) {
             }
         }
         if(canSubmitForIngest(O.currentUser, object)) {
-            depositPanel.link(20, "/do/hres-repo-ingest-workflow/start/"+object.ref.toString(), "Deposit item");
+            var isSubmittingOnBehalf = !O.serviceMaybe("hres:repository:is_author", O.currentUser, object);
+            var depositLabel = isSubmittingOnBehalf ? 
+                NAME("hres_repo_ingest_workflow:deposit_item_on_behalf", "Deposit item") :
+                NAME("hres_repo_ingest_workflow:deposit_item", "Deposit item");
+            var depositLink = O.serviceMaybe("hres_repo_ingest_workflow:redirect_start_for_object", object) ||
+                "/do/hres-repo-ingest-workflow/start/";
+            depositPanel.link(20, depositLink+object.ref.toString(), depositLabel);
         }
+    }
+    // Direct deposits don't have the transition to withdraw
+    if(object.labels.includes(Label.AcceptedIntoRepository) && !P.Ingest.instanceForRef(object.ref)) {
+        builder.panel(10).link("bottom",
+            "/do/hres-repo-ingest-workflow/withdraw-direct-deposit/"+object.ref.toString(),
+            "Withdraw deposit",
+            "secondary"
+        );
     }
 };
 P.implementService("std:action_panel:category:hres:repository_item", function(display, builder) {
@@ -68,10 +84,7 @@ P.respond("GET,POST", "/do/hres-repo-ingest-workflow/start", [
 
 // ----------------------------------------------------------------
 
-// TODO: Should this instead be a generic service to start the ingest workflow from other plugins,
-// which is called in client code, through and implementation of the 
-// "hres_repo_symplectic_elements_eprints_emulation:notify:saved" service?
-P.implementService("hres_repo_symplectic_elements_eprints_emulation:notify:saved", function(object) {
+P.implementService("hres_repo_ingest_workflow:start_workflow_for_object", function(object) {
     P.Ingest.create({object: object});
 });
 
@@ -87,11 +100,12 @@ P.hook('hPostObjectEdit', function(response, object, previous) {
 });
 
 // Users can edit repository items when they are the actionableBy user of the ingest workflow
+// Any author can edit if the item is draft
 P.hook("hOperationAllowOnObject", function(response, user, object, operation) {
-    if(operation !== "read" && O.serviceMaybe("hres:repository:is_repository_item", object)) {
-        if(O.work.query("hres_repo_ingest_workflow:in").ref(object.ref).actionableBy(user).count()) {
-            response.allow = true;
-        }
+    if(object.ref && operation !== "read" && O.serviceMaybe("hres:repository:is_repository_item", object)) {
+        var M = P.Ingest.instanceForRef(object.ref);
+        var returnedStates = ["returned_author"];
+        O.service("hres:repository:user-can-edit-ingested-output", response, user, object, M, returnedStates);
     }
 });
 
@@ -133,5 +147,63 @@ P.respond("GET,POST", "/do/hres-repo-ingest-workflow/deposit-admin-bypass", [
         text: "The item will be deposited to the public repository, "+verb+" the usual approval process.\n"+
             "Please confirm that it should be made available in the public interface immediately.",
         options: [{label:"Confirm"}]
+    }, "std:ui:confirm");
+});
+
+P.respond("GET,POST", "/do/hres-repo-ingest-workflow/withdraw-direct-deposit", [
+    {pathElement:0, as:"object"}
+], function(E, object) {
+    AdminBypass.enforce();
+    var M = P.Ingest.instanceForRef(object.ref);
+    // If there's a workflow that hasn't been bypassed they should be using the transition
+    if(M && M.selected({closed:true})) { O.stop("Not permitted."); }
+    if(E.request.method === "POST") {
+        var removeLabels = [
+            Label.AcceptedIntoRepository,
+            Label.AcceptedClosedDeposit,
+            Label.RejectedFromRepository
+        ];
+        object.relabel(O.labelChanges().remove(removeLabels));
+        // Gives same UX as withdraw transition and prevents needing this override again
+        M = P.Ingest.create({object: object});
+        return E.response.redirect(M.url);
+    }
+    E.render({
+        pageTitle: "Withdraw item: " + object.title,
+        text: "Withdraw the item. This item requires further review by library staff.",
+        options: [{label:"Confirm: Withdraw deposit"}]
+    }, "std:ui:confirm");
+});
+P.respond("GET,POST", "/do/hres-repo-ingest-workflow/choose-submitting-author", [
+    {pathElement:0, as:"workUnit"},
+    {parameter:"author", as:"ref", optional:true}
+], function(E, wu, authorRef) {
+    var M = P.Ingest.instance(wu);
+    var submitterIsAuthor = O.service("hres:repository:is_author", M.workUnit.createdBy, M.entities.object);
+    if(!M.selected({state:"wait_editor"}) || submitterIsAuthor) { O.stop("Not permitted."); }
+    if(E.request.method === "POST") {
+        // Should fail loudly if ref without account selected as something has gone wrong.
+        if(!authorRef ||
+            !O.user(authorRef).isActive ||
+            !O.service("hres:repository:is_author", O.user(authorRef), M.entities.object)) {
+                O.stop("Invalid author chosen.");
+        }
+        // Store original submitter for possible future reference
+        wu.data.originalSubmitter = wu.createdBy.id;
+        wu.createdBy = O.user(authorRef).id;
+        wu.save();
+        M.transition("return");
+        E.response.redirect(M.url);
+    }
+    E.render({
+        pageTitle: "Select author to return to",
+        text: "Select the author to return this workflow to (this choice is saved for future returns)",
+        backLink: M.url,
+        options: _.map(P.getActiveAuthorsForWorkflow(M), function(authorRef) {
+            return {
+                label: authorRef.loadObjectTitleMaybe(),
+                parameters: {author: authorRef}
+            };
+        })
     }, "std:ui:confirm");
 });

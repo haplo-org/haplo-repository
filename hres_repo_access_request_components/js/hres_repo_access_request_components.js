@@ -211,25 +211,25 @@ The specification provided must include 2 properties for it's use
 The dashboard permissions are enforced by action "hres:repository_access_requests:can_view_reporting" (if you need to change permissions).
 
 */
-P.workflow.registerWorkflowFeature("hres:repository:access_requests:default_reporting", function(workflow, spec) {
-    var CanViewAccessRequestReporting = O.action("hres_repository_access_requests:can_view_reporting").
-        title("Can view access request reporting dashboards").
-        allow("group", Group.RepositoryEditors);
 
-    var updateRelevantFacts = function(outputRef) {
-        O.service("std:reporting:update_required", "repository_items", [outputRef]);
-        let output = outputRef.load();
+var CanViewAccessRequestReporting = O.action("hres_repository_access_requests:can_view_reporting").
+    title("Can view access request reporting dashboards").
+    allow("group", Group.RepositoryEditors);
+
+P.workflow.registerWorkflowFeature("hres:repository:access_requests:default_reporting", function(workflow, spec) {
+    var updateRelevantFacts = function(output) {
+        O.service("std:reporting:update_required", "repository_items", [output.ref]);
         let researchers = output.every(A.Author);
-        if("Editor" in A) { researchers.concat(output.every(A.Editor)); }
+        if("Editor" in A) { researchers = researchers.concat(output.every(A.Editor)); }
         O.service("std:reporting:update_required", "researchers", researchers);
     };
 
     workflow.start(function(M, initial, properties) {
-        updateRelevantFacts(properties.ref);
+        updateRelevantFacts(properties.ref.load());
     });
 
     workflow.observeFinish({}, function(M) {
-        updateRelevantFacts(O.ref(M.workUnit.tags["ref"]));
+        updateRelevantFacts(O.ref(M.workUnit.tags["ref"]).load());
     });
 
     // --------------------------------------------------------------------------

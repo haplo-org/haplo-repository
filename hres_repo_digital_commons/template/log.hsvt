@@ -1,0 +1,13 @@
+pageTitle("Digital Commons import log")
+backLink("/do/hres-repo-digital-commons/admin") { "Admin" }
+
+if(file) {
+    <h2> "File" </h2>
+    <p><a href=file.url>file.name</a></p>
+}
+
+if(log) {
+    <h2> "Log" </h2>
+    <p><a href=["/do/hres-repo-digital-commons/download-log/" row]>"Download"</a></p>
+    <pre style="font-size:10px;line-height:12px"> log </pre>
+}

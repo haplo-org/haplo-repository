@@ -14,6 +14,7 @@ attribute hres:attribute:issn as Issn
 attribute hres:attribute:publication-dates as PublicationDates
 attribute hres:attribute:keywords as Keywords
 attribute hres:attribute:page-range as PageRange
+attribute hres:attribute:journal as Journal
 
 OPTIONAL attribute hres:attribute:ref-unit-of-assessment as RefUnitOfAssessment
 OPTIONAL attribute hres:attribute:publication-process-dates as PublicationProcessDates
@@ -21,3 +22,5 @@ OPTIONAL attribute hres:attribute:publication-process-dates as PublicationProces
 # ------------------------------------------------------------------
 
 type hres:type:person:external-researcher as ExternalResearcher
+type std:type:journal as Journal
+type hres:type:organisation:publisher as Publisher

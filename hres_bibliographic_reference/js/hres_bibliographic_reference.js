@@ -30,7 +30,8 @@ var ensureProperties = function() {
         "journal_citation": {after:'"."', desc:A.JournalCitation},
         "pagerange": {before: '"pp. "', desc:A.PageRange},
         "issn": {desc:A.Issn},
-        "doi": {key:"doi"},
+        // DOIs frequently overflow in publications this gives them a selector so that can be handled
+        "doi": {key:"doi", before: "<span class=\"citation-doi\">", after:"</span>" },
         "patent_id": {desc:A.PatentId},
         "type": {key:"type"},
         "institution": {desc:A.InstitutionName},
@@ -41,17 +42,17 @@ var ensureProperties = function() {
     propertiesForType.set(T.BookChapter, ["authors", "year", "chapter_title", "editors", "book_title",
         "place_of_pub", "publisher", "pagerange"]);
     propertiesForType.set(T.JournalArticle, ["authors", "year", "title_no_italic", "journal",
-        "journal_citation"]);
+        "journal_citation", "doi"]);
     propertiesForType.set(T.ConferenceItem, ["authors", "year", "title_no_italic", "editors",
         "event_title", "event_location", "event_dates", "place_of_pub", "publisher", "pagerange", "doi"]);
     propertiesForType.set(T.Report, ["authors", "year", "title", "place_of_pub", "publisher", "doi"]);
-    propertiesForType.set(T.Artefact, ["authors", "year", "title", "place_of_pub", "publisher"]);
-    propertiesForType.set(T.DigitalOrVisualMedia, ["authors", "year", "title", "place_of_pub"]);
+    propertiesForType.set(T.Artefact, ["authors", "year", "title", "place_of_pub", "publisher", "doi"]);
+    propertiesForType.set(T.DigitalOrVisualMedia, ["authors", "year", "title", "place_of_pub", "doi"]);
     propertiesForType.set(T.Patent, ["authors", "year", "title", "patent_id"]);
     _.each([T.Performance, T.Exhibition], function(type) {
-        propertiesForType.set(type, ["authors", "year", "title", "event_location", "event_dates"]);
+        propertiesForType.set(type, ["authors", "year", "title", "event_location", "event_dates", "doi"]);
     });
-    propertiesForType.set(T.Thesis, ["authors", "year", "title", "type", "institution", "department"]);
+    propertiesForType.set(T.Thesis, ["authors", "year", "title", "type", "institution", "department", "doi"]);
     O.serviceMaybe("hres_bibliographic_reference:extend_reference_formats", properties, propertiesForType, Values);
 };
 
@@ -95,12 +96,16 @@ Values.prototype.__defineGetter__("event_location", function() {
     var v = this.object.first(A.Event);
     if(!v || !O.isRef(v)) { return null; }
     var ev = v.load();
+    // When importing the output may be saved with a preallocatedRef, which cannot be loaded
+    if(!ev) { return null; }
     return ev.first(A.Location) ? ev.first(A.Location).toString() : null;
 });
 Values.prototype.__defineGetter__("event_dates", function() {
     var v = this.object.first(A.Event);
     if(!v || !O.isRef(v)) { return null; }
     var ev = v.load();
+    // When importing the output may be saved with a preallocatedRef, which cannot be loaded
+    if(!ev) { return null; }
     var d = ev.first(A.EventDate);
     if(!d) { return null; }
     if(O.typecode(d) === O.T_DATETIME) {

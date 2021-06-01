@@ -22,6 +22,7 @@ P.implementService("std:action_panel:activity:menu:repository", function(display
             link(500, "/do/hres-repository/files-by-faculty", "Attached files by "+NAME("Faculty")).
             link(550, "/do/hres-repository/files-by-department", "Attached files by "+NAME("Department"));
         builder.panel(1500).title("Exports");
+        builder.panel(11111).title("Testing");
     }
 });
 

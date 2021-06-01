@@ -94,7 +94,7 @@ P.respond("GET,POST", "/do/hres-doi-minting/mint", [
         backLink: object.url(),
         backLinkText: "Cancel",
         text: "Would you like to mint a new DOI for \""+object.title+"\", sending the metadata to "+
-            "Datacite for this purpose?\nThe new DOI will link to the public landing page for this item, "+
+            "DataCite for this purpose?\nThe new DOI will link to the public landing page for this item, "+
             "and the associated DOI metadata will be updated if this record is changed.",
         options: [{label: "Mint"}]
     }, "std:ui:confirm");

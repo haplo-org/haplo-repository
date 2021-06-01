@@ -45,3 +45,49 @@ P.implementService("hres:journal_citation:append_citation_to_object", function(m
 P.implementService("hres:journal_citation:create", function(spec) {
     return createJournalCitation(spec);
 });
+
+// --------------------------------------------------------------------------
+
+P.implementService("haplo:data-import-framework:structured-data-type:add-destination:hres:journal-citation", function(model) {
+    model.addDestination({
+        name: "value:hres:journal-citation",
+        title: "Journal citation value (structured value)",
+        displaySort: 999999,
+        pseudo: true,
+        kind: "dictionary",
+        dictionaryNames: {
+            volume: {
+                description: "Volume of the journal",
+                type: "text",
+                required: true
+            },
+            number: {
+                description: "Issue number",
+                type: "text"
+            },
+            pageRange: {
+                description: "Page range, list of pages, or singular page. e.g. '90-94', or '98,99', or '91'",
+                type: "text"
+            },
+            firstPage: {
+                description: "First page in the page range",
+                type: "text"
+            },
+            lastPage: {
+                description: "Last page in the page range",
+                type: "text"
+            }
+        },
+        valueTransformerConstructor(batch, specification, sourceDetailsForErrors) {
+            return function(value) {
+                if(typeof(value) !== 'object') { return undefined; }
+                if(!value.pageRange && value.firstPage) {
+                    let pageRange = [value.firstPage];
+                    if(value.lastPage) { pageRange.push(value.lastPage); }
+                    value.pageRange = pageRange.join("-");
+                }
+                return createJournalCitation(value);
+            };
+        }
+    });
+});

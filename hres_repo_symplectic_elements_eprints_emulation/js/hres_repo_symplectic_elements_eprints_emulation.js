@@ -61,10 +61,12 @@ var FILE_DESC_TO_CONTENT_PROPERTY = {
 
 // --------------------------------------------------------------------------
 
-// The service user is allowed to read/create/change objects that are labelled with itself
+// The service user is allowed to read/create/change objects that are labelled with itself, and 
+// read items that are AcceptedIntoRepository
 P.hook('hUserPermissionRules', function(response, user) {
     if(user.isMemberOf(Group.SymplecticElementsAPI)) {
         response.rules.add(Label.SymplecticElements, O.STATEMENT_ALLOW, O.PERM_READ | O.PERM_CREATE | O.PERM_UPDATE);
+        response.rules.add(Label.AcceptedIntoRepository, O.STATEMENT_ALLOW, O.PERM_READ);
         response.rules.add(T.Person, O.STATEMENT_ALLOW, O.PERM_UPDATE);
         response.rules.add(Label.DELETED, O.STATEMENT_DENY, O.PERM_ALL);
     }
@@ -170,6 +172,11 @@ P.respond("GET", "/api/symplectic-elements-eprints-emulation/cgi/oai2", [
         oaiPmhResponder = O.service("hres:oai-pmh:create-responder", {
             refToOAIIdentifier(ref) {
                 return "oai:eprints.emulation:"+ref.objId;
+            },
+            oaiIdentifierToRef(identifier) {
+                var e = identifier.split(':');
+                var objId = parseInt(e[e.length-1], 10);
+                return O.ref(objId);
             },
             attributes: OAI_PMH_REPO_ATTRS,
             objectToURL(item) {

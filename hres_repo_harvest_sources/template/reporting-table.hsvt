@@ -12,6 +12,7 @@ if(multipleSources) {
     <tr>
         <th> i("Output") </th>
         <th> i("Primary author") </th>
+        <th> i("Type") </th>
         <th> i("Source") </th>
         <th> i("Harvested on") </th>
         <th> i("Matched object") </th>
@@ -23,8 +24,9 @@ if(multipleSources) {
         <tr> 
             <td> std:object:link(object) </td>
             <td> if(primaryAuthor) { std:object:link(primaryAuthor) } </td>
+            <td> std:object:title(objectType) </td>
             <td> hres_repo_harvest_sources:source_to_name(source subSource) </td>
-            <td> std:date(harvestDate) </td>
+            <td data-sort=harvestDateSort> std:date(harvestDate) </td>
             <td> if(authoritativeVersion) { std:object:link(authoritativeVersion) } </td>
             if(^{hasClaimed}) {
                 <td>

@@ -1,2 +1,8 @@
 attribute dc:attribute:author as Author
 attribute hres:attribute:editor as Editor
+attribute hres:attribute:publication-process-dates as PublicationProcessDates
+attribute dc:attribute:date as Date
+
+qualifier hres:qualifier:deposited as Deposited
+
+label hres:label:accepted-into-repository as AcceptedIntoRepository

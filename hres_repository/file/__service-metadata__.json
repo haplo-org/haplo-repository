@@ -4,5 +4,15 @@
             "conforms-to hres:repository:match-item-to-existing-in-list",
             "list-of people"
         ]
+    },
+    "haplo:data-import-framework:setup-model:repository-item": {
+        "statements": [
+            "conforms-to haplo:data-import-framework:setup-model"
+        ],
+        "metadata": {
+            "name": "hres:repository-item",
+            "title": "Repository item",
+            "description": "Model for the import of repository items"
+        }
     }
 }

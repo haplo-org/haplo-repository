@@ -1,4 +1,7 @@
 
+feature std:configuration-data
+    property: {"hres_repo_harvest_sources:safety_application_hostname":"(SET TO HOSTNAME OF LIVE APPLICATION)"}
+
 label std:label:deleted as DELETED
 
 label haplo:label:alternative-version as AlternativeVersion

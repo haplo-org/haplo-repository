@@ -1,0 +1,12 @@
+
+ifContent() {
+    <div style="padding-right: 100px;">
+      each(sections) {
+        <p> <b> heading </b> </p>
+        each(outputs) {
+          <p> markContent() { render(.) } </p>
+        }
+      }
+      <br>
+    </div>
+}

@@ -1,0 +1,12 @@
+pageTitle(i("Object not editable"))
+backLink(std:object:url(currentAlternative))
+
+<p> i("This object has been harvested from an external source and can't be edited.") </p>
+
+<p> 
+    ifAll(claimWorkUnit currentUserIsActionable) {
+        i("You can claim the object {}.") { <a href=["/do/hres-repo-harvest-claim/claim/" claimWorkUnit.id]> "here" </a> }
+    } else {
+        i("You can view and (provided it is permissible to do so) edit the authoritative version {}.") { <a href=std:object:url(authoritativeVersion)> "here" </a> }
+    }
+</p>

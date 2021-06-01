@@ -230,6 +230,8 @@ P.implementService("hres:repository:oaire:write-store-object-below-xml-cursor", 
         oaire.element("version").text("VoR").attribute("uri", "http://purl.org/coar/version/c_970fb48d4fbd8a85").up();
     } else if(unrestrictedItem.getAttributeGroupIds(A.AcceptedAuthorManuscript).length) {
         oaire.element("version").text("AM").attribute("uri", "http://purl.org/coar/version/c_ab4af688f83e57aa").up();
+    } else if(("DatasetVersion" in A) && item.first(A.DatasetVersion)) {
+        oaire.element("version").text(item.first(A.DatasetVersion).toString()).up();
     }
 
     let citationTitle = getValueFromAttributeList([A.Journal, A.BookTitle, A.Conference]);
@@ -271,95 +273,30 @@ P.implementService("hres:repository:oaire:write-store-object-below-xml-cursor", 
     }
 
     // datacite elements
-
-    let datacite = cursor.
-        addNamespace("http://datacite.org/schema/kernel-4", "datacite", "http://schema.datacite.org/meta/kernel-4/metadata.xsd").
-        cursorWithNamespace("http://datacite.org/schema/kernel-4");
-
-    simpleElement(datacite, A.Title, "title", (c, d, v, q) => {
-        if(q === Q.Alternative) {
-            c.attribute("titleType", "AlternativeTitle");
-        }
+    let datacite = cursor.cursor();
+    let selectedFields = [
+        "title",
+        "creator",
+        "contributor",
+        "alternateIdentifier",
+        "relatedIdentifier",
+        "date",
+        "identifier",
+        "subject",
+        "geoLocation"
+    ];
+    if(item.isKindOfTypeAnnotated("hres:annotation:repository:research-data")) {
+        // OpenAIRE only supports this field for data archives.
+        selectedFields.push("publicationYear");
+    }
+    O.service("hres:repository:datacite:write-store-object-below-xml-cursor", item, datacite, {
+        selectedFields: selectedFields
     });
-
-    if(item.first(A.AuthorsCitation)) {
-        datacite.element("creators");
-        item.every(A.AuthorsCitation, (cite) => {
-            datacite.element("creator");
-            datacite.element("creatorName").text(cite).up();
-            addPersonORCIDid(datacite, cite);
-            datacite.up();
-        });
-        datacite.up();
-    }
-
-    if(item.first(A.EditorsCitation)) {
-        datacite.element("contributors");
-        item.every(A.EditorsCitation, (cite) => {
-            datacite.element("contributor").attribute("contributorType", "Editor");
-            datacite.element("contributorName").text(cite).up();
-            addPersonORCIDid(datacite, cite);
-            datacite.up();
-        });
-        datacite.up();
-    }
-
-    let publicationDates = item.first(A.PublicationDates) || item.first(A.Date);
-    let publicationDate = publicationDates ? publicationDates.start : item.creationDate; // Publication date is a mandatory field
-    if((embargoStart && embargoEnd) || publicationDate) {
-        datacite.element("dates");
-        if(embargoStart && embargoEnd) {
-            datacite.
-                element("date").
-                text(new XDate(embargoStart).toString("yyyy-MM-dd")).
-                attribute("dateType", "Accepted").
-                up().
-                element("date").
-                text(new XDate(embargoEnd).toString("yyyy-MM-dd")).
-                attribute("dateType", "Available").
-                up();
-        }
-        if(publicationDate) {
-            datacite.
-                element("date").
-                text(new XDate(publicationDate).toString("yyyy-MM-dd")).
-                attribute("dateType", "Issued").
-                up();
-        }
-        datacite.up();
-    }
-
-    let identifierType;
-
-    if(item.first(A.DOI)) {
-        datacite.
-            element("identifier").
-            text(P.DOI.asString(item.first(A.DOI))).
-            attribute("identifierType", "DOI").
-            up();
-        identifierType = "DOI";
-    } else {
-        if(item.first(A.WebAddressUrl)) {
-            datacite.
-                element("identifier").
-                text(item.first(A.WebAddressUrl)).
-                attribute("identifierType", "URL").
-                up();
-            identifierType = "URL";
-        }
-    }
-    simpleElement(datacite, A.ISSN, "alternateIdentifier", (c,v,d,q) => {
-        c.attribute("alternateIdentifierType", "ISSN");
-    });
-    simpleElement(datacite, A.ISBN, "alternateIdentifier", (c,v,d,q) => {
-        c.attribute("alternateIdentifierType", "ISBN");
-    });
-    if(identifierType !== "URL") {
-        simpleElement(datacite, A.WebAddressUrl, "alternateIdentifier", (c,v,d,q) => {
-            c.attribute("alternateIdentifierType", "URL");
-        });
-    }
-
+    // Namespace is added by the service above, however using again here as the rightsURI should be DataCite namespaced
+    datacite = datacite.cursorWithNamespace("http://datacite.org/schema/kernel-4");
+    
+    // Added separately, as (https://openaire-guidelines-for-literature-repository-managers.readthedocs.io/en/latest/field_accessrights.html#dci-accessrights)
+    // "Unlike DataCite, OpenAIRE restricts the use of this property to indicate the access right."
     datacite.element("rights");
     if(currentEmbargoExists) {
         datacite.
@@ -372,7 +309,6 @@ P.implementService("hres:repository:oaire:write-store-object-below-xml-cursor", 
     }
     datacite.up();
 
-    simpleElement(datacite, A.Keywords, "subject");
 
     // dc elements
     let dc = cursor.
@@ -382,6 +318,9 @@ P.implementService("hres:repository:oaire:write-store-object-below-xml-cursor", 
     simpleElement(dc, A.Publisher, "publisher");
     simpleElement(dc, A.Abstract, "description");
     formatElements(dc, [A.PublishersVersion, A.AcceptedAuthorManuscript, A.File]);
+    if("DataCollectionPeriod" in A) {
+        simpleElement(dc, A.DataCollectionPeriod, "coverage");
+    }
 });
 
 

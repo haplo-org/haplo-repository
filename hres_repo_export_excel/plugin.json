@@ -1,0 +1,12 @@
+{
+  "pluginName": "hres_repo_export_excel",
+  "pluginAuthor": "Haplo Services",
+  "pluginVersion": 1,
+  "displayName": "Haplo RM Repository Item Excel Export",
+  "displayDescription": "Facilitates the export of repository items to excel spreadsheet.",
+  "installSecret": "630ac9e4f3715436ba66e911a1dd0a43c4aeec09",
+  "apiVersion": 4,
+  "load": [
+      "js/hres_repo_export_excel.js"
+    ]
+}

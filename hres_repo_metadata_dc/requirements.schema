@@ -6,6 +6,7 @@ attribute hres:attribute:abstract as Abstract
 attribute hres:attribute:authors-citation as AuthorsCitation
 attribute hres:attribute:editor as Editor
 attribute hres:attribute:issn as ISSN
+attribute std:attribute:isbn as ISBN
 attribute hres:attribute:keywords as Keywords
 attribute hres:attribute:license as License
 attribute hres:attribute:peer-review as PeerReview

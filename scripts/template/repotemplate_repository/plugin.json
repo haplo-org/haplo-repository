@@ -1,0 +1,38 @@
+{
+  "pluginName": "repotemplate_repository",
+  "pluginAuthor": "Haplo Services",
+  "pluginVersion": 1,
+  "displayName": "TmplUni Repository",
+  "displayDescription": "Repository plugin for TemplateUniversity",
+  "installSecret": "1c1a8fb6889e6e1db7b736263246d21a1feb74e5",
+  "apiVersion": 4,
+  "depend": [
+      "hres_repository",
+      "repository_import_method",
+      "hres_repo_schema_recommended",
+      "hres_repo_oa_green_inferred",
+      "hres_repo_embargoes",
+      "hres_repo_access_level_policy",
+      "hres_repo_schema_outputs",
+      "hres_repo_schema_outputs_recommended",
+      "hres_data_monitoring",
+      "hres_repo_datacite",
+      "hres_repo_doi_minting",
+      "hres_repo_list_management",
+      "hres_repo_metadata_dc",
+      "hres_repo_navigation",
+      "hres_repo_object_editor",
+      "hres_repo_open_access",
+      "hres_repo_rioxx",
+      "hres_repo_openaire",
+      "hres_repo_endnote",
+      "hres_geographic_bounding_box_value",
+      "hres_related_output_value",
+      "hres_repo_usage_statistics",
+      "hres_repo_export_excel"
+  ],
+  "load": [
+      "js/repotemplate_repository.js"
+    ],
+  "respond": ["/do/repotemplate-repository"]
+}

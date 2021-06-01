@@ -13,12 +13,14 @@ sort: 1
 --
 h3(feature). "hres:repository:google-analytics"
 
-Web publisher feature to create the google analytics page part to go on every page for tracking, only runs on enabled application and requires \
-"hres:repository:google-tracking-id" be set in the config data
+Web publisher feature to create the google analytics page part to go on every page for tracking, only runs on enabled application.
+
+Requires "hres:repository:google-tracking-id" be set in the config data to the client's tracking id (also called "Measurement ID") \
+and "hres_repo_publication_google_analytics:enabled_application" to be set to the internal hostname of the live application.
 */
 P.webPublication.feature("hres:repository:google-analytics", (publication, spec) => {
     //If live application
-    if(O.application.hostname === O.application.config["hres_repo_irus_uk:enabled_application"]) {
+    if(O.application.hostname === O.application.config["hres_repo_publication_google_analytics:enabled_application"]) {
         // HSVT UnsafeScriptTag only takes src arguments, need to write the html in here and pass through
         let trackingTag = "<!-- Global site tag (gtag.js) - Google Analytics -->"+
             "<script async src=\"https://www.googletagmanager.com/gtag/js?id="+googleTrackingID+"\"></script>"+

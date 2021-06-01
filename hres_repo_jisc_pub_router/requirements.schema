@@ -44,6 +44,7 @@ attribute dc:attribute:date as Date
 attribute hres:attribute:pages as Pages
 attribute std:attribute:notes as Notes
 attribute std:attribute:url as Url
+attribute hres:attribute:fundref as FundRef
 OPTIONAL attribute hres:attribute:pubmed-id as PubmedId
 OPTIONAL attribute hres:attribute:pubmedcentral-id as PubMedCentralID
 OPTIONAL attribute hres:attribute:nlm-id as NLMID

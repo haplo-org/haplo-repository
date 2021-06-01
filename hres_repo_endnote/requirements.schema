@@ -8,11 +8,12 @@ type hres:type:conference-item:conference-paper as ConferencePaper
 type hres:type:conference-item as ConferenceItem
 type hres:type:design as Design
 type hres:type:journal-article as JournalArticle
-type hres:type:dataset as Dataset
+OPTIONAL type hres:type:dataset as Dataset
 type hres:type:patent as Patent
 type hres:type:report as Report
 type hres:type:thesis as Thesis
 type hres:type:website as Website
+OPTIONAL type hres:type:other as Other
 
 attribute hres:attribute:authors-citation as AuthorsCitation
 attribute std:attribute:event as Event
@@ -33,3 +34,13 @@ attribute hres:attribute:issn as ISSN
 attribute std:attribute:isbn as ISBN
 attribute std:attribute:file as File
 OPTIONAL attribute hres:attribute:license as License
+
+attribute std:attribute:notes as Notes
+attribute std:attribute:url as URL
+attribute dc:attribute:author as Author
+attribute hres:attribute:editor as Editor
+attribute hres:attribute:edition as Edition
+attribute hres:attribute:book-title as BookTitle
+OPTIONAL attribute hres:attribute:pages as Pages
+
+qualifier dc:qualifier:alternative as Alternative

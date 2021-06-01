@@ -40,12 +40,12 @@ P.implementService("hres:repository:navigation:change_kind_handler", function(ki
 
 // NOTE: Called 'Outputs' in the UI, even if they're not strictly speaking outputs, as this is a recognisable term
 P.implementService("std:action_panel:category:hres:person", function(display, builder) {
-    builder.panel(1600).link("default", "/do/repository/outputs/researcher/"+display.object.ref, "Research outputs");
+    builder.panel(1600).link("default", "/do/repository/outputs/researcher/"+display.object.ref, NAME("hres_repo_navigation:research-outputs-name", "Research outputs"));
 });
 
 var myOutputsBuilder = function(builder, user) {
     if(user.ref) {
-        builder.link("default", "/do/repository/outputs/researcher/"+user.ref, "My Research Outputs");
+        builder.link("default", "/do/repository/outputs/researcher/"+user.ref, NAME("hres_repo_navigation:my-research-outputs-name", "My Research Outputs"));
     }
 };
 P.implementService("std:action_panel:home_page_my_links", function(display, builder) {
@@ -61,6 +61,7 @@ var PANEL_SERVICES = {
     "research-group": "research_group_navigation",
     "uoa": "uoa_navigation"
 };
+
 _.each(PANEL_SERVICES, function(panel, kind) {
     P.implementService("std:action_panel:"+panel, function(display, builder) {
         builder.panel(1600).
@@ -158,7 +159,9 @@ var getFilterData = function(selected, object) {
             "t"
         )
     );
-    return data;
+    let excludeParameters = [];
+    O.serviceMaybe("hres:repository:navigation:exclude-filters-by-parameter", excludeParameters);
+    return _.filter(data, (filter) => !_.contains(excludeParameters, filter.parameter));
 };
 
 var getFilterObject = function(selected, title, filterValues, parameter) {
@@ -191,6 +194,8 @@ var makeQueryString = function(selected, kindQuery, object) {
     _.each(selected, (v,k) => {
         if(v.query) {
             str += v.query;
+        } else {
+            str += O.serviceMaybe("hres:repository:navigation:get_query_for_additional_filter", k, v) || "";
         }
     });
     return str;

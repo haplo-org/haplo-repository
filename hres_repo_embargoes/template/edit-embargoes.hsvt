@@ -1,8 +1,8 @@
 
-std:plugin:resources("edit-embargoes.js" "reference-links.js" "embargoes.css")
+std:plugin:resources("edit-embargoes.js" "embargoes.css")
 
 pageTitle("Embargo: " std:object:title(output))
-backLink(std:object:url(output))
+backLink(std:object:url(output)) { "Back to output" }
 
 std:object(displayObject)
 
@@ -18,5 +18,3 @@ if(publicationDate) {
     std:form(form)
     <p><input type="submit" value="Apply embargoes"></p>
 </form>
-
-<div class="sherpa-links" data-ref=output></div>

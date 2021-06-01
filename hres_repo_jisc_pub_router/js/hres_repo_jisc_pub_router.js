@@ -10,13 +10,13 @@ P.db.table("downloadedFiles", {
     digest: { type:"text", nullable:true },
     error: { type:"text", nullable:true }
 });
-
-var END_POINT = O.application.config["hres_repo_jisc_pub_router:end_point"];
+var KEYCHAIN_ENTRY = O.application.config["hres_repo_jisc_pub_router:credential_name"] || "Publications Router";
+var END_POINT = "https://pubrouter.jisc.ac.uk/api/v3/routed/";
 var PAGE_SIZE = 100; // max page size
 
 var ensureSafeHarvest = function() {
-    if(!END_POINT) {
-        throw new Error("No JISC pub router end point specified.");
+    if(!O.keychain.credential(KEYCHAIN_ENTRY).account["Username"]) {
+        throw new Error("No JISC pub router account ID specified.");
     }
     let lastImport = P.data.jiscPubRouterOverrideSince || P.data.jiscPubRouterLastImport;
     if(!lastImport) {
@@ -25,18 +25,20 @@ var ensureSafeHarvest = function() {
     if(isNaN(new Date(lastImport))) {
         throw new Error("Invalid last import date.");
     }
-    if(new XDate(lastImport).diffDays(new XDate()) < 1) {
-        throw new Error("Attempting to import from before the last import.");
+    if(new XDate(lastImport).diffDays(XDate.today()) < 0) {
+        throw new Error("Attempting to import from the future.");
     }
 };
 
 var requestPage = function(pageNumber) {
     ensureSafeHarvest();
     let since = P.data.jiscPubRouterOverrideSince || P.data.jiscPubRouterLastImport;
-    let client = O.httpClient(END_POINT).
+    let credentials = O.keychain.credential(KEYCHAIN_ENTRY);
+    let client = O.httpClient(END_POINT+credentials.account["Username"]).
         method("GET").
         queryParameter("since", since).
-        queryParameter("pageSize", PAGE_SIZE.toString());
+        queryParameter("pageSize", PAGE_SIZE.toString()).
+        queryParameter("api_key", credentials.secret["Password"]);
     if(pageNumber) {
         client.queryParameter("page", pageNumber.toString());
     }
@@ -69,7 +71,8 @@ var jiscCallback = P.callback("get-notifications", function(data, client, result
             P.data.jiscPubRouterLastImport = new XDate().toString("yyyy-MM-dd");
         }
     } else {
-        throw new Error("Get notifications returned error - "+result.errorMessage);
+        console.log("Get notifications returned error - "+result.errorMessage); // For development
+        throw new Error("Get notifications returned error - "+result.errorMessage); // For production
     }
 });
 
@@ -92,7 +95,10 @@ P.backgroundCallback("download_files_then_harvest", function(data) {
     });
     data.linksRemaining = _.uniq(linksRemaining);
     if(data.linksRemaining[0]) {
-        O.httpClient(data.linksRemaining[0]).request(Download, data);
+        let credentials = O.keychain.credential(KEYCHAIN_ENTRY);
+        O.httpClient(data.linksRemaining[0]).
+            queryParameter("api_key", credentials.secret["Password"]).
+            request(Download, data);
     } else {
         harvest(data);
     }
@@ -169,9 +175,11 @@ var harvest = function(json) {
     harvest = _.filter(harvest, h => !_.isEmpty(h));
     if(errors.length) {
         let totalNotifications = json.notifications.length;
-        O.reportHealthEvent("There were errors when creating items for the latest JISC Publications Router harvest. "+
+        let message = "There were errors when creating items for the latest JISC Publications Router harvest. "+
             harvest.length+"/"+totalNotifications+" items queued for harvest.\n"+
-            errors.join("\n"));
+            errors.join("\n");
+        O.reportHealthEvent(message); // For production
+        console.log(message); // For development
     }
 
     _.each(objectsToSave, o => o.save());
@@ -200,7 +208,7 @@ var DATE_TYPE_MAP = {
 };
 
 var normalise = function(text) {
-    return text.toLowerCase().replace(/[^a-z]/,"");
+    return text.toLowerCase().replace(/[^a-z]/g,"");
 };
 var normalisedTitleLists = O.refdict();
 var normalisedTitleList = function(type) {
@@ -330,14 +338,36 @@ var createObject = function(notification) {
         if(funding.identifier) {
             existingFunder = appendIdentifiers(funder, funding.identifier, true);
         }
-        // TODO: update funder obj once FundRef support exists for identifying them
         if(!existingFunder) {
             existingFunder = matchOnNormalisedTitle(funding.name, T.Funder);
         }
         if(existingFunder) {
+            if(funding.identifier) {
+                if(!existingFunder.isMutable()) {
+                    let mExistingFunder = existingFunder.mutableCopy();
+                    appendIdentifiers(mExistingFunder, funding.identifier);
+                    if(!existingFunder.valuesEqual(mExistingFunder)) {
+                        mExistingFunder.save();
+                        existingFunder = mExistingFunder; // Get an updated reference
+                    }
+                } else {
+                    appendIdentifiers(existingFunder, funding.identifier);
+
+                    // Save __now__ to allow future matching on identifier
+                    existingFunder.save();
+                    delete objectsToSave[existingFunder.ref.toString()]; // Already saved so remove from saveLater
+
+                    updateNormalisedTitleLists(existingFunder);
+                }
+            }
             funder = existingFunder;
         } else {
-            saveLater(funder);
+            if(!funding.identifier) {
+                saveLater(funder);
+            } else {
+                // If there's identifiers on the funder then save it here for future matching
+                funder.save();
+            }
             updateNormalisedTitleLists(funder);
         }
         object.append(funder, A.Funder);
@@ -348,9 +378,7 @@ var createObject = function(notification) {
                 project = O.object().appendType(T.ProjectPast).appendTitle(gn);
                 project.preallocateRef();
             } else {
-                if(!existingProject.isMutable()) {
-                    project = existingProject.mutableCopy();
-                }
+                project = existingProject.isMutable() ? existingProject : existingProject.mutableCopy();
             }
             _.each(authors, a => {
                 if(a.ref && !project.has(a.ref, A.Researcher)) {
@@ -652,6 +680,10 @@ var matchOutputServices = function() {
     return _matchOutputServices;
 };
 
+if(("PubmedId" in A) || ("PubMedCentralID" in A)) {
+    P.use("hres:pmid");
+}
+
 var appendIdentifiers = function(object, identifiers, tryMatch) {
     let queryableIds = [];
     _.each(identifiers, id => {
@@ -675,14 +707,14 @@ var appendIdentifiers = function(object, identifiers, tryMatch) {
             case "pmid":
                 if("PubmedId" in A) {
                     desc = A.PubmedId;
-                    value = id.id;
+                    value = P.PMID.create(id.id);
                 }
                 break;
             case "pmc":
             case "pmcid":
                 if("PubMedCentralID" in A) {
                     desc = A.PubMedCentralID;
-                    value = id.id;
+                    value = P.PMID.create(id.id);
                 }
                 break;
             case "nlmid":
@@ -690,6 +722,11 @@ var appendIdentifiers = function(object, identifiers, tryMatch) {
                     desc = A.NLMID;
                     value = id.id;
                 }
+                break;
+            case "FundRef":
+                desc = A.FundRef;
+                value = P.DOI.create(id.id);
+                queryableIds.push([value, desc]);
                 break;
             default:
                 throw new Error("Unknown identifier type in " + JSON.stringify(id));
@@ -757,4 +794,40 @@ P.respond("GET", "/do/hres-repo-jisc-pub-router/downloaded-files-status", [
     });
     E.response.kind = "json";
     E.response.body = JSON.stringify(json);
+});
+
+// --------------------------------------------------------------------------
+// Test code - Leave this in, useful for checking changes without needing a full harvest
+// --------------------------------------------------------------------------
+
+var SingleNotificationForm = P.form({
+    specificationVersion: 0,
+    formId: "single-notification",
+    formTitle: "Single notification",
+    elements: [
+        {
+            name: "notification",
+            type: "paragraph",
+            path: "notification",
+            rows: 30
+        }
+    ]
+});
+
+P.respond("GET,POST", "/do/hres-repo-jisc-pub-router/harvest-single-notification", [
+], function(E) {
+    if(!O.currentUser.isSuperUser) { O.stop("Not permitted."); }
+    
+    let document = {};
+    let form = SingleNotificationForm.handle(document, E.request);
+    if(form.complete) {
+        let notification = JSON.parse(document.notification);
+        harvest({
+            notifications: [notification]
+        });
+        return E.response.redirect("/");
+    }
+    E.render({
+        form: form
+    });
 });

@@ -4,11 +4,14 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.         */
 
+var DISABLE_OA_SERVICE_FOR_OA_TYPE = O.application.config["hres_repo_open_access:disable_oa_service_for_oa_type"] || [];
 
 P.implementService("hres:repository:open_access:is_green_oa", function(object) {
+    if(_.contains(DISABLE_OA_SERVICE_FOR_OA_TYPE, "green")) { return; }
     return !!object.getAttributeGroupIds(A.AcceptedAuthorManuscript).length;
 });
 P.implementService("hres:repository:open_access:is_not_oa", function(object) {
+    if(_.contains(DISABLE_OA_SERVICE_FOR_OA_TYPE, "not")) { return; }
     return (!object.first(A.OpenAccess) && !object.getAttributeGroupIds(A.AcceptedAuthorManuscript).length);
 });
 

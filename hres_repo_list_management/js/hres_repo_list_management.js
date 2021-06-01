@@ -4,7 +4,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.         */
 
-
+var ADDITIONAL_ACTIVITIES_TO_SHOW_MANAGEMENT_SECTION = O.application.config["hres_repo_list_management:additional_activities_to_show_management_section"] || [];
 var LIST_TYPES = SCHEMA.getTypesWithAnnotation("hres:repository:managed-list-type");
 
 // --------------------------------------------------------------------------
@@ -21,14 +21,22 @@ var CanManageRepositoryLists = O.action("hres:action:repository:manage-lists").
 
 // --------------------------------------------------------------------------
 
-P.implementService("std:action_panel:activity:menu:repository", function(display, builder) {
+var fillPanel = function(display, builder) {
     if(O.currentUser.allowed(CanManageRepositoryLists)) {
         var panel = builder.panel(1300).title("Manage lists");
         LIST_TYPES.forEach(function(type) {
             panel.link(100, "/do/repository-list-management/list/"+type, SCHEMA.getTypeInfo(type).name);
         });
     }
+};
+
+P.implementService("std:action_panel:activity:menu:repository", fillPanel);
+
+_.each(ADDITIONAL_ACTIVITIES_TO_SHOW_MANAGEMENT_SECTION, (activityName) => {
+    P.implementService("std:action_panel:activity:menu:"+activityName, fillPanel);
 });
+
+
 
 P.respond("GET", "/do/repository-list-management/list", [
     {pathElement:0, as:"ref"}

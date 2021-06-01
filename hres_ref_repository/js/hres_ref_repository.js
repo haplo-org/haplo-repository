@@ -18,6 +18,8 @@ P.db.table("exceptions", {
     evidence: {type: "text", nullable: true}
 });
 
+// DEPRECATED: new code should use the table in hres_repo_open_access. __This table has not been migrated__
+// Not migrated for historical compatibility and as the table in hres_repo_open_access was added close to REF2021
 P.db.table("firstFileDeposit", {
     output: {type: "ref"},
     date: {type: "date"},
@@ -111,8 +113,7 @@ var isConfItemOrJournalArticle = P.isConfItemOrJournalArticle = function(output)
 };
 
 var isGoldOA = P.isGoldOA = function(output) {
-    return !!(output.first(A.OpenAccess) &&
-        output.first(A.OpenAccess).behaviour === "hres:list:open-access:gold");
+    return !!O.service("hres:repository:open_access:is_gold_oa", output);
 };
 
 var isPublishedInREFOAPeriod = P.isPublishedInREFOAPeriod = function(object) {

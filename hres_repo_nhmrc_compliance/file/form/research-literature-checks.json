@@ -1,0 +1,14 @@
+{
+    "specificationVersion": 0,
+    "formId": "research-literature-checks",
+    "formTitle": "Research literature checks",
+    "renderDocumentOmitEmpty": true,
+    "elements": [
+        {
+            "type": "boolean",
+            "style": "checkbox",
+            "path": "grantManagementSystemUpdated",
+            "label": "I have updated the NHMRC grant management system to clearly show that the authors were unable to make the output openly accessible within 12 months of publication."
+        }
+    ]
+}

@@ -35,3 +35,35 @@ This service has been implemented in this plugin and takes two arguments, output
 h2(service). "hres_repo_cover_sheets:file_types"
 
 This service can be implemented by the client plugin to modify the default file type map. It should return an object with the file types information, mapped as file type shorthand to an object containing the file attribute, the corresponding statement attribute on the publishers record, and the form that is to be edited before creating the cover sheet.
+
+h2(service). "hres_repo_cover_sheets:add_available_tags"
+
+Implement this service to add additional tags to the object editor display.
+
+h3(arguments). Arguments
+
+Service takes one argument which is the array of standard tags to be added to if necessary. The tags added should be of the form @[KEY, Description]@ where:
+
+@KEY@ is the key needed to be found for interpolation
+@Description@ is the human readable explanation of what the KEY will be replaced with.
+
+h3(usage). Usage:
+
+<pre>language=javascript
+P.implementService("hres_repo_cover_sheets:add_available_tags", function(availableTags) {
+    availableTags.push(["DOI", "The DOI from the output"]); 
+});
+</pre>
+
+h2(service). "hres_repo_cover_sheets:interpolate_additional_tags"
+
+Implement this service to interpolate any custom tags required by a client. Make sure the client knows about them by adding them to the list of available tags using the above service.
+
+h3(usage). Usage:
+
+<pre>language=javascript
+P.implementService("hres_repo_cover_sheets:interpolate_additional_tags", function(str, output) {
+    const DOI = output.first(A.DOI);
+    str = str.replace(/\[DOI\]/g, (DOI ? DOI.toString() : "NO DOI"));
+    return t
+});

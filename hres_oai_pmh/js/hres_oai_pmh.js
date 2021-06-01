@@ -114,6 +114,7 @@ var addOAIErrorCode = function(cursor, errorCode, text) {
 
 var OAIPMHResponder = function(spec) {
     this._refToOAIIdentifier = spec.refToOAIIdentifier;
+    this._oaiIdentifierToRef = spec.oaiIdentifierToRef;
     this._objectToURL = spec.objectToURL || function(){};
     this._fileToURL = spec.fileToURL || function(){};
     this._attributes = _.extend({}, spec.attributes, REQUIRED_REPO_ATTRIBUTES);
@@ -259,9 +260,14 @@ COMMANDS.GetRecord = function(responder, E, cursor) {
     })) { return; }
     var metadataPrefix = E.request.parameters.metadataPrefix;
     var identifier = E.request.parameters.identifier;
-    var e = identifier.split(':');
-    var refStr = e[e.length-1];
-    var ref = O.ref(refStr);
+    var ref;
+    if(responder._oaiIdentifierToRef) {
+        ref = responder._oaiIdentifierToRef(identifier);
+    } else {
+        var e = identifier.split(':');
+        var refStr = e[e.length-1];
+        ref = O.ref(refStr);
+    }
     if(!ref) {
         addOAIErrorCode(cursor, ERROR_CODES.UNKNOWN_ID, "Identifier not found in this repository.");
         return;

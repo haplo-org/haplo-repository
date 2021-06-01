@@ -1,0 +1,14 @@
+{
+    "hres:pubmed_id:match_to_existing_item_in_list": {
+        "statements": [
+            "conforms-to hres:repository:match-item-to-existing-in-list",
+            "list-of repository-items"
+        ]
+    },
+    "hres:pubmed_central_id:match_to_existing_item_in_list": {
+        "statements": [
+            "conforms-to hres:repository:match-item-to-existing-in-list",
+            "list-of repository-items"
+        ]
+    }
+}

@@ -18,9 +18,9 @@ P.webPublication.feature("hres:repository:common:search", function(publication, 
 
     publication.respondToExactPath(spec.path,
         function(E, context) {
-            let showing = !!E.request.parameters.q;
-            context.hint.objectKind = showing ? "search-results" : "search";
-            var search = P.webPublication.widget.search(E, {
+            let showing = !E.request.parameters.q;
+            context.hint.objectKind = showing ? "search" : "search-results";
+            let search = P.webPublication.widget.search(E, {
                 modifyQuery(query) {
                     if(spec.includeLabels) {
                         query.anyLabel(spec.includeLabels);
@@ -42,7 +42,7 @@ P.webPublication.feature("hres:repository:common:search", function(publication, 
 //   SEARCH BY FIELDS
 // --------------------------------------------------------------------------
 
-let SearchByFieldsForm = P.form("search_by_fields", "form/search_by_fields.json");
+let SearchByFieldsForm = P.replaceableForm("search_by_fields", "form/search_by_fields.json");
 
 const NUMBER_OTHER_FIELDS = 5;
 const DEFAULT_OTHER_FIELDS = [A.Abstract, A.Keywords, A.Journal, A.Publisher];
@@ -111,6 +111,9 @@ P.webPublication.feature("hres:repository:common:search-by-fields", function(pub
         let form = SearchByFieldsForm.instance(fields);
         form.choices("types", choicesType);
         form.choices("fields", choicesField);
+        if("prepareFormInstance" in spec) {
+            spec.prepareFormInstance(SearchByFieldsForm, form);
+        }
         form.update(E.request);
         if(form.complete) {
             let components = [];
@@ -135,6 +138,9 @@ P.webPublication.feature("hres:repository:common:search-by-fields", function(pub
                         components.push(p+v);
                     }
                 }
+            }
+            if("modifyQuery" in spec) {
+                spec.modifyQuery(components, fields);
             }
             if(components.length) {
                 var joined = components.length === 1 ?

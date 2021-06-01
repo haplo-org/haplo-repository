@@ -5,11 +5,13 @@
   "displayName": "Haplo RM Open Access",
   "displayDescription": "Open Access compliance reporting for Haplo Research Manager repositories",
   "apiVersion": 4,
+  "privilegesRequired": ["pDatabase"],
   "use": [
       "std:reporting"
     ],
   "depend": [
       "std_reporting",
+      "hres_repository",
       "hres_repo_schema_outputs"
     ],
   "load": [

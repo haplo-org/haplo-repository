@@ -102,7 +102,7 @@ P.hook('hObjectAttributeRestrictionLabelsForUser', function(response, user, obje
 
 P.implementService("hres_repository:test_data:pre_item_save", function(generator, repositoryItem) {
     var funderDistribution = [
-        0.8, generator.randomListMember(generator.funders),
+        0.8, generator.randomListMember(generator.funders || []),
         0.9, generator.randomProjectName(),
         1, null
     ];

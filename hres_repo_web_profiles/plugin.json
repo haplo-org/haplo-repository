@@ -12,8 +12,12 @@
     "hres_schema",
     "std_action_panel"
   ],
+  "use": [
+      "std:document_store"
+  ],
   "load": [
-      "js/hres_repo_web_profiles.js"
+      "js/hres_repo_web_profiles.js",
+      "js/wp_featured_outputs.js"
     ],
   "respond": ["/do/hres-repo-web-profiles"]
 }

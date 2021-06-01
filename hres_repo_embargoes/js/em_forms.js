@@ -68,7 +68,11 @@ var embargoForm = P.form('embargo', 'form/embargo.json');
 P.respond("GET,POST", "/do/hres-repo-embargoes/edit", [
     {pathElement:0, as:"object"}
 ], function(E, output) {
-    P.CanEditEmbargoes.enforce();
+    if(P.objectWorkflowIsUsingFeature(output)) {
+        if(!P.userCanEditEmbargoesForWorkflowObject(O.currentUser, output)) { O.stop("Not permitted."); }
+    } else {
+        P.CanEditEmbargoes.enforce();
+    }
 
     var displayObject = O.object();
     _.each(DISPLAY_ATTRIBUTES, function(attr) {
@@ -160,13 +164,12 @@ P.respond("GET,POST", "/do/hres-repo-embargoes/edit", [
         return;
     }
 
-    E.renderIntoSidebar({
-        elements: [{
-            label: "Delete all embargoes",
-            href: "/do/hres-repo-embargoes/delete/"+output.ref,
-            indicator: "standard"
-        }]
-    }, "std:ui:panel");
+    // Splitting links into two panels
+    let builder = O.ui.panel().
+        panel(50).link("default", "/do/hres-repo-embargoes/sherpa-information/"+output.ref,  "View archiving guidance").
+        panel(100).link("default", "/do/hres-repo-embargoes/delete/"+output.ref, "Delete all embargoes", "standard");
+    E.renderIntoSidebar(builder.deferredRender(), "std:render");
+
     E.render({
         output: output.ref,
         displayObject: displayObject,
@@ -178,7 +181,11 @@ P.respond("GET,POST", "/do/hres-repo-embargoes/edit", [
 P.respond("GET,POST", "/do/hres-repo-embargoes/delete", [
     {pathElement:0, as:"object"}
 ], function(E, output) {
-    P.CanEditEmbargoes.enforce();
+    if(P.objectWorkflowIsUsingFeature(output)) {
+        if(!P.userCanEditEmbargoesForWorkflowObject(O.currentUser, output)) { O.stop("Not permitted."); }
+    } else {
+        P.CanEditEmbargoes.enforce();
+    }
     
     if(E.request.method === "POST") {
         P.db.embargoes.select().where("object", "=", output.ref).deleteAll();
@@ -198,13 +205,21 @@ P.respond("GET,POST", "/do/hres-repo-embargoes/delete", [
 });
 
 P.respond("GET,POST", "/do/hres-repo-embargoes/sherpa-information", [
-    {pathElement:0, as:"object"}
-], function(E, output) {
+    {pathElement:0, as:"object"},
+    {parameter:"forVersion", as:"string", optional:true}
+], function(E, output, forVersion) {
     var document = {};
     var existingDocumentQuery = P.db.embargoDocuments.select().where("object", "=", output.ref);
     if(existingDocumentQuery.length) {
         document = JSON.parse(existingDocumentQuery[0].document);
     }
+
+    E.renderIntoSidebar({
+        elements: [{
+            label: "Edit embargoes",
+            href: "/do/hres-repo-embargoes/edit/"+output.ref
+        }]
+    }, "std:ui:panel");
 
     if(E.request.method === "POST") {
         if(existingDocumentQuery.length) {
@@ -221,6 +236,7 @@ P.respond("GET,POST", "/do/hres-repo-embargoes/sherpa-information", [
     }
 
     E.render({
-        output: output.ref
+        output: output.ref,
+        forVersion: forVersion
     }, "sherpa-information");
 });

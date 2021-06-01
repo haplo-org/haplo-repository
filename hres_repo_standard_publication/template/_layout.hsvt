@@ -65,13 +65,19 @@
         <div class="collapse navbar-collapse" id="navbarCollapse">
           <ul class="navbar-nav mr-auto">
             <li class=["nav-item" if(context.hint.isResearcherDirectoryPage) { "active" }]>
-                <a class="nav-link p-3 text-white" href=[BASE_PATH "/researchers/a"]> "People" </a>
+                <a class="nav-link p-3 text-white" href=[BASE_PATH "/researchers/a"]>
+                  NAME("hres_repo_standard_publication:nav_bar_links:people" "People")
+                </a>
             </li>
             <li class=["nav-item" if(context.hint.isResearchInstituteBrowsePage) { "active"} ]>
-                <a class="nav-link p-3 text-white" href=[BASE_PATH "/departments"]> "Research areas" </a>
+                <a class="nav-link p-3 text-white" href=[BASE_PATH "/departments"]>
+                  NAME("hres_repo_standard_publication:nav_bar_links:research_areas" "Research areas")
+                </a>
             </li>
             <li class=["nav-item" if(context.hint.isLatestAdditionsPage) { "active" } ]>
-                <a class="nav-link p-3 text-white" href=[BASE_PATH "/latest"]> "Latest Additions" </a>
+                <a class="nav-link p-3 text-white" href=[BASE_PATH "/latest"]>
+                  NAME("hres_repo_standard_publication:nav_bar_links:latest_additions" "Latest Additions")
+                </a>
             </li>
           </ul>
 
@@ -160,7 +166,7 @@
         <div class="footer-copyright text-center py-3">
           <p><span class="haplo-copyright">"&copy; Copyright - "
           <a href=COPYRIGHT_LINK.href class="text-white"> COPYRIGHT_LINK.text </a> 
-          " 2019 "</span>
+          " 2020 "</span>
 
           <span class="haplo-powered">" Powered by " 
             <a href="https://www.haplo.com/repository" class="pl-1">

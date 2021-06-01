@@ -124,6 +124,12 @@ if(Publication.featureImplemented("haplo:publication:branding:update")) {
     Publication.use("haplo:publication:branding:update");
 }
 
+if("PreparedFile" in A) {
+    Publication.setPagePartOptions("hres:repository:common:file-restrictions", {
+        ignoreDescs: [A.PreparedFile]
+    });
+}
+
 Publication.layout(function(E, context, blocks) {
     return P.template("_layout").render({
         HOME_PATH: HOME_PATH,

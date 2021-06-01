@@ -1,0 +1,6 @@
+pageTitle("Harvest single notification")
+
+<form method="POST"> std:form:token()
+  std:form(form)
+  <input type="submit" value="Submit">
+</form>

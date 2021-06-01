@@ -8,6 +8,7 @@ schema-template hres:template-type:repository:output
     element: std:group:everyone bottom hres_repo_research_fish:research_fish_metadata [sort=10001]
 
 schema-template hres:template-type:repository:practice-based-research
+    annotation hres:annotation:repository-item
     annotation hres:annotation:repository:practice-based-research
     # For schema annotation queries
     annotation hres:annotation:repository:output
@@ -95,12 +96,8 @@ aliased-attribute hres:aliased-attribute:creators-citation
 attribute dc:attribute:author as Author
 attribute dc:attribute:date as Date
 attribute hres:attribute:researcher as Researcher
-
 attribute hres:attribute:place-of-publication as PlaceOfPublication
-    title: Place of publication
-    search-name: place-of-publication
-    qualifier std:qualifier:null
-    data-type text
+attribute hres:attribute:pages as Pages
 
 attribute hres:attribute:image-credit
     title Image credit
@@ -199,11 +196,6 @@ attribute hres:attribute:book-author as BookAuthor
     data-type plugin
     data-type-options hres:author_citation
 
-attribute hres:attribute:pages as Pages
-    title: Pages
-    search-name: pages
-    qualifier std:qualifier:null
-    data-type text
 
 # -------- File types ---------------------------------------------
 

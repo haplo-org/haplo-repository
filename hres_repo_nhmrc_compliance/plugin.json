@@ -1,0 +1,28 @@
+{
+  "pluginName": "hres_repo_nhmrc_compliance",
+  "pluginAuthor": "Haplo Services",
+  "pluginVersion": 1,
+  "displayName": "Haplo RM NHMRC Compliance Checker",
+  "displayDescription": "Compliance checking tool to ensure outputs comply with the NHMRC OA policy.",
+  "installSecret": "1c95c724801486eab17a601adffa64e17b5c64cf",
+  "apiVersion": 4,
+  "privilegesRequired": ["pDatabase"],
+  "depend": [
+      "hres_repository",
+      "hres_repo_open_access",
+      "std_document_store",
+      "std_reporting"
+    ],
+  "use": [
+    "std:document_store",
+    "std:reporting"
+  ],
+  "load": [
+      "js/hres_repo_nhmrc_compliance.js",
+      "js/nhmrc_research_literature_requirements.js",
+      "js/nhmrc_research_data_requirements.js",
+      "js/nhmrc_patent_requirements.js",
+      "js/nhmrc_reporting.js"
+    ],
+  "respond": ["/do/hres-repo-nhmrc-compliance"]
+}

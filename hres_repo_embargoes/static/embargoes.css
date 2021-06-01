@@ -6,10 +6,33 @@
 
 
 .sherpa-links {
-    margin-top: 90px;
     background: #eee;
     padding: 8px 13px;
     border-radius: 3px;
+}
+
+.policy-title > * {
+    display: inline;
+}
+
+.policy-table {
+    padding: 0 5px;
+    border-radius: 3px;
+    border: 1px solid #d6d6d6;
+}
+
+.expand-collapse {
+    float: right;
+    cursor: pointer;
+}
+
+.collapsed {
+    display: none;
+}
+
+/* Navigation arrow elements */
+.ey {
+    padding: unset;
 }
 
 .sherpa-links h2 {

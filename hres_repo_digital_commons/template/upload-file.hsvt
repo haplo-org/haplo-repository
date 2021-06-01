@@ -1,0 +1,7 @@
+
+backLink("/do/hres-repo-digital-commons/admin")
+
+<form method="POST"> std:form:token()
+    std:form(form)
+    <input type="submit" value="Upload and begin import">
+</form>

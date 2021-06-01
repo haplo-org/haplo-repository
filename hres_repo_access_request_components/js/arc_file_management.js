@@ -55,8 +55,9 @@ P.workflow.registerWorkflowFeature("hres:repository:access_requests:file_release
         // Send email to recipient
         let releaseUrl = O.service("hres:file_mediated_access_access:release_url", identifier);
         let hostname = M.workflowServiceMaybe("ar:publication_hostname_for_instance") || O.application.hostname;
+        let releaseEmailTemplate = (spec && ("releaseEmailTemplate" in spec)) ? spec.releaseEmailTemplate : P.template("file-release/email/release");
         let email = {
-            template: P.template("file-release/email/release"),
+            template: releaseEmailTemplate,
             view: {
                 item: O.ref(M.workUnit.tags["ref"]).load(),
                 releaseUrl: "https://"+hostname+releaseUrl

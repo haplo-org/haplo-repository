@@ -1,0 +1,151 @@
+
+template:std:ui:tabs:links()
+
+<br>
+
+if(policies) {
+  each(policies) {
+    <div class="policy-title">
+      // TODO: change to down arrow for expanded when platform supports
+      std:ui:navigation:arrow("right")
+      <h3>
+        i("Policy option {} {applicable}") { option }
+          applicable { unless(haploApplicable) { "(not applicable to this repository)" } }
+        </h3>
+        <a class="expand-collapse" data-policy-option=option data-status=if(haploApplicable) { "1" } else { "0" }>
+        if(haploApplicable) { "collapse" } else { "expand" }
+      </a>
+    </div>
+    <div class=["policy-table" unless(haploApplicable) { "collapsed" }] data-policy-option=option>
+      <table>
+        if(additionalFee) {
+          <tr>
+            <th> i("Additional OA Fee") </th>
+            <td> 
+              i("{} additional fee to make the article open access") {
+                switch(additionalFee) {}
+                No { "There is no" }
+                Yes { "There is an" }
+              }
+            </td>
+          </tr>
+        }
+        if(location) {
+          <tr>
+            <th> i("Location") </th>
+            <td> 
+              each(location) {
+                <p> . </p>
+              }
+            </td>
+          </tr>
+        }
+        if(embargo) {
+          <tr>
+            <th> i("Embargo") </th>
+            <td> embargo </td>
+          </tr>
+        }
+        if(license) {
+          <tr>
+            <th> i("License") </th>
+            <td> 
+              each(license) {
+                <p> . </p>
+              }
+            </td>
+          </tr>
+        }
+        if(copyrightOwner) {
+          <tr>
+            <th> i("Copyright owner") </th>
+            <td> 
+              each(copyrightOwner) {
+                <p> . </p>
+              }
+            </td>
+          </tr>
+        }
+        if(publisherDeposit) {
+          <tr>
+            <th> i("Publisher will deposit to") </th>
+            <td> 
+              each(publisherDeposit) {
+                <p> <a href=url> name </a> </p>
+              }
+            </td>
+          </tr>
+        }
+        if(prerequisites) {
+          within(prerequisites) {
+            if(rules) {
+              <tr>
+                <th> i("Prerequisites") </th>
+                <td> 
+                  each(rules) {
+                    <p> . </p>
+                  }
+                </td>
+              </tr>
+            }
+            if(funders) {
+              <tr>
+                <th> i("Prerequisite funders") </th>
+                <td> 
+                  each(funders) {
+                    <p> <a href=url> name </a> </p>
+                  }
+                </td>
+              </tr>
+            }
+            if(subjects) {
+              <tr>
+                <th> i("Prerequisite subjects") </th>
+                <td> 
+                  each(subjects) {
+                    <p> . </p>
+                  }
+                </td>
+              </tr>
+            }
+          }
+        }
+        if(conditions) {
+          <tr>
+            <th> i("Conditions") </th>
+            <td> 
+              each(conditions) {
+                <p> . </p>
+              }
+            </td>
+          </tr>
+        }
+        if(notes) {
+          <tr>
+            <th> i("Notes") </th>
+            <td> 
+              each(notes) {
+                <p> . </p>
+              }
+            </td>
+          </tr>
+        }
+      </table>
+    </div>
+    <br>
+  }
+}
+
+if(additionalInformationURLs) {
+  <hr>
+  <p> "For more information, please see the following links:" </p>
+  <ul>
+    each(additionalInformationURLs) {
+      <li> <a href=url> description </a> </li>
+    }
+  </ul>
+}
+
+unlessAny(policies additionalInformationURLs) {
+  <p> "No policies available." <a target="_blank" href="https://v2.sherpa.ac.uk/romeo/"> " Romeo home page" </a></p>
+}

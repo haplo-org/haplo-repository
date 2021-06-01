@@ -4,6 +4,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.         */
 
+var ADDITIONAL_ACTION_PANELS = O.application.config["hres_repo_embargoes:display_additional_action_panels"] || [];
 
 var CanEditEmbargoes = P.CanEditEmbargoes = O.action("hres_repo_embargoes:can_edit").
     title("Can edit embargoes").
@@ -125,6 +126,8 @@ P.implementService("std:action_panel_priorities", function(priorities) {
 });
 
 var fillPanel = function(display, builder, preventEdit) {
+    // If using the feature then UI will be handled there.
+    if(P.objectWorkflowIsUsingFeature(display.object)) { return; }
     var embargoes = getEmbargoData(display.object);
     if(embargoes) {
         var anyIsActive = _.some(embargoes, (e) => { return e.isActive(); });
@@ -154,25 +157,20 @@ P.implementService("std:action_panel:alternative_versions", function(display, bu
     fillPanel(display, builder, true);
 });
 
+_.each(ADDITIONAL_ACTION_PANELS, (panelName) => {
+    P.implementService("std:action_panel:"+panelName, function(display, builder) {
+        fillPanel(display, builder);
+    });
+});
+
 P.implementService("std:action_panel:output", function(display, builder) {
     var output = display.object;
+    // If using the feature then UI will be handled there.
+    if(P.objectWorkflowIsUsingFeature(output)) { return; }
     if(O.application.config["hres_repo_embargoes:sherpa_romeo_enable_for_articles_only"] &&
         !output.isKindOf(T.JournalArticle)) { return; }
-    var panel = builder.panel(155);
-    panel.element(0, { title: "Archiving guidance" });
-    var q = P.db.sherpaArchivingData.select().where('object', '=', output.ref);
-    if(q.length) {
-        _.each(q[0].data.publishers, (p) => {
-            panel.element(10, { label: p.name });
-            _.each(p.archiving, (a) => {
-                panel.element(10, { label: _.capitalize(a) });
-            });
-        });
-    }
-    panel.link(20,
-        "/do/hres-repo-embargoes/sherpa-information/"+output.ref,
-        (q.length ? "More" : "Get")+" information",
-        "default");
+    builder.panel("hres:repository_item:embargo").
+        link("bottom", "/do/hres-repo-embargoes/sherpa-information/"+output.ref, "View archiving guidance");
 });
 
 // -------------------------------------------------------------------
@@ -308,8 +306,12 @@ var liftEmbargoesDaily = P.liftEmbargoesDaily = function(onDay) {
     var updated = O.refdict();
     _.each(ending, (embargo) => {
         if(!updated.get(embargo.object)) {
-            relabelForEmbargoes(embargo.object.load(), onDay);
+            var embargoedObject = embargo.object.load();
+            relabelForEmbargoes(embargoedObject, onDay);
             updated.set(embargo.object, true);
+            O.serviceMaybe("haplo:integration-global-observation:send-update-for-object", embargoedObject, {
+                action: "hres:repository:embargo-lifted"
+            });
         }
     });
     P.data['lastLiftedEmbargoes'] = (new Date()).toString();
@@ -386,4 +388,36 @@ P.respond("GET,POST", "/do/hres-repo-embargoes/admin/reapply-embargo-labels", [
             "ensure embargo labels are correct according to the data in the underlying database.",
         options: [{label: "Confirm"}]
     }, "std:ui:confirm");
+});
+
+// --------------------------------------------------------------------------
+// Adding serialisation source
+
+P.implementService("std:serialiser:discover-sources", function(source) {
+    source({
+        name: "hres:repository:embargoes",
+        sort: 2040,
+        setup: function() { },
+        apply: function(serialiser, object, serialised) {
+            if(object.isKindOfTypeAnnotated("hres:annotation:repository-item")) {
+                var embargoes = serialised["repository_embargoes"] = _.chain(getEmbargoData(object)).
+                    filter(function(embargo) { return embargo.isActive(); }).
+                    map((function(embargo) {
+                        return {
+                            wholeRecord: !embargo.extensionGroup,
+                            extension: {
+                                groupId: embargo.extensionGroup,
+                                desc: embargo.desc
+                            },
+                            licenseURL: embargo.licenseURL ?
+                                P.template("url/safe-license-url").render(embargo.licenseURL) :
+                                null,
+                            start: embargo.start,
+                            end: embargo.end
+                        };
+                    })).
+                    value();
+            }
+        }
+    });
 });

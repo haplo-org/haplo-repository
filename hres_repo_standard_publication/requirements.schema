@@ -19,6 +19,7 @@ label hres:label:repository-item as RepositoryItem
 label hres:label:researcher-published-to-repository as ResearcherPublishedToRepository
 
 OPTIONAL attribute hres:attribute:ref-unit-of-assessment as REFUnitOfAssessment
+OPTIONAL attribute hres:attribute:prepared-file as PreparedFile
 
 type std:type:person as Person
 type hres:type:person:researcher as Researcher

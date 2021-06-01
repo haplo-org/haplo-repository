@@ -7,6 +7,11 @@
 
 var INTERNAL_SUBMISSION_SPEC = {};
 
+var userCanReadProject = function(user, object) {
+    // Prevents workflow being created where project entity causes permissions issues.
+    return !!(!object.first(A.Project) || (object.first(A.Project) && user.canRead(object.first(A.Project))));
+};
+
 /*HaploDoc
 title: Internal requests
 node: /hres_repo_access_request_components/internal
@@ -44,7 +49,7 @@ P.workflow.registerWorkflowFeature("hres:repository:access_requests:internal_sub
     INTERNAL_SUBMISSION_SPEC[workflow.fullName] = spec;
 
     workflow.plugin.implementService("std:action_panel:category:hres:repository_item", function(display, builder) {
-        if(spec.canStart(O.currentUser, display.object)) {
+        if(spec.canStart(O.currentUser, display.object) && userCanReadProject(O.currentUser, display.object)) {
             builder.panel(spec.panel || 125).
                 link("default", P.template("start/start-url").render({
                     ref: display.object.ref.toString(),
@@ -82,7 +87,7 @@ P.respond("GET,POST", "/do/hres-repo-access-request/start", [
 ], function(E, item, workType) {
     const workflow = P.WORKFLOW_DEFINITION_LOOKUP[workType];
     const spec = INTERNAL_SUBMISSION_SPEC[workType];
-    if(!spec.canStart(O.currentUser, item)) { O.stop("Not permitted."); }
+    if(!spec.canStart(O.currentUser, item) || !userCanReadProject(O.currentUser, item)) { O.stop("Not permitted."); }
     if(!O.service("hres:repository:is_repository_item", item)) { O.stop("Can only request access to repository items."); }
     let document = {};
     let form = spec.form.handle(document, E.request);

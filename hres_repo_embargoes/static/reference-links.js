@@ -7,54 +7,44 @@
 
 (function($) {
 
+    var EXPAND_STATUS = {
+        COLLAPSED: 0,
+        EXPANDED: 1
+    };
     var safety = 5;
-    var doneHeading = false;
-    var haveResults = false;
     var getLinks = function(doneStr) {
         if(--safety < 0) { return; }
 
         var output = $('.sherpa-links').data('ref');
+        var forVersion = $('.sherpa-links').data('for-version');
 
+        var queryParams = [];
         var url = "/api/hres-repo-embargoes/sherpa-romeo/"+output;
-        if(doneStr) { url += "?done="+doneStr; }
+        if(doneStr) { queryParams.push("done="+doneStr); }
+        if(forVersion) { queryParams.push("forVersion="+forVersion); }
+        url += queryParams.length > 0 ? "?" + queryParams.join("&") : "";
+
         $.get(url)
             .done(function(response) {
-                var publishers = response.publishers;
-                var html = [];
-                if(!doneHeading) {
-                    html.push('<h2>SHERPA/RoMEO guidance</h2><br>');
-                    doneHeading = true;
-                }
-                if(publishers.length > 0) {
-                    haveResults = true;
-                }
-                _.each(publishers, function(p) {
-                    html.push('<h2>', _.escape(p.name), '</h2>');
-                    if(p.paidAccess) { 
-                        html.push("<h4><a target='_blank' rel='noopener' href='", _.escape(p.paidAccess.url), "'>", _.escape(p.paidAccess.name), "</a>", _.escape(p.paidAccess.notes), "</h4>");
+                $('.sherpa-links').append(response.render);
+
+                // Add expand/collapse functionality
+                $(".expand-collapse").click(function() {
+                    var policyOption = $(this).data("policy-option");
+                    var status = $(this).data("status");
+                    var policyTable = $(".policy-table[data-policy-option=\""+policyOption+"\"]");
+                    if(status === EXPAND_STATUS.COLLAPSED) {
+                        // For those hidden by default
+                        $(this).removeClass("collapsed");
+                        policyTable.fadeIn();
+                        $(this).text("collapse");
+                        $(this).data("status", EXPAND_STATUS.EXPANDED);
+                    } else {
+                        policyTable.fadeOut();
+                        $(this).text("expand");
+                        $(this).data("status", EXPAND_STATUS.COLLAPSED);
                     }
-                    _.each(p.archiving, function(a) {
-                        html.push('<h4>Author ', a, '</h4>');
-                    });
-                    if(p.conditions) {
-                        html.push("<h3>Conditions:</h3>");
-                    }
-                    _.each(p.conditions, function(c) {
-                        html.push("<li>", _.escape(c), "</li>"); 
-                    });
-                    if(p.copyright) {
-                        html.push("<h3>Copyright:</h3>");
-                    }
-                    _.each(p.copyright, function(c) {
-                        html.push("<li><a target='_blank' rel='noopener' href='", _.escape(c.url), "'>", _.escape(c.text), "</a></li>"); 
-                    });
-                    html.push("<hr>");
                 });
-                if(!response.more && !haveResults) {
-                    html.push('<p>No links available. <a target="_blank" href="http://www.sherpa.ac.uk/romeo/">RoMEO home page</a><p>');
-                }
-                var htmlString = html.join('');
-                $('.sherpa-links').append(htmlString);
                 if(response.more) {
                     getLinks((response.done||[]).join(','));
                 }

@@ -1,0 +1,2 @@
+
+std:security:user-controlled-url-is-valid(.) { . } not-valid { "invalid" }

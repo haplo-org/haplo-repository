@@ -53,10 +53,20 @@ P.implementService("hres:repository:datacite:export-object-as-binary-data-multip
 });
 
 var writeObjectAsDataciteXML = function(item, cursor, options) {
-    var resource = cursor.
-        cursorSettingDefaultNamespace("http://datacite.org/schema/kernel-4").
-        element("resource").
-        addSchemaLocation("http://datacite.org/schema/kernel-4", "https://schema.datacite.org/meta/kernel-4.3/metadata.xsd");
+    options = options || {};
+    var resource;
+    // if we only want selected fields we can extend from there the existing element, otherwise
+    // (if adding to a blank document, or an OAI-PMH response) we need to add the base "resource" element
+    if(options.selectedFields) {
+        resource = cursor.
+            addNamespace("http://datacite.org/schema/kernel-4", "datacite", "http://schema.datacite.org/meta/kernel-4.3/metadata.xsd").
+            cursorWithNamespace("http://datacite.org/schema/kernel-4");
+    } else {
+        resource = cursor.
+            cursorSettingDefaultNamespace("http://datacite.org/schema/kernel-4").
+            element("resource").
+            addSchemaLocation("http://datacite.org/schema/kernel-4", "https://schema.datacite.org/meta/kernel-4.3/metadata.xsd");
+    }
 
     var simpleElement = function(desc, elementName, modifyElement) {
         item.every(desc, function(v,d,q) {
@@ -135,267 +145,357 @@ var writeObjectAsDataciteXML = function(item, cursor, options) {
         });
     };
 
-    simpleElement(A.DOI, "identifier", function(c, v) {
-        if(P.DOI.isDOI(v)) {
-            c.attribute("identifierType", "DOI");
-        }
-    });
-
-    if("Dataset" in T && !item.isKindOf(T["Dataset"])) {
-        simpleElement(A.Type, "resourceType", function(c, v) {
-            var t;
-            _.each(RESOURCE_TYPE_GENERAL, (types, resourceTypeGeneral) => {
-                _.each(types, (type) => { if(item.isKindOf(type)) { t = resourceTypeGeneral; } });
-            });
-            c.attribute("resourceTypeGeneral", t || "Text");
+    var setIdentifier = function() {
+        simpleElement(A.DOI, "identifier", function(c, v) {
+            if(P.DOI.isDOI(v)) {
+                c.attribute("identifierType", "DOI");
+            }
         });
-    } else {
-        var t, 
-            text = "",
-            dataFiles = "DatasetFile" in A ? item.getAttributeGroupIds(A.DatasetFile) : [];
+    };
 
-        _.find(dataFiles, groupId => {
-            var group = item.extractSingleAttributeGroup(groupId);
-            var dataType = "DataType" in A ? group.first(A.DataType) : null;
-            if(dataType) {
-                dataType = dataType.load().title;
-                return _.find(RESOURCE_TYPE_GENERAL, (types, resourceTypeGeneral) => {
-                    return _.find(types, (type) => {
-                        if(O.isRef(type)) { type = type.load().title; }
-                        if(type === dataType) { 
-                            t = resourceTypeGeneral;
-                            if(t === "Other") {
-                                text = dataType;
-                            }
-                            return true;
-                        } 
-                    });
+    var setResourceType = function () {
+        if("Dataset" in T && !item.isKindOf(T["Dataset"])) {
+            simpleElement(A.Type, "resourceType", function(c, v) {
+                var t;
+                _.each(RESOURCE_TYPE_GENERAL, (types, resourceTypeGeneral) => {
+                    _.each(types, (type) => { if(item.isKindOf(type)) { t = resourceTypeGeneral; } });
                 });
-            }
-        });
-        resource.element("resourceType").text(text).attribute("resourceTypeGeneral", t || "Text");
-        resource.up();
-    }
-
-    var identifierDescs = [A.Url, A.ISBN, A.DOI, A.Handle, A.PubMedID, A.PubMedCentralID];
-    if("RelatedOutput" in A) {
-        resource.element("relatedIdentifiers");
-        item.every(A.RelatedOutput, (v, d, q) => {
-            var output = v.toString().split(": ");
-            var value = output[output.length-1];
-            var name = SCHEMA.getQualifierInfo(q).name;
-            var identifier = v;
-            name = name.split(" ");
-            //Put into schema format (no spaces capital start of word)
-            name = _.map(name, word => { return word[0].toUpperCase() + word.substr(1); }).join("");
-
-            var type;
-            if(O.isRef(v)) {
-                // If link is to item in repository then find a DataCite compliant identifier to use
-                var linkedObj = v.load();
-                var identifierDesc = _.find(identifierDescs, (desc) => !!linkedObj.first(desc));
-                if(identifierDesc) {
-                    value = linkedObj.first(identifierDesc);
-                    type = O.typecode(value);
-                    identifier = value;
-                }
-            } else {
-                type = output.length > 1 ? output[0] : O.typecode(identifier);
-            }
-
-            if(_.isNumber(type)) {
-                if(type === O.T_IDENTIFIER_URL) { type = "URL"; }
-                else if(type === O.T_IDENTIFIER_ISBN) { type = "ISBN"; }
-                if(P.DOI.isDOI(identifier)) { type = "DOI"; }
-                else if(P.Handle.isHandle(identifier)) { type = "Handle"; }
-                else if(P.PMID.isPMID(identifier)) { type = "PMID"; }
-            }
-            if(value && type) {
-                resource.element("relatedIdentifier").
-                    attribute("relationType", name).
-                    text(value).
-                    attribute("relatedIdentifierType", type).
-                    up();
-            }
-        });
-        resource.up();
-    }
-
-    resource.element("creators");
-    personElement(A.AuthorsCitation, "creator");
-    resource.up();
-
-    resource.element("titles");
-    simpleElement(A.Title, "title");
-    resource.up();
-
-    var pub = item.first(A.Publisher);
-    if(pub) {
-        var str;
-        if(O.isRef(pub)) {
-            str = pub.load().title;
+                c.attribute("resourceTypeGeneral", t || "Text");
+            });
         } else {
-            str = pub.toString();
+            var t, 
+                text = "",
+                dataFiles = "DatasetFile" in A ? item.getAttributeGroupIds(A.DatasetFile) : [];
+
+            _.find(dataFiles, groupId => {
+                var group = item.extractSingleAttributeGroup(groupId);
+                var dataType = "DataType" in A ? group.first(A.DataType) : null;
+                if(dataType) {
+                    dataType = dataType.load().title;
+                    return _.find(RESOURCE_TYPE_GENERAL, (types, resourceTypeGeneral) => {
+                        return _.find(types, (type) => {
+                            if(O.isRef(type)) { type = type.load().title; }
+                            if(type === dataType) { 
+                                t = resourceTypeGeneral;
+                                if(t === "Other") {
+                                    text = dataType;
+                                }
+                                return true;
+                            } 
+                        });
+                    });
+                }
+            });
+            resource.element("resourceType").text(text).attribute("resourceTypeGeneral", t || "Text");
+            resource.up();
         }
-        resource.element("publisher").text(str).up();
-    }
-    if(item.first(A.Date)) {
+    };
+
+    var setRelatedIdentifier = function() {
+        var identifierDescs = [A.Url, A.ISBN, A.DOI, A.Handle, A.PubMedID, A.PubMedCentralID];
+        if("RelatedOutput" in A) {
+            resource.element("relatedIdentifiers");
+            item.every(A.RelatedOutput, (v, d, q) => {
+                var output = v.toString().split(": ");
+                var value = output[output.length-1];
+                var name = SCHEMA.getQualifierInfo(q).name;
+                var identifier = v;
+                name = name.split(" ");
+                //Put into schema format (no spaces capital start of word)
+                name = _.map(name, word => { return word[0].toUpperCase() + word.substr(1); }).join("");
+
+                var type;
+                if(O.isRef(v)) {
+                    // If link is to item in repository then find a DataCite compliant identifier to use
+                    var linkedObj = v.load();
+                    var identifierDesc = _.find(identifierDescs, (desc) => !!linkedObj.first(desc));
+                    if(identifierDesc) {
+                        value = linkedObj.first(identifierDesc);
+                        type = O.typecode(value);
+                        identifier = value;
+                    }
+                } else {
+                    type = output.length > 1 ? output[0] : O.typecode(identifier);
+                }
+
+                if(_.isNumber(type)) {
+                    if(type === O.T_IDENTIFIER_URL) { type = "URL"; }
+                    else if(type === O.T_IDENTIFIER_ISBN) { type = "ISBN"; }
+                    if(P.DOI.isDOI(identifier)) { type = "DOI"; }
+                    else if(P.Handle.isHandle(identifier)) { type = "Handle"; }
+                    else if(P.PMID.isPMID(identifier)) { type = "PMID"; }
+                }
+                if(value && type) {
+                    resource.element("relatedIdentifier").
+                        attribute("relationType", name).
+                        text(value).
+                        attribute("relatedIdentifierType", type).
+                        up();
+                }
+            });
+            resource.up();
+        }
+    };
+
+    var setCreator = function() {
+        resource.element("creators");
+        personElement(A.AuthorsCitation, "creator");
+        resource.up();
+    };
+
+    var setTitle = function() {
+        resource.element("titles");
+        simpleElement(A.Title, "title");
+        resource.up();
+    };
+
+    var setPublisher = function() {
+        var pub = item.first(A.Publisher);
+        if(pub) {
+            var str;
+            if(O.isRef(pub)) {
+                str = pub.load().title;
+            } else {
+                str = pub.toString();
+            }
+            resource.element("publisher").text(str).up();
+        }
+    };
+
+    var setPublicationYear = function() {
+        if(item.first(A.Date)) {
         // To guarantee the element contains only the year information
         resource.element("publicationYear").
             text(new XDate(item.first(A.Date).start).toString("yyyy")).
             up();
-    }
-
-    resource.element("subjects");
-    var subjectModifier;
-    if(!O.serviceImplemented("hres:datacite:add-subjects-from-taxonomy-below-cursor")) {
-        subjectModifier = function(c, v) {
-            if(!O.isRef(v)) { return; }
-            var url = v.load().first(A.Url);
-            if(url) { c.attribute("valueURI", url.toString()); }
-        };
-    }
-    elementMaybe("Keywords", "subject", subjectModifier);
-    O.serviceMaybe("hres:datacite:add-subjects-from-taxonomy-below-cursor", resource, item);
-    resource.up();
-
-    resource.element("contributors");
-    personElement(A.EditorsCitation, "contributor", function(c, v) {
-        c.attribute("contributorType", "Editor");
-    });
-    if(!SHOULD_NOT_EXPORT_CONTRIBUTORS) {
-        personElement(A.Contributors, "contributor",
-            // Modify element
-            function(c, v, d, q) {
-                var info = SCHEMA.getQualifierInfo(q);
-                // Non-DataCite compliant qualifier should be exported as type 'Other'
-                var type = info.code.indexOf("datacite") !== -1 ? info.name.toString() : "Other";
-                var typeWords = type.split(" ");
-                type = _.map(typeWords, (word) => word.charAt(0).toUpperCase() + word.slice(1)).join("");
-                c.attribute("contributorType", type);
-            },
-            // Validate element
-            function(v, d, q) {
-                var qual =  q ? SCHEMA.getQualifierInfo(q).code : null;
-                return !!qual;
-            }
-        );
-    }
-    resource.up();
-
-    if("PublicationProcessDates" in A) {
-        if(item.first(A.PublicationProcessDates, Q.Accepted)) {
-            resource.element("dates");
-            resource.element("date").
-                attribute("dateType", "Accepted").
-                text(new XDate(item.first(A.PublicationProcessDates, Q.Accepted).start).toString("yyyy-MM-dd")).
-                up();
-            resource.up();
         }
-    }
+    };
 
-    resource.element("alternateIdentifiers");
-    resource.element("alternateIdentifier").
-        attribute("alternateIdentifierType", "HaploRef").
-        text(item.ref.toString()).
-        up();
-    resource.up();
+    var setSubject = function() {
+        resource.element("subjects");
+        var subjectModifier;
+        if(!O.serviceImplemented("hres:datacite:add-subjects-from-taxonomy-below-cursor")) {
+            subjectModifier = function(c, v) {
+                if(!O.isRef(v)) { return; }
+                var url = v.load().first(A.Url);
+                if(url) { c.attribute("valueURI", url.toString()); }
+            };
+        }
+        elementMaybe("Keywords", "subject", subjectModifier);
+        O.serviceMaybe("hres:datacite:add-subjects-from-taxonomy-below-cursor", resource, item);
+        resource.up();
+    };
 
-    resource.element("rightsList");
-    elementMaybe("License", "rights", function(c, v) {
-        if(!O.isRef(v)) { return; }
-        var uri = v.load().first(A.Url);
-        if(uri) { c.attribute("rightsURI", uri.toString()); }
-    });
-    resource.up();
-
-    resource.element("descriptions");
-    elementMaybe("Abstract", "description", function(c, v) {
-        c.attribute("descriptionType", "Abstract");
-    });
-    elementMaybe("DataCollectionMethod", "description", function(c, v) {
-        c.attribute("descriptionType", "Methods");
-    });
-    elementMaybe("DataProcessing", "description", function(c, v) {
-        c.attribute("descriptionType", "TechnicalInfo");
-    });
-    resource.up();
-
-    // DataCite XML Elements in order of their attribute string representation
-    var boundingBoxElements = ["southBoundLatitude", "westBoundLongitude", "northBoundLatitude", "eastBoundLongitude"];
-    resource.element("geoLocations");
-    if("GeographicLocation" in A) {
-        var locations = item.getAttributeGroupIds(A.GeographicLocation);
-        _.each(locations, locationID => {
-            var location = item.extractSingleAttributeGroup(locationID);
-            var placeName = location.first(A.GeographicCoverage) || "";
-            var boundingBox = location.first(A.BoundingBox);
-
-            resource.element("geoLocation");
-            if(placeName) {
-                resource.element("geoLocationPlace").
-                    text(placeName.toString()).
-                    up();
-            }
-            if(boundingBox) {
-                boundingBox = boundingBox.toString();
-                var coordinates = boundingBox.split(" ");
-                // Every coordinate is required for DataCite schema
-                if(coordinates.length === 4) {
-                    resource.element("geoLocationBox");
-                    _.each(coordinates, (coordinate, i) => {
-                        resource.element(boundingBoxElements[i]).
-                            text(coordinate).
-                            up();
-                    });
-                    resource.up();
+    var setContributor = function() {
+        resource.element("contributors");
+        personElement(A.EditorsCitation, "contributor", function(c, v) {
+            c.attribute("contributorType", "Editor");
+        });
+        if(!SHOULD_NOT_EXPORT_CONTRIBUTORS && "Contributors" in A) {
+            personElement(A.Contributors, "contributor",
+                // Modify element
+                function(c, v, d, q) {
+                    var info = SCHEMA.getQualifierInfo(q);
+                    // Non-DataCite compliant qualifier should be exported as type 'Other'
+                    var type = info.code.indexOf("datacite") !== -1 ? info.name.toString() : "Other";
+                    var typeWords = type.split(" ");
+                    type = _.map(typeWords, (word) => word.charAt(0).toUpperCase() + word.slice(1)).join("");
+                    c.attribute("contributorType", type);
+                },
+                // Validate element
+                function(v, d, q) {
+                    var qual =  q ? SCHEMA.getQualifierInfo(q).code : null;
+                    return !!qual;
                 }
+            );
+        }
+        resource.up();
+    };
+
+    var setDates = function() {
+        if("PublicationProcessDates" in A) {
+            if(item.first(A.PublicationProcessDates, Q.Accepted)) {
+                resource.element("dates");
+                resource.element("date").
+                    attribute("dateType", "Accepted").
+                    text(new XDate(item.first(A.PublicationProcessDates, Q.Accepted).start).toString("yyyy-MM-dd")).
+                    up();
+                resource.up();
             }
+        }
+    };
 
-            resource.up();
-        });
-    }
-
-    if("GeographicCoverage" in A) {
-        //List deprecated geographic coverage single element
-        item.every(A.GeographicCoverage, (v,d,q,x) => {
-            if(x) { return; }
-            resource.element("geoLocation").
-                element("geoLocationPlace").
-                text(v.toString()).
-                up().
-                up();
-        });
-    }
-
-    resource.up();
-
-    let funderCount = item.every(A.Funder).length;
-    let projectCount = item.every(A.Project).length;
-    let useGrantID = (funderCount === 1) && (projectCount === 1);
-
-    resource.element("fundingReferences");
-    item.every(A.Funder, (v,d,q) => {
-        let funderTitle = O.isRef(v) ? v.load().title : v;
-        resource.
-            element("fundingReference").
-            element("funderName").
-            text(funderTitle).
+    var setAlternateIdentifier = function() {
+        resource.element("alternateIdentifiers");
+        resource.element("alternateIdentifier").
+            attribute("alternateIdentifierType", "HaploRef").
+            text(item.ref.toString()).
             up();
-        if(useGrantID) {
-            let project = item.first(A.Project).load();
-            resource.
-                element("awardNumber").
-                text(project.first(A.GrantId)).
-                up();
-            resource.
-                element("awardTitle").
-                text(project.title).
+        var permalink = O.serviceMaybe("hres:repository:common:public-url-for-object", item);
+        if(permalink) {
+            resource.element("alternateIdentifier").
+                attribute("alternateIdentifierType", "Permalink").
+                text(permalink).
                 up();
         }
         resource.up();
-    });
-    resource.up();
+    };
+
+    var setRightsList = function() {
+        resource.element("rightsList");
+        elementMaybe("License", "rights", function(c, v) {
+            if(!O.isRef(v)) { return; }
+            var uri = v.load().first(A.Url);
+            if(uri) { c.attribute("rightsURI", uri.toString()); }
+        });
+        resource.up();
+    };
+
+    var setDescription = function() {
+        resource.element("descriptions");
+        elementMaybe("Abstract", "description", function(c, v) {
+            c.attribute("descriptionType", "Abstract");
+        });
+        elementMaybe("DataCollectionMethod", "description", function(c, v) {
+            c.attribute("descriptionType", "Methods");
+        });
+        elementMaybe("DataProcessing", "description", function(c, v) {
+            c.attribute("descriptionType", "TechnicalInfo");
+        });
+        resource.up();
+    };
+
+    var setGeoLocation = function() {
+        // DataCite XML Elements in order of their attribute string representation
+        var boundingBoxElements = ["southBoundLatitude", "westBoundLongitude", "northBoundLatitude", "eastBoundLongitude"];
+        resource.element("geoLocations");
+        if("GeographicLocation" in A) {
+            var locations = item.getAttributeGroupIds(A.GeographicLocation);
+            _.each(locations, locationID => {
+                var location = item.extractSingleAttributeGroup(locationID);
+                var placeName = location.first(A.GeographicCoverage) || "";
+
+                resource.element("geoLocation");
+                if(placeName) {
+                    resource.element("geoLocationPlace").
+                        text(placeName.toString()).
+                        up();
+                }
+                var coordinates;
+                if("BoundingBox" in A) {
+                    var boundingBox = location.first(A.BoundingBox);
+                    if(boundingBox) {
+                        boundingBox = boundingBox.toString();
+                        coordinates = boundingBox.split(" ");
+                        // Every coordinate is required for DataCite schema
+                        if(coordinates.length === 4) {
+                            resource.element("geoLocationBox");
+                            _.each(coordinates, (coordinate, i) => {
+                                resource.element(boundingBoxElements[i]).
+                                    text(coordinate).
+                                    up();
+                            });
+                            resource.up();
+                        }
+                    }
+                }
+                if("LocationPoint" in A) {
+                    var locationPoint = location.first(A.LocationPoint);
+                    if(locationPoint) {
+                        locationPoint = locationPoint.toString();
+                        coordinates = locationPoint.split(" ");
+                        if(coordinates.length === 2) {
+                            resource.element("geoLocationPoint");
+                            resource.element("pointLatitude").
+                                text(coordinates[0]).
+                                up();
+                            resource.element("pointLongitude").
+                                text(coordinates[1]).
+                                up();
+                            resource.up();
+                        }
+                    }
+                }
+
+                resource.up();
+            });
+        }
+
+        if("GeographicCoverage" in A) {
+            //List deprecated geographic coverage single element
+            item.every(A.GeographicCoverage, (v,d,q,x) => {
+                if(x) { return; }
+                resource.element("geoLocation").
+                    element("geoLocationPlace").
+                    text(v.toString()).
+                    up().
+                    up();
+            });
+        }
+        resource.up();
+    };
+
+    var setFundingReference = function() {
+        let funderCount = item.every(A.Funder).length;
+        let projectCount = item.every(A.Project).length;
+        let useGrantID = (funderCount === 1) && (projectCount === 1);
+
+        resource.element("fundingReferences");
+        item.every(A.Funder, (v,d,q) => {
+            let funderTitle = O.isRef(v) ? v.load().title : v;
+            resource.
+                element("fundingReference").
+                element("funderName").
+                text(funderTitle).
+                up();
+            if(useGrantID) {
+                let project = item.first(A.Project).load();
+                resource.
+                    element("awardNumber").
+                    text(project.first(A.GrantId)).
+                    up();
+                resource.
+                    element("awardTitle").
+                    text(project.title).
+                    up();
+            }
+            resource.up();
+        });
+    };
+
+    var setSize = function() {
+
+    };
+
+    var fieldsMap = {
+        "identifier": setIdentifier,
+        "resourceType": setResourceType,
+        "relatedIdentifier": setRelatedIdentifier,
+        "creator": setCreator,
+        "title": setTitle,
+        "publisher": setPublisher,
+        "publicationYear": setPublicationYear,
+        "subject": setSubject,
+        "contributor": setContributor,
+        "date": setDates,
+        "alternateIdentifier": setAlternateIdentifier,
+        "rightsList": setRightsList,
+        "description": setDescription,
+        "geoLocation": setGeoLocation,
+        "fundingReference": setFundingReference,
+        "size": setSize
+    };
+
+    if(options.selectedFields) {
+        _.each(options.selectedFields, function(field) {
+            fieldsMap[field]();
+        });
+    } else {
+        _.each(fieldsMap, function(fn, field) {
+            fn();
+        });
+        resource.up();
+    }
 
 };
 

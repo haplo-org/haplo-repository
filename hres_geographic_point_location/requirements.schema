@@ -1,0 +1,28 @@
+type hres:type:dataset as Dataset
+    REMOVE attribute hres:attribute:geographic-coverage [sort=14200]
+    attribute hres:attribute:geographic-location [sort=14200]
+
+# ------ Grouped Attributes ---------------------------------------
+
+attribute hres:attribute:geographic-location
+    title Geographic location
+    search-name geographic location
+    data-type attribute-group
+    group-type hres:type:geographic-location-group
+
+type hres:type:geographic-location-group
+    title: Geographic location group
+    search-name location group
+    behaviour hide-from-browse
+    attribute hres:attribute:geographic-coverage
+    attribute hres:attribute:geographic-point-location
+    create-position never
+
+# -------- Attributes ------------------------------
+
+attribute hres:attribute:geographic-point-location
+    title Geographic point location
+    search-name geographic point location
+    qualifier std:qualifier:null
+    data-type plugin
+    data-type-options hres:geographic_point

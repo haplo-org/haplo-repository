@@ -40,6 +40,9 @@ attribute hres:attribute:abstract as Abstract
 attribute hres:attribute:keywords as Keywords
 attribute haplo:attribute:location as Location
 
+OPTIONAL attribute hres:attribute:data-collection-period as DataCollectionPeriod
+OPTIONAL attribute hres:attribute:dataset-version as DatasetVersion
+
 # ---------------------------------------------------------------------------
 
 type std:type:book as Book

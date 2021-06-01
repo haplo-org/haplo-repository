@@ -29,3 +29,6 @@ OPTIONAL attribute hres:attribute:collection-item as CollectionItem
 
 attribute hres:attribute:output as Output
     linked-type hres:type:dataset
+
+OPTIONAL attribute hres:attribute:double-weighting-substitute
+    linked-type hres:type:dataset

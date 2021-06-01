@@ -157,7 +157,7 @@ P.implementService("hres:development:generate-test-data-end", function(action) {
         };
         
         // Create 3108 output records
-        for(var i = 0; i < 3108; i++) {
+        for(var i = 0; i < (generator.debug ? 5 : 3108); i++) {
             createRepositoryItem();
         }
     });

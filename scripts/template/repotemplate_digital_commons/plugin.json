@@ -1,0 +1,16 @@
+{
+  "pluginName": "repotemplate_digital_commons",
+  "pluginAuthor": "Haplo Services",
+  "pluginVersion": 1,
+  "displayName": "TmplUni Digital Commons",
+  "displayDescription": "Digital Commons import customisations for TemplateUniversity",
+  "installSecret": "b561ec4db51cbd06add5d200e298184940c53ea1",
+  "apiVersion": 4,
+  "depend": [
+    "hres_repo_digital_commons"
+  ],
+  "load": [
+      "js/repotemplate_digital_commons.js"
+    ],
+  "respond": ["/do/repotemplate-digital-commons"]
+}

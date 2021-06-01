@@ -81,7 +81,11 @@ P.respond("GET,POST", "/do/hres-repo-web-profiles/edit-outputs-preferred-order",
         updated: !!updated,
         backLink: "/do/repository/outputs/researcher/"+researcher.ref,
         outputs: _.map(orderedOutputs, function(output) {
-            return {ref:output.ref.toString(), title:output.title};
+            return {
+                ref:output.ref.toString(),
+                title:output.title,
+                citation:O.serviceMaybe("hres_bibliographic_reference:for_object", output)
+            };
         })
     }, "edit-outputs-preferred-order");
 });
@@ -125,32 +129,92 @@ P.respond("GET,POST", "/do/hres-repo-web-profiles/migrate-preferred-orders", [
 
 // --------------------------------------------------------------------------
 
-P.implementService("hres_researcher_profile:export:additional_sections",
-    function(researcher, sections) {
-        var outputs = [];
-        if(O.serviceImplemented("hres:repo-publication-parts-person:get-ordered-outputs-for-researcher")) {
-            outputs = O.service("hres:repo-publication-parts-person:get-ordered-outputs-for-researcher", 
-                researcher.ref);
-        } else {
-            outputs = O.query().
+var orderedOutputsForResearcherOrReversePublicationOrder = P.orderedOutputsForResearcherOrReversePublicationOrder = function(researcher) {
+    var outputsOrderRow = P.db.outputsOrder.select().where("researcher","=",researcher.ref)[0];
+    let outputs;
+    if(outputsOrderRow) {
+        outputs = P.orderedOutputsForResearcherYieldingLookup(researcher.ref, JSON.parse(outputsOrderRow.order));
+    } else {
+        let linkedOutputs = O.query().
             link(SCHEMA.getTypesWithAnnotation('hres:annotation:repository-item'), A.Type).
+            anyLabel([Label.AcceptedIntoRepository]).
             or(function(subquery) {
                 subquery.link(researcher.ref, A.Author).
                     link(researcher.ref, A.Editor);
             }).
             sortByDate().
             execute();
-        }
-        sections.push({
-            title: "Publications",
-            deferredRender: P.template("export/outputs").deferredRender({
-                outputs: _.map(outputs, (o) => {
-                    return {
-                        output: o,
-                        citation: O.service("hres_bibliographic_reference:for_object", o)
-                    };
-                })
-            })
+        outputs = _.sortBy(linkedOutputs, (o) => {
+            var date = O.service("hres:repository:earliest_publication_date", o) ||
+                o.first(A.PublicationProcessDates, Q.Deposited) ||
+                o.first(A.Date) ||
+                o.creationDate;
+            if(date.start) { date = date.start; }
+            return -1*date.getTime();
         });
     }
-);
+    return outputs;
+};
+
+P.implementService("hres_repo_web_profiles:ordered_outputs_for_researcher_or_reverse_publication_order",
+    orderedOutputsForResearcherOrReversePublicationOrder);
+
+if(O.featureImplemented("hres:researcher-profile")) {
+
+    P.use("hres:researcher-profile");
+
+    P.researcherProfile.renderedSection({
+        name: "outputs",
+        sort: 99999,
+        title: "Publications",
+        includeInExport: true,
+        editLink: function(profile) {
+            return "/do/hres-repo-web-profiles/edit-outputs-preferred-order/"+profile.researcher.ref;
+        },
+        deferredRender: function(profile) {
+            var outputs = orderedOutputsForResearcherOrReversePublicationOrder(profile.researcher);
+            return P.template("export/outputs").deferredRender({
+                outputs: _.map(outputs, function(o) {
+                    return O.service("hres_bibliographic_reference:for_object", o);
+                })
+            });
+        },
+        deferredRenderForExport: function(profile) {
+            var outputs = orderedOutputsForResearcherOrReversePublicationOrder(profile.researcher);
+            var outputsByType = O.refdictHierarchical(function() { return []; });
+            _.each(outputs, function(o) {
+                var outputsOfThisType = outputsByType.get(o.firstType());
+                outputsOfThisType.push(o);
+                outputsByType.set(o.firstType(), outputsOfThisType);
+            });
+            var outputTypeSections = [];
+            var prioritisedTypes = O.serviceMaybe("hres:repository:ingest_ui:types");
+            if(prioritisedTypes) {
+                var orderedTypes = prioritisedTypes.primaryTypes.concat(prioritisedTypes.secondaryTypes);
+                _.each(orderedTypes, function(typeInfo) {
+                    var opsForType = outputsByType.get(typeInfo.ref);
+                    if(opsForType.length) {
+                        outputTypeSections.push({
+                            heading: typeInfo.name,
+                            outputs: _.map(opsForType, function(o) {
+                                return O.service("hres_bibliographic_reference:for_object", o);
+                            })
+                        });
+                    }
+                });
+            } else {
+                outputsByType.each(function(type, outputs) {
+                    outputTypeSections.push({
+                        heading: type.load().title,
+                        outputs: _.map(outputs, function(o) {
+                            return O.service("hres_bibliographic_reference:for_object", o);
+                        })
+                    });
+                });
+            }
+            return P.template("export/outputs-for-exports").deferredRender({
+                sections: outputTypeSections
+            });
+        }
+    });
+}

@@ -6,6 +6,7 @@
   "displayDescription": "Repository schema and display for Haplo Research Manager",
   "apiVersion": 4,
   "loadPriority": 5600,
+  "privilegesRequired": ["pBackgroundProcessing"],
   "depend": [
       "std_reporting",
       "haplo_activity_navigation",
@@ -24,7 +25,9 @@
       "js/repo_test_data.js",
       "js/repo_permissions.js",
       "js/repo_permissions_public.js",
-      "js/repo_reporting.js"
+      "js/repo_reporting.js",
+      "js/repo_standard_migrations.js",
+      "js/repo_data_import_model.js"
     ],
   "respond": [
       "/do/hres-repository"

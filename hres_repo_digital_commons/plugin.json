@@ -1,0 +1,34 @@
+{
+  "pluginName": "hres_repo_digital_commons",
+  "pluginAuthor": "Haplo Services",
+  "pluginVersion": 1,
+  "displayName": "Haplo Repository Digital Commons",
+  "displayDescription": "Support for Digital Commons within Haplo Repository",
+  "installSecret": "e2ac378292d17f1965449fbe566cbb1424d56b74",
+  "apiVersion": 4,
+  "privilegesRequired": [
+    "pBackgroundProcessing",
+    "pDatabase",
+    "pHTTPClient",
+    "pKeychainRead"
+  ],
+  "depend": [
+      "hres_repo_schema_outputs_recommended",
+      "hres_digital_object_identifier",
+      "hres_journal_citation_value",
+      "hres_location",
+      "hres_repo_data_monitoring",
+      "hres_repo_scopus",
+      "hres_schema_projects"
+    ],
+  "use": [
+      "hres:doi",
+      "hres:scopus"
+    ],
+  "load": [
+      "js/hres_repo_digital_commons.js",
+      "js/digital_commons_import.js",
+      "js/digital_commons_file_import.js"
+    ],
+  "respond": ["/do/hres-repo-digital-commons"]
+}

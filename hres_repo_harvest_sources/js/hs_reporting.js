@@ -25,6 +25,8 @@ P.implementService("std:action_panel:activity:menu:repository", function(display
 var getRowsFromTable = function(source) {
     let dbRows = P.db.sourceObjects.select();
     if(source) { dbRows.where("source", "=", source); }
+    // Hide deleted objects like std_reporting
+    dbRows = _.filter(dbRows, (row) => !row.ref.load().deleted);
     return _.map(dbRows, (row) => {
         let object = row.ref.load();
         let closedWu = O.work.query("hres_repo_harvest_claim:claim_item").
@@ -34,11 +36,13 @@ var getRowsFromTable = function(source) {
         let reportRow = {
             object: object,
             primaryAuthor: object.first(A.Author),
+            objectType: object.firstType(),
             authoritativeVersion: object.first(A.AuthoritativeVersion),
             source: row.source,
             subSource: row.subSource,
             // Source objects can only be edited by the harvest framework
             harvestDate: object.lastModificationDate,
+            harvestDateSort: object.lastModificationDate.getTime(),
             claimed: closedWu ? !closedWu.tags.disclaimed : false,
             disclaimed: closedWu ? !!closedWu.tags.disclaimed : false
         };
@@ -55,8 +59,11 @@ P.globalTemplateFunction("hres_repo_harvest_sources:source_to_name", function(so
 });
 
 var createReportingNavigation = function(selectedSource) {
+    if(!selectedSource) { selectedSource = "all"; }
     let i = P.locale().text("template");
     let sources = P.sourceNames();
+    let multipleSources = _.size(sources) > 1;
+    if(multipleSources) { sources = _.extend({all: "All"}, sources); }
     return {
         tabs: _.map(sources, (name, source) => {
             return {
@@ -65,7 +72,7 @@ var createReportingNavigation = function(selectedSource) {
                 label: i[name]
             };
         }),
-        multipleSources: sources.length > 1
+        multipleSources: multipleSources
     };
 };
 
@@ -77,6 +84,7 @@ P.respond("GET,POST", "/do/hres-repo-harvest-sources/all-harvested-items", [
     {parameter: "source", as: "string", optional: true}
 ], function(E, source) {
     CanManageHarvestedItems.enforce();
+    if(source === "all") { source = undefined; }
     let view = _.extend({
         title: "All harvested items",
         hasClaimed: true,
@@ -89,6 +97,7 @@ P.respond("GET,POST", "/do/hres-repo-harvest-sources/all-unclaimed-items", [
     {parameter: "source", as: "string", optional: true}
 ], function(E, source) {
     CanManageHarvestedItems.enforce();
+    if(source === "all") { source = undefined; }
     let view = _.extend({
         title: "All unclaimed items",
         hasClaimed: false,

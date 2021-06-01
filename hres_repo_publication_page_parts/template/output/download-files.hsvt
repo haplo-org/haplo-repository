@@ -6,30 +6,32 @@ std:web-publisher:template("haplo:publication-common:ui:panel") {
     <div class="card border-0 bg-light">
         <div class="card-body">
             each(files) {
-                if(group) {
+                if(groupTitle) {
                     unless(first) { <hr> }
                     <div class="media">
                         <div class="media-body">
                             <h6 class="media-heading">
-                                group
+                                groupTitle
                             </h6>
                         </div>
                     </div>
                 }
-                ifAll(file url) {
+                if(fileURLs) {
                     <div class="file mb-0">
                         <table class="file-table">
-                            <tr>
-                                <td rowspan="3">std:web-publisher:file:thumbnail(file)</td>
-                                <td>
-                                    <a href=url role="button">
-                                        <i class="fas fa-download mr-2"></i>
-                                        file.filename
-                                    </a>
-                                </td>
-                            </tr>
-                            if(license) { <tr><td>"License: " license</td></tr> }
-                            if(accessLevel) { <tr><td>"File access level: " accessLevel</td></tr> }
+                            each(fileURLs) {
+                                <tr>
+                                    <td>std:web-publisher:file:thumbnail(file)</td>
+                                    <td>
+                                        <a href=url role="button">
+                                            <i class="fas fa-download mr-2"></i>
+                                            file.filename
+                                        </a>
+                                    </td>
+                                </tr>
+                            }
+                            if(license) { <tr><td colspan="3">"License: " license</td></tr> }
+                            if(accessLevel) { <tr><td colspan="3">"File access level: " accessLevel</td></tr> }
                         </table>
                         unless(lastInGroup) { <br> }
                     </div>

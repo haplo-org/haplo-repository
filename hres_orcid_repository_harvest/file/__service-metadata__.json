@@ -1,0 +1,11 @@
+{
+    "hres:repository:harvest-source:orcid": {
+        "statements": [
+            "hres:repository:harvest-source"
+        ],
+        "metadata": {
+            "source": "orcid",
+            "name": "ORCID"
+        }
+    }
+}

@@ -9,10 +9,12 @@
   "depend": [
       "hres_repo_schema_outputs_recommended",
       "hres_repo_publication_common",
-      "hres_repository"
+      "hres_repository",
+      "hres_author_citation_value"
     ],
   "load": [
-      "js/hres_repo_endnote.js"
+      "js/hres_repo_endnote.js",
+      "js/endnote_enw.js"
     ],
   "respond": ["/do/hres-repo-endnote"]
 }

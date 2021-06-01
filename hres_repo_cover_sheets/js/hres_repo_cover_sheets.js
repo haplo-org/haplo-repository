@@ -389,6 +389,9 @@ var interpolate = function(str, output) {
         const fullCitation = O.service("hres_bibliographic_reference:plain_text_for_object", output);
         str = str.replace(/\[FULL_CITATION\]/g, fullCitation || "NO CITATION");
     }
+    if(O.serviceImplemented("hres_repo_cover_sheets:interpolate_additional_tags")) {
+        str = O.service("hres_repo_cover_sheets:interpolate_additional_tags", str, output);
+    }
     return str;
 };
 
@@ -406,9 +409,11 @@ var STANDARD_TAGS = [
 ];
 
 P.hook('hObjectEditor', function(response, object) {
+    let availableTags = _.clone(STANDARD_TAGS);
+    O.serviceMaybe("hres_repo_cover_sheets:add_available_tags", availableTags);
     if(object.isKindOf(T.Publisher)) {
         response.plugins.hres_repo_cover_sheets = {
-            availableTags: STANDARD_TAGS,
+            availableTags: availableTags,
             statementAttrs: [A.AuthorManuscriptStatement, A.PublishersVersionStatement]
         };
         P.template("include_publisher_statement_interpolations").render();

@@ -10,7 +10,9 @@
     "pHTTPClient",
     "pDatabase",
     "pBackgroundProcessing",
-    "pReportHealthEvent"
+    "pReportHealthEvent",
+    "pKeychainRead",
+    "pKeychainReadSecret"
   ],
   "depend": [
       "hres_repository",
@@ -19,7 +21,8 @@
       "hres_repo_harvest_sources",
       "hres_repo_harvest_claim",
       "hres_orcid",
-      "hres_digital_object_identifier"
+      "hres_digital_object_identifier",
+      "hres_funder_registry"
   ],
   "load": [
       "js/hres_repo_jisc_pub_router.js"

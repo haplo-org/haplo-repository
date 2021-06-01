@@ -11,17 +11,44 @@ var Ingest = P.Ingest = P.workflow.
 
 if(P.workflow.workflowFeatureImplemented("hres:ref_compliance")) {
     Ingest.use("hres:ref_compliance");
+} else {
+    // Consistent direct links to transitions
+    Ingest.actionPanelTransitionUI({state:"wait_editor"}, function(M, builder) {
+        if(M.workUnit.isActionableBy(O.currentUser)) {
+            _.each(M.transitions.list, function(t) {
+                builder.link(150, M.transitionUrl(t.name), t.label, t.indicator);
+            });
+            return true;
+        }
+    });
 }
+
+var getActiveAuthorsForWorkflow = P.getActiveAuthorsForWorkflow = function(M) {
+    return _.filter(M.entities.author_refList, function(authorRef) {
+        var authorUser = O.user(authorRef);
+        return authorUser && authorUser.isActive;
+    });
+};
+
+// Overriding the return url
+Ingest.transitionUI({state:"wait_editor"}, function(M, E, ui) {
+    if(ui.requestedTransition !== "return") { return; }
+    var output = M.entities.object;
+    var submitterIsAuthor = O.service("hres:repository:is_author", M.workUnit.createdBy, output);
+    // If the output wasn't submitted by an author and there's multiple authors allow repository staff to set
+    // submitting author (point of contact) for this output.
+    if(!submitterIsAuthor && getActiveAuthorsForWorkflow(M).length > 1) {
+        ui.preventTransition();
+        E.response.redirect("/do/hres-repo-ingest-workflow/choose-submitting-author/" + M.workUnit.id);
+    }
+});
 
 Ingest.use("hres:combined_application_entities");
 Ingest.use("std:entities:add_entities", {
     submitterAuthorOrCreator: function() {
         var submitter = this.M.workUnit.createdBy;
         var creator = this.M.getActionableBy("object:creator");
-        var authors = _.filter(this.author_refList, (authorRef) => {
-            var authorUser = O.user(authorRef);
-            return authorUser && authorUser.isActive;
-        });
+        var authors = getActiveAuthorsForWorkflow(this.M);
         // Submitter only added if they're an author
         if(submitter.ref && this.M.hasRole(submitter, "author")) {
             authors.unshift(submitter.ref);
@@ -37,6 +64,8 @@ Ingest.use("std:notes", {
     canSeePrivateNotes: function(M, user) { return user.isMemberOf(Group.RepositoryEditors); }
 });
 
+Ingest.use("haplo:directToTransitions", { selector:{flags: ["directToTransitions"]} });
+
 Ingest.actionPanelTransitionUI({state:"on_hold"}, function(M, builder) {
     if(O.currentUser.isMemberOf(Group.RepositoryEditors)) {
         builder.link("default", '/do/hres-repo-ingest-workflow/recall/'+M.workUnit.id, "Re-activate workflow", "standard");
@@ -44,13 +73,14 @@ Ingest.actionPanelTransitionUI({state:"on_hold"}, function(M, builder) {
 });
 
 Ingest.actionPanelTransitionUI({state:"returned_author"}, function(M, builder) {
-    if(O.currentUser.isMemberOf(Group.RepositoryEditors) && !M.hasRole(O.currentUser, "submitterAuthorOrCreator")) {
+    // Potential for repository editors to create outputs on behalf of authors so only prevent control for cases where they are an author
+    if(O.currentUser.isMemberOf(Group.RepositoryEditors) && !M.hasRole(O.currentUser, "author")) {
         builder.link("default", "/do/hres-repo-ingest-workflow/resubmit/"+M.workUnit.id, "Recall review", "secondary");
     }
 });
 
 Ingest.filterTransition({state: "returned_author"}, function(M, transition) {
-    if(M.hasRole(O.currentUser, "submitterAuthorOrCreator") && transition === "_recall") { return false; }
+    if(M.hasRole(O.currentUser, "author") && transition === "_recall") { return false; }
 });
 
 Ingest.observeFinish({}, function(M) {
@@ -79,6 +109,16 @@ Ingest.observeFinish({}, function(M) {
     }
 });
 
+Ingest.observeExit({ closed: true }, function(M, transition) {
+    if(transition === "withdraw") {
+        var mItem = M.workUnit.ref.load();
+        // Removing label assigned when item moved into finished state
+        mItem.relabel(O.labelChanges().remove([Label.AcceptedIntoRepository, Label.AcceptedClosedDeposit]));
+        M.workUnit.reopen();
+        M.workUnit.save();
+    }
+});
+
 Ingest.observeEnter({}, function(M, transition, previousState) {
     O.serviceMaybe("hres:repository:ingest_observe_enter_state", M, transition, previousState);
 });
@@ -99,12 +139,14 @@ Ingest.states({
         ]
     },
     "on_hold": {
+        flags: ["directToTransitions"],
         actionableBy: "std:group:workflow-on-hold",
         transitions: [
             ["_recall", "wait_editor"]
         ]
     },
     "returned_author": {
+        flags: ["directToTransitions"],
         actionableBy: "submitterAuthorOrCreator",
         transitions: [
             ["submit", "wait_editor"],
@@ -112,12 +154,20 @@ Ingest.states({
         ]
     },
     "published": {
-        flags: ["__preventSupportMoveBack__"],
-        finish: true
+        flags: ["__preventSupportMoveBack__", "directToTransitions"],
+        finish: true,
+        actionableBy: "hres:group:repository-editors",
+        transitions: [
+            ["withdraw", "wait_editor"]
+        ]
     },
     "published_closed": {
-        flags: ["__preventSupportMoveBack__"],
-        finish: true
+        flags: ["__preventSupportMoveBack__", "directToTransitions"],
+        finish: true,
+        actionableBy: "hres:group:repository-editors",
+        transitions: [
+            ["withdraw", "wait_editor"]
+        ]
     },
     "rejected": {
         flags: ["__preventSupportMoveBack__"],
@@ -148,8 +198,8 @@ P.respond("GET,POST", "/do/hres-repo-ingest-workflow/recall", [
 P.respond("GET,POST", "/do/hres-repo-ingest-workflow/resubmit", [
     {pathElement:0, as:"workUnit", allUsers:true}
 ], function(E, workUnit) {
-    if(!O.currentUser.isMemberOf(Group.RepositoryEditors)) { O.stop("Not permitted."); }
     var M = Ingest.instance(workUnit);
+    if(!O.currentUser.isMemberOf(Group.RepositoryEditors) || M.hasRole(O.currentUser, "author")) { O.stop("Not permitted."); }
     var itemLink = workUnit.ref.load().url();
     if(E.request.method === "POST") {
         M.transition("_recall");

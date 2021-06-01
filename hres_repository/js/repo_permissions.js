@@ -59,9 +59,29 @@ P.implementService("haplo:user_roles_permissions:setup", function(setup) {
     // will only ever be one label for this permission.
     setup.groupPermission(Group.Everyone, "create", Label.RepositoryItem);
     setup.groupPersonalRole(Group.Everyone, "Is: Repository Item Author");
-    setup.roleOversightPermission("Is: Repository Item Author", "read-edit", [Label.RepositoryItem]);
+    setup.roleOversightPermission("Is: Repository Item Author", "read",      [Label.RepositoryItem]);
     setup.roleOversightPermission("Is: Repository Item Author", "read-edit", [T.ExternalEvent]);
     setup.groupPermission(Group.ITSupport, "read", Label.ActivityRepository);
+});
+
+P.implementService("hres:repository:user-can-edit-ingested-output", function(response, user, object, M, returnedStates) {
+    var userIsObjectCreatorOrAuthor = (object.creationUid === user.id) || P.personIsAuthorOfObject(user, object);
+    if(M) {
+        var currentStateDefn = M.getStateDefinition(M.state);
+        var userIsActionableBy = M.hasRole(user, currentStateDefn.actionableBy);
+        var workflowIsOpen = M.selected({ closed: false });
+        var workflowInReturnedState = _.contains(returnedStates, M.state);
+        // Returned states are those in which the authors are intended to take some action.
+        // Largely the correct people will be covered by userIsActionableBy but this ensures that the
+        // object creator & authors can also edit in these states
+        if(workflowIsOpen && (userIsActionableBy || (workflowInReturnedState && userIsObjectCreatorOrAuthor))) {
+            response.allow = true;
+        }
+    } else {
+        if(userIsObjectCreatorOrAuthor) {
+            response.allow = true;
+        }
+    }
 });
 
 P.hook("hUserLabelStatements", function(response, user) {

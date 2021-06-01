@@ -8,7 +8,8 @@
   "privilegesRequired": ["pDatabase", "pHTTPClient", "pKeychainRead", "pKeychainReadSecret"],
   "use": [
       "haplo:respond-after-http-request",
-      "std:reporting"
+      "std:reporting",
+      "std:workflow"
     ],
   "depend": [
       "std_reporting",
@@ -23,7 +24,8 @@
       "js/hres_repo_embargoes.js",
       "js/em_forms.js",
       "js/em_reporting.js",
-      "js/em_web_publisher.js"
+      "js/em_web_publisher.js",
+      "js/em_workflow.js"
     ],
   "respond": [
       "/api/hres-repo-embargoes",

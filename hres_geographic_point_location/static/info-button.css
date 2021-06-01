@@ -1,0 +1,37 @@
+/* Haplo Research Manager                            https://haplo.org
+ * (c) Haplo Services Ltd 2006 - 2020            https://www.haplo.com
+ * This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.         */
+
+.repository_guidance_show.geo-point p {
+    font-family: Ubuntu;
+    color: #aaa;
+    line-height: 1.4em;
+    border-style: solid;
+    border-radius: 1em;
+    border-width: 1px;
+    border-color: #aaa;
+    text-align: center;
+    width: 1.6em;
+    margin: 0
+}
+
+.repository_guidance_show.geo-point p:hover {
+    border-color:  #666;
+    color:  #666;
+}
+
+.repository_guidance_note.geo-point {
+    text-align: left;
+    margin-bottom: 12px;
+    color: #888;
+    line-height:  1.4em;
+    display: none
+}
+
+.repository_guidance_show.geo-point {
+    position: absolute;
+    top: -10px;
+    right: 0
+}

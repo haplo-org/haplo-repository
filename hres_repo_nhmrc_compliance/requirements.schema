@@ -1,0 +1,27 @@
+
+# --------- Groups ---------------------------------
+
+group hres:group:repository-editors as RepositoryEditors
+
+# -------- Labels ----------------------------------
+
+label hres:label:repository-item as RepositoryItem
+
+# -------- Types -----------------------------------
+
+type hres:type:journal-article as JournalArticle
+type hres:type:conference-item as ConferenceItem
+type hres:type:research-institute:faculty as Faculty
+
+OPTIONAL type hres:type:patent as Patent
+OPTIONAL type hres:type:dataset as Dataset
+
+# -------- Attributes ------------------------------
+
+attribute hres:attribute:publication-process-dates as PublicationProcessDates
+attribute hres:attribute:publication-dates as PublicationDates
+attribute std:attribute:file as File
+
+# -------- Qualifiers-------------------------------
+
+qualifier hres:qualifier:deposited as Deposited

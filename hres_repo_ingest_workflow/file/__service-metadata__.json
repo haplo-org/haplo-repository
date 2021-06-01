@@ -1,0 +1,12 @@
+{
+    "haplo:data-import-framework:setup-model:hres:repo:ingest-workflow": {
+        "statements": [
+            "conforms-to haplo:data-import-framework:setup-model"
+        ],
+        "metadata": {
+            "name": "hres:repo:ingest-workflow",
+            "title": "Repository ingest workflow model",
+            "description": "Import an ingest workflow in progress"
+        }
+    }
+}

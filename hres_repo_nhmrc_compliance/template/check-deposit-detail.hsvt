@@ -1,0 +1,26 @@
+
+if(deadline) { <h2> i("Open access deadline - {}") { std:date(deadline) } </h2> }
+
+<p><i> i("NHMRC requires that any peer-reviewed publication arising from NHMRC supported research must 
+  be made openly accessible in an institutional repository or other acceptable location (e.g. publisher 
+  website, subject repositories) within a 12-month period from the date of publication. This policy applies 
+  to all publications from 1 July 2012 except for peer‐reviewed conference papers where it applies from 
+  15 January 2018.") </i></p>
+
+if(embargoes.length) {
+  <h2> i("Embargoes") </h2>
+  <table>
+    <tr><th> i("Embargo applied to") </th> <th> i("Embargo active") </th> </tr>
+    each(embargoes) { <tr><td> i("{}") { attribute } </td> <td> displayDates </td> </tr> }
+  </table>
+}
+
+if(fileDeposit) {
+  <p><b> i("First file deposited: ") </b> std:date(fileDeposit) </p>
+  <p><b> i("Version deposited: ") </b> i("{}") { version } </p>
+  <br>
+} else {
+    <p><b> i("No deposited file found.") </b></p>
+}
+
+std:object(displayObject)

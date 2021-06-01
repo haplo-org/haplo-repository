@@ -1,0 +1,65 @@
+
+pageTitle(i("Digital Commons Administration"))
+
+<h2> i("File import") </h2>
+<p>
+    <a href="/do/hres-repo-digital-commons/fetch-files" role="button"> i("Fetch files") </a>
+</p>
+
+if(recentFilesLogSummary) {
+    <h2> i("Recent file fetch logs") </h2>
+    <table>
+        <tr>
+            <th> i("Log id") </th>
+            <th> i("Start") </th>
+            <th> i("End") </th>
+            <th> i("Status") </th>
+        </tr>
+        each(recentFilesLogSummary) {
+            <tr>
+                <td> id </td>
+                <td> start </td>
+                <td> end </td>
+                <td> status </td>
+            </tr>
+        }
+    </table>
+}
+
+<hr>
+
+<h2> i("Metadata import") </h2>
+
+<p><a href="/do/hres-repo-digital-commons/import-metadata"> i("Start new import") </a></p>
+
+if(recentLogSummary) {
+    <h2> i("Recent logs") </h2>
+    <table>
+        <tr>
+            <th> i("Log id") </th>
+            <th> i("Log") </th>
+            <th> i("Filename") </th>
+            <th> i("Started") </th>
+            <th> i("Status") </th>
+        </tr>
+        each(recentLogSummary) {
+            <tr>
+                <td> id </td>
+                <td><a href=["/do/hres-repo-digital-commons/log/" id]> i("View") </a></td>
+                <td> filename </td>
+                <td> date </td>
+                <td> status </td>
+            </tr>
+        }
+    </table>
+}
+
+<hr>
+
+<h1> "Data monitoring" </h1>
+
+<p>
+  <a href="/do/hres-repo-data-monitoring/outputs-missing-authors">
+    i("Outputs missing authors")
+  </a>
+</p>

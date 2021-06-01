@@ -1,0 +1,14 @@
+{
+  "pluginName": "hres_geographic_point_location",
+  "pluginAuthor": "Haplo Services",
+  "pluginVersion": 1,
+  "displayName": "Geographic Point Location Value",
+  "displayDescription": "Implementation of point location value data type",
+  "apiVersion": 4,
+  "depend": [
+    "hres_repo_schema_research_data"
+  ],
+  "load": [
+      "js/hres_geographic_point_location.js"
+    ]
+}

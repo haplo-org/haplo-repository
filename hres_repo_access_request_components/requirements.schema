@@ -7,4 +7,5 @@ OPTIONAL type hres:type:preparation-action as Action
 OPTIONAL attribute hres:attribute:prepared-file as PreparedFile
  
 attribute dc:attribute:author as Author
+attribute std:attribute:project as Project
 OPTIONAL attribute hres:attribute:editor as Editor

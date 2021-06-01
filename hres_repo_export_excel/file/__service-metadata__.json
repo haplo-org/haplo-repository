@@ -1,0 +1,10 @@
+{
+    "hres:repository:excel:export-object-as-xlsx": {
+        "statements": [
+            "hres:repository:exportable-metadata-format"
+        ],
+        "metadata": {
+            "hres:repository:export-format": "Excel"
+        }
+    }
+}

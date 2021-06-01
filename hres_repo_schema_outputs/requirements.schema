@@ -19,6 +19,7 @@ schema-template hres:template-type:repository-item
 
 # Used for traditional outputs - Journal articles, Books, etc.
 schema-template hres:template-type:repository:output
+    annotation hres:annotation:repository:text-based-research
     annotation hres:annotation:repository:output
     search-name: output
     attribute dc:attribute:publisher [sort=10800]
@@ -95,8 +96,6 @@ type hres:type:conference-item as ConferenceItem
     attribute hres:attribute:accepted-author-manuscript [sort=12500]
     attribute hres:attribute:published-file [sort=12510]
     attribute hres:attribute:journal-citation [sort=12600]
-    attribute hres:attribute:book-title [sort=12610]
-    attribute hres:attribute:book-editor [sort=12620]
     attribute std:attribute:isbn [sort=12630]
     attribute hres:attribute:conference-proceedings-url [sort=12650]
     render-icon: E20D,1,f E430,1,f
@@ -329,6 +328,37 @@ attribute hres:attribute:original-research-institute as OriginalResearchInstitut
     linked-type hres:type:research-institute
 
 attribute hres:attribute:output as Output
+    linked-type hres:type:artefact
+    linked-type hres:type:book-chapter
+    linked-type hres:type:composition
+    linked-type hres:type:conference-item
+    linked-type hres:type:design
+    linked-type hres:type:devices-and-products
+    linked-type hres:type:digital-or-visual-media
+    linked-type hres:type:exhibition
+    linked-type hres:type:journal-article
+    linked-type hres:type:online-educational-resource
+    linked-type hres:type:other
+    linked-type hres:type:patent
+    linked-type hres:type:performance
+    linked-type hres:type:report
+    linked-type hres:type:software
+    linked-type hres:type:thesis
+    linked-type hres:type:website
+
+attribute hres:attribute:place-of-publication
+    title: Place of publication
+    search-name: place-of-publication
+    qualifier std:qualifier:null
+    data-type text
+
+attribute hres:attribute:pages
+    title: Pages
+    search-name: pages
+    qualifier std:qualifier:null
+    data-type text
+
+OPTIONAL attribute hres:attribute:double-weighting-substitute
     linked-type hres:type:artefact
     linked-type hres:type:book-chapter
     linked-type hres:type:composition

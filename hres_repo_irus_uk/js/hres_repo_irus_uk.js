@@ -5,7 +5,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.         */
 
 
-// var LIVE_ENDPOINT = "https://irus.jisc.ac.uk/counter/";
+var LIVE_ENDPOINT = O.application.config["hres_repo_irus_uk:counter_endpoint"] || "https://irus.jisc.ac.uk/counter/";
 // var TEST_ENDPOINT = "https://irus.jisc.ac.uk/counter/test/";
 
 // Constants - matching KIND_ENUM saved in haplo_usage_tracking
@@ -29,7 +29,7 @@ P.implementService("haplo_usage_tracking:notify:event", function(event) {
     }
 
     if(O.application.hostname === O.application.config["hres_repo_irus_uk:enabled_application"]) {
-        let client = O.httpClient("https://irus.jisc.ac.uk/counter/").
+        let client = O.httpClient(LIVE_ENDPOINT).
             queryParameter("url_ver", "Z39.88-2004").
             queryParameter("url_tim", new XDate(event.datetime).toISOString()).
             queryParameter("req_id", event.remoteAddress).

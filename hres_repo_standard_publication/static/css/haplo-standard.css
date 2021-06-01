@@ -104,6 +104,10 @@ cite {
     font-style: normal;
 }
 
+cite span.citation-doi {
+    word-break: break-all;
+}
+
 .table th,
 .table td {
     border: none;

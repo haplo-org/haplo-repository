@@ -1,0 +1,12 @@
+
+pageTitle(i("Edit featured outputs"))
+
+if(updated) {
+    std:ui:notice(i("Your preferences have been saved."))
+}
+if(edited) {
+    std:ui:notice(i("There are unsaved changes in your preferences"))
+}
+<form method="POST"> std:form:token()
+    render(form)
+</form>

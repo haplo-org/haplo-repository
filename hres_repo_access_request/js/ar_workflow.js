@@ -39,7 +39,10 @@ if(O.featureImplemented("std:web-publisher")) {
         form: REQUEST_ACCESS,
         canStart: function(object) {
             // Permissions enforced by calling service with publication service user - could be neater?
-            return O.serviceMaybe("hres:repository:access_requests:has_restricted_files_for_user", O.currentUser, object);
+            let hasRestrictedFilesForUser = O.serviceMaybe("hres:repository:access_requests:has_restricted_files_for_user",
+                O.currentUser, object
+            );
+            return (object.isKindOfTypeAnnotated("hres:annotation:repository:research-data") && hasRestrictedFilesForUser);
         }
     });
 }

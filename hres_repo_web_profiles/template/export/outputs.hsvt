@@ -1,9 +1,11 @@
 
-<div style="padding-right: 100px;">
-    each(outputs) {
-        <b>output.title</b><br>
-        if(citation) { render(citation) }
+ifContent() {
+    <div style="padding-right: 100px;">
         <br>
-        <br>
-    }
-</div>
+        each(outputs) {
+            markContent() { render(.) }
+            <br>
+            <br>
+        }
+    </div>
+}

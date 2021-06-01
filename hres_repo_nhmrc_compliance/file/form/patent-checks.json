@@ -1,0 +1,26 @@
+{
+    "specificationVersion": 0,
+    "formId": "patent-checks",
+    "formTitle": "Patent checks",
+    "renderDocumentOmitEmpty": true,
+    "elements": [
+        {
+            "type": "boolean",
+            "style": "checkbox",
+            "path": "publishedInAOJPWithin18Months",
+            "label": "I confirm the details of this patent's application were published in the Australian Official Journal of Patents within 18 months of the application's earliest priority date."
+        },
+        {
+            "type": "boolean",
+            "style": "checkbox",
+            "path": "administeringInstitutionOnSourceIP",
+            "label": "I confirm that that the administering institution is listed as a 'Research Organisation' with Source IP."
+        },
+        {
+            "type": "boolean",
+            "style": "checkbox",
+            "path": "grantIDOnSourceIP",
+            "label": "I confirm that I have referenced the NHMRC Grant ID in the description for this patent on Source IP."
+        }
+    ]
+}

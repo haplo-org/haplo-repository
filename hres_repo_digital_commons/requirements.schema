@@ -1,0 +1,56 @@
+
+feature std:configuration-data
+    property: {"hres_repo_digital_commons:legacy_system_hostname":"(Set to hostname of legacy Digital Commons repository)"}
+    property: {"hres_repo_digital_commons:file_server_hostname":"(Set to hostname of server containing dump of all files)"}
+
+label hres:label:accepted-into-repository as AcceptedIntoRepository
+
+
+type std:type:book as Book
+type std:type:journal as Journal
+type std:type:organisation as Organisation
+type std:type:person as Person
+type hres:type:book-chapter as BookChapter
+type hres:type:conference-item as ConferenceItem
+type hres:type:conference-item:conference-poster as ConferencePoster
+type hres:type:location:country as Country
+type hres:type:dataset as Dataset
+type hres:type:external-event as ExternalEvent
+type hres:type:journal-article as JournalArticle
+type hres:type:organisation:publisher as Publisher
+type hres:type:report as Report
+type hres:type:thesis as Thesis
+
+
+attribute dc:attribute:author as Author
+attribute dc:attribute:date as Date
+attribute dc:attribute:publisher as Publisher
+attribute std:attribute:event as Event
+attribute std:attribute:file as File
+attribute std:attribute:isbn as ISBN
+attribute std:attribute:notes as Notes
+attribute std:attribute:url as URL
+attribute hres:attribute:abstract as Abstract
+attribute hres:attribute:book-title as BookTitle
+attribute hres:attribute:editor as Editor
+attribute hres:attribute:location as Location
+attribute hres:attribute:digital-object-identifier-doi as DOI
+attribute hres:attribute:grant-id as GrantId
+attribute hres:attribute:issn as ISSN
+attribute hres:attribute:journal as Journal
+attribute hres:attribute:journal-citation as JournalCitation
+attribute hres:attribute:license as License
+attribute hres:attribute:pages as Pages
+attribute hres:attribute:peer-review as PeerReview
+attribute hres:attribute:place-of-publication as PlaceOfPublication
+attribute hres:attribute:published-file as PublishedFile
+attribute hres:attribute:qualification-name as QualificationName
+attribute hres:attribute:scopus-eid as ScopusEID
+attribute hres:attribute:series as Series
+attribute hres:attribute:supplemental-file as SupplementalFile
+
+attribute hres:attribute:grant-notes as GrantNotes
+    title: Grant Notes
+    search-name grant notes
+    qualifier std:qualifier:null
+    data-type text-paragraph

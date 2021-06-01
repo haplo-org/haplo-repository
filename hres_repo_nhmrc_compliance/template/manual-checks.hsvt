@@ -1,0 +1,6 @@
+pageTitle(i("Edit manual checks for: {}") { std:object:title(output) })
+backLink(std:object:url(output))
+
+<form method="POST"> std:form:token()
+  render(deferred)
+</form>

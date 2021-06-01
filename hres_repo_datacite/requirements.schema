@@ -4,8 +4,6 @@ attribute dc:attribute:publisher as Publisher
 attribute dc:attribute:author as Author
 
 attribute hres:attribute:abstract as Abstract
-attribute hres:attribute:data-collection-method as DataCollectionMethod
-attribute hres:attribute:data-processing as DataProcessing
 attribute hres:attribute:authors-citation as AuthorsCitation
 attribute hres:attribute:digital-object-identifier-doi as DOI
 attribute hres:attribute:editor as Editor
@@ -15,10 +13,13 @@ attribute hres:attribute:research-institute as ResearchInstitute
 attribute hres:attribute:grant-id as GrantId
 attribute std:attribute:project as Project
 attribute hres:attribute:funder as Funder
+OPTIONAL attribute hres:attribute:data-processing as DataProcessing
+OPTIONAL attribute hres:attribute:data-collection-method as DataCollectionMethod
 OPTIONAL attribute hres:attribute:related-output as RelatedOutput
 
 OPTIONAL attribute hres:attribute:geographic-location as GeographicLocation
 OPTIONAL attribute hres:attribute:geographic-bounding-box as BoundingBox
+OPTIONAL attribute hres:attribute:geographic-point-location as LocationPoint
 OPTIONAL attribute hres:attribute:geographic-coverage as GeographicCoverage
 OPTIONAL attribute hres:attribute:dataset-file as DatasetFile
 OPTIONAL attribute hres:attribute:data-type as DataType
@@ -36,7 +37,7 @@ schema-template hres:template-type:repository-item
 
 OPTIONAL attribute hres:attribute:grid-id as GridID
 
-attribute hres:attribute:contributors as Contributors
+OPTIONAL attribute hres:attribute:contributors as Contributors
     title Contributors
     search-name contributors
     qualifier hres:datacite:qualifier:contact-person

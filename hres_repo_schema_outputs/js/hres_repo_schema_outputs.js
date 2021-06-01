@@ -4,6 +4,8 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.         */
 
+var DISABLE_COMPUTE_RESEARCH_INSTITUTES = O.application.config["hres_repo_schema_outputs:disable_compute_output_research_institute"];
+var DISABLE_ORIGINAL_RESEARCH_INSTITUTE_COMPUTATION = O.application.config["hres_repo_schema_outputs:disable_original_research_institute_computation"];
 
 P.implementService("haplo:descriptive_object_labelling:setup", function(type) {
     SCHEMA.getTypesWithAnnotation('hres:annotation:repository:output').forEach(function(outputType) {
@@ -89,9 +91,9 @@ P.implementService("hres:repository:add-attributes-from-creators", function(obje
 });
 
 P.hook('hComputeAttributes', function(response, object) {
-    if(object.isKindOfTypeAnnotated("hres:annotation:repository-item")) {
+    if(object.isKindOfTypeAnnotated("hres:annotation:repository-item") && !DISABLE_COMPUTE_RESEARCH_INSTITUTES) {
         addAttrFromPeople(object, A.ResearchInstitute);
-        if(!object.first(A.OriginalResearchInstitute)) {
+        if(!object.first(A.OriginalResearchInstitute) && !DISABLE_ORIGINAL_RESEARCH_INSTITUTE_COMPUTATION) {
             addAttrFromPeople(object, A.ResearchInstitute, A.OriginalResearchInstitute);
         }
     }

@@ -25,6 +25,18 @@ h3. Arguments:
 The restrictions array is usually set by the calling plugin then the service is called in a loop through each of the possible \
 groupDescs, building the restricitons array with each iteration.
 */
+
+/*HaploDoc
+node: /hres_repo_embargoes/publication
+title: Publication
+sort: 2
+--
+
+h2(service). "hres_repo_embargoes:get_restriction_panel_template"
+
+Service to allow the template used to display the embargo render for file groups to be altered without needing access to a publication.
+
+*/
 P.implementService("hres_repo_publication_common:collect_renders_for_file_groups", function(object, groupDesc, restrictions) {
     let q = P.getEmbargoData(object);
     if(q) {
@@ -36,9 +48,11 @@ P.implementService("hres_repo_publication_common:collect_renders_for_file_groups
             return embargo.isActive();
         });
         if(activeEmbargoes.length) {
+            const restrictionPanelTemplate = O.serviceMaybe("hres_repo_embargoes:get_restriction_panel_template") ||
+                P.template("web-publisher/restriction-panel");
             restrictions.push({
                 sort: 10,
-                deferredRender: P.template("web-publisher/restriction-panel").deferredRender({
+                deferredRender: restrictionPanelTemplate.deferredRender({
                     embargoes: _.map(activeEmbargoes, (embargo) => {
                         // Find the number of files affected by this embargo in a non-crappy and terrible way
                         let number = 0;

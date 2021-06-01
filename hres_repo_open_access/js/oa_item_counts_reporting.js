@@ -19,6 +19,7 @@ var addOAFactsToCollection = function(collection) {
     collection.
         fact("oaGoldOutputs",       "json",      "Gold").
         fact("oaGreenOutputs",      "json",      "Green").
+        fact("oaOpenAccessOutputs", "json",      "Any OA").
         fact("oaNotOAOutputs",      "json",      "Not OA").
         fact("oaTotalEligibleOutputs", "json",   "Total OA Eligible");
 };
@@ -33,6 +34,7 @@ var getOAFactsForObject = function(object, row, collectRelevantRepositoryItems) 
     var oaGoldOutputs = {};
     var oaGreenOutputs = {};
     var oaNotOAOutputs = {};
+    var oaOpenAccessOutputs = {};
     var oaTotalEligibleOutputs = {};
     _.each(O.deduplicateArrayOfRefs(relevant), function(ref) {
         var item = ref.load();
@@ -40,19 +42,23 @@ var getOAFactsForObject = function(object, row, collectRelevantRepositoryItems) 
             var year = new XDate(item.first(A.Date).start).getFullYear();
             oaTotalEligibleOutputs[year] = (oaTotalEligibleOutputs[year] || 0)+1;
             if(item.first(A.OpenAccess)) {
-                var behaviour = item.first(A.OpenAccess).behaviour;
-                if(behaviour === "hres:list:open-access:gold") {
+                if(O.service("hres:repository:open_access:is_gold_oa", item)) {
                     oaGoldOutputs[year] = (oaGoldOutputs[year] || 0)+1;
+                    oaOpenAccessOutputs[year] = (oaOpenAccessOutputs[year] || 0)+1;
                 } else if(O.service("hres:repository:open_access:is_green_oa", item)) {
                     oaGreenOutputs[year] = (oaGreenOutputs[year] || 0)+1;
+                    oaOpenAccessOutputs[year] = (oaOpenAccessOutputs[year] || 0)+1;
                 } else if(O.service("hres:repository:open_access:is_not_oa", item)) {
                     oaNotOAOutputs[year] = (oaNotOAOutputs[year] || 0)+1;
+                } else if(O.serviceMaybe("hres:repository:open_access:is_any_oa", item)) {
+                    oaOpenAccessOutputs[year] = (oaOpenAccessOutputs[year] || 0)+1;
                 }
             }
         }
     });
     row.oaGoldOutputs = oaGoldOutputs;
     row.oaGreenOutputs = oaGreenOutputs;
+    row.oaOpenAccessOutputs = oaOpenAccessOutputs;
     row.oaNotOAOutputs = oaNotOAOutputs;
     row.oaTotalEligibleOutputs = oaTotalEligibleOutputs;
 };

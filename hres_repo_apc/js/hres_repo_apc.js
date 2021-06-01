@@ -120,9 +120,8 @@ P.respond("GET", "/do/hres-repo-apc/view_apc_form",[
 });
 
 P.implementService("std:action_panel:category:hres:repository_item", function(display, builder) {
-    if(canViewAPCForm(display.object)&&
-        display.object.first(A.OpenAccess) &&
-        display.object.first(A.OpenAccess).behaviour === "hres:list:open-access:gold") {
+    var isGoldOA = O.service("hres:repository:open_access:is_gold_oa", display.object);
+    if(canViewAPCForm(display.object) && isGoldOA) {
         var highlight;
         if(canEditAPCForm(display.object) &&
             !P.apcFormStore.instance(display.object).currentDocumentIsComplete) {
@@ -134,11 +133,11 @@ P.implementService("std:action_panel:category:hres:repository_item", function(di
 
 
 P.hook('hPostObjectEdit', function(response, object, previous) {
+    var isGoldOA = O.service("hres:repository:open_access:is_gold_oa", object);
     if(!previous && 
         O.serviceMaybe("hres:repository:is_repository_item", object) && 
         canEditAPCForm(object) &&
-        object.first(A.OpenAccess) &&
-        object.first(A.OpenAccess).behaviour === "hres:list:open-access:gold") {
+        isGoldOA) {
         response.redirectPath = "/do/hres-repo-apc/edit_apc_form/"+object.ref;
     }
 });

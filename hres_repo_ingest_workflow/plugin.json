@@ -16,7 +16,8 @@
       "std_reporting",
       "std_workflow",
       "haplo_activity_guidance_notes",
-      "hres_repository"
+      "hres_repository",
+      "haplo_workflow_direct_to_transitions"
     ],
   "load": [
       "js/hres_repo_ingest_workflow.js",

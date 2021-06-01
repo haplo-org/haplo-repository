@@ -1,0 +1,16 @@
+{
+    "specificationVersion": 0,
+    "formId": "featured-outputs",
+    "formTitle": "Featured outputs",
+    "class": "oforms-no-autofocus",
+    "elements": [
+
+        {
+            "type": "choice",
+            "path": "featuredOutputs",
+            "label": "Select featured outputs here:",
+            "style": "multiple",
+            "choices": "outputs"
+        }
+    ]
+}

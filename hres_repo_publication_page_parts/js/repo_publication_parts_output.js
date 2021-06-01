@@ -173,40 +173,52 @@ P.webPublication.pagePart({
     deferredRender: function(E, context, options) {
         if(context.object) {
             var restricted = context.object.restrictedCopy(O.currentUser);
-            var lastGroup = {};
-            var nextFile = {};
-            var files = [];
-            restricted.every(A.File, function(v,d,q,x) {
-                if(lastGroup.groupId !== x.groupId) {
-                    var isNewGroup = lastGroup.desc !== x.desc;
-                    if(!_.isEmpty(nextFile)) {
-                        if(isNewGroup) { nextFile.lastInGroup = true; }
-                        files.push(nextFile);
-                    }
-                    nextFile = {
-                        group: isNewGroup ? SCHEMA.getAttributeInfo(x.desc).name : undefined
-                    };
-                    lastGroup = x;
+            var groups = {};
+            var seenGroupIds = {};
+            var getAttributeValueMaybe = function(attrName, object) {
+                if(attrName in A) {
+                    var value = object.first(A[attrName]);
+                    return O.isRef(value) ? value.loadObjectTitleMaybe() : value;
                 }
-                var group = restricted.extractSingleAttributeGroup(x.groupId);
-                group.every(function(v,d,q) {
-                    if(d === A.File) {
-                        nextFile.file = v;
-                        nextFile.url = context.publication.urlForFileDownload(v);
-                    }
-                    if("License" in A && d === A.License) {
-                        nextFile.license = v.load().title;
-                    }
-                    if("FileAccessLevel" in A && d === A.FileAccessLevel) {
-                        nextFile.accessLevel = v.load().title;
-                    }
-                });
+            };
+            restricted.every(A.File, function(v,d,q,x) {
+                if(!x) {
+                    if(!(d in groups)) { groups[d] = []; }
+                    groups[d].push({
+                        fileURLs: [{
+                            file: v,
+                            url: context.publication.urlForFileDownload(v)
+                        }]
+                    });
+                // Each group can have multiple files. This adds all files from a group at once.
+                // Checking groupId to prevent duplicates
+                } else if(!(x.groupId in seenGroupIds)) {
+                    if(!(x.desc in groups)) { groups[x.desc] = []; }
+
+                    var groupObj = restricted.extractSingleAttributeGroup(x.groupId);
+                    groups[x.desc].push({
+                        license: getAttributeValueMaybe("License", groupObj),
+                        accessLevel: getAttributeValueMaybe("FileAccessLevel", groupObj),
+                        fileURLs: _.map(groupObj.every(A.File), (file) => {
+                            return { file: file, url: context.publication.urlForFileDownload(file) };
+                        })
+                    });
+                    seenGroupIds[x.groupId] = true;
+                }
             });
-            if(!_.isEmpty(nextFile)) {
-                files.push(nextFile);
-            }
-            if(_.isEmpty(files)) { return; }
-            files[0].first = true;
+            if(_.isEmpty(groups)) { return; }
+
+            var files = [];
+            var typeInfo = SCHEMA.getTypeInfo(restricted.firstType());
+            // Using typeInfo.attributes to ensure consistent display order
+            _.each(typeInfo.attributes, (attr) => {
+                if(attr in groups) {
+                    var groupFiles = groups[attr];
+                    // Only show title on first group of files for a given desc
+                    groupFiles[0].groupTitle = SCHEMA.getAttributeInfo(attr).name;
+                    files = files.concat(groupFiles);
+                }
+            });
             return context.
                 publication.
                 getReplaceableTemplate("hres:repo-publication-parts:output:download-files").

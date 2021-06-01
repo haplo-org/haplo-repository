@@ -735,10 +735,12 @@ var setProjects = function(cursor, intermediate, attribute) {
 
 var setDOI = function(cursor, intermediate, attribute) {
     try {
-        // it's a free text field in EPrints, and users often add the prefix themselves
+        // it's a free text field in EPrints, and users often add the prefix or full url themselves
         let doi = cursor.getText();
         doi = doi.replace("DOI:", "");
         doi = doi.replace("doi:", "");
+        // Catches everything from doi.org/ to https://dx.doi.org/
+        doi = doi.replace(/(https?:\/\/)?(www\.)?(dx\.)?doi\.org\//gi, "");
         doi = doi.trim();
         attribute.value = P.DOI.create(doi);
         intermediate.attributes.push(attribute);

@@ -1,0 +1,17 @@
+{
+  "pluginName": "repotemplate_eprints",
+  "pluginAuthor": "Haplo Services",
+  "pluginVersion": 1,
+  "displayName": "TmplUni ePrints",
+  "displayDescription": "ePrints import customisations for TemplateUniversity",
+  "installSecret": "7cf5437d27285818d3f6b710c66c2d4dd7d637e8",
+  "apiVersion": 4,
+  "depend": [
+      "hres_repo_eprints",
+      "hres_repo_oa_green_inferred"
+  ],
+  "load": [
+      "js/repotemplate_eprints.js"
+    ],
+  "respond": ["/do/repotemplate-eprints"]
+}

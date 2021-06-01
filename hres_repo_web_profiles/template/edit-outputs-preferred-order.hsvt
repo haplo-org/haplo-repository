@@ -7,7 +7,7 @@ if(updated) {
 }
 
 <p>"Please drag your outputs into the order you'd like them displayed on your web profile, then click 'Save changes'."</p>
-<p>"Any new outputs will appear at the bottom of this list."</p>
+<p>"The default order is reverse publication date order, any new outputs will appear at the top of the list."</p>
 
 <form method="POST">
   std:form:token()
@@ -16,7 +16,7 @@ if(updated) {
 
   <div id="cv-outputs-list">
   each(outputs) {
-    <div class="cv-outputs-item" data-ref=ref>title</div>
+    <div class="cv-outputs-item" data-ref=ref> if(citation) { render(citation) } else { title } </div>
   }
   </div>
 </form>

@@ -1,0 +1,16 @@
+{
+  "pluginName": "repotemplate_application",
+  "pluginAuthor": "Haplo Services",
+  "pluginVersion": 1,
+  "displayName": "TmplUni Application",
+  "displayDescription": "Application plugin for TemplateUniversity",
+  "installSecret": "db550cdd9a5302b3ca3b78e6def27ed36f213fa8",
+  "apiVersion": 4,
+  "depend": [
+      "repotemplate_repository"
+  ],
+  "load": [
+      "js/repotemplate_application.js"
+    ],
+  "respond": ["/do/repotemplate-application"]
+}

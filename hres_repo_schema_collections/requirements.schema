@@ -112,3 +112,6 @@ attribute hres:attribute:lead-output as LeadOutput
 
 attribute hres:attribute:output as Output
     linked-type hres:type:collection
+
+OPTIONAL attribute hres:attribute:double-weighting-substitute
+    linked-type hres:type:collection

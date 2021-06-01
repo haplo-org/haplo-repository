@@ -11,6 +11,9 @@ attribute dc:attribute:author as Author
 attribute dc:attribute:date as Date
 attribute hres:attribute:editor as Editor
 attribute hres:attribute:research-institute as ResearchInstitute
+attribute std:attribute:file as File
+attribute hres:attribute:published-file as PublishedFile
+attribute hres:attribute:accepted-author-manuscript as AcceptedAuthorManuscript
 
 
 

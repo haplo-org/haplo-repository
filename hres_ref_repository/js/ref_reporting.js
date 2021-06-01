@@ -20,13 +20,6 @@ P.implementService("std:reporting:collection:repository_items:setup", function(c
         fact("refIsOACompliant",        "boolean",      "OA compliant").
         // NOTE: Published as Green OA !== Green OA compliant (for REF purposes). See hres_open_access plugin
         fact("refIsGreenOACompliant",   "boolean",      "Green OA compliant").
-        
-        fact("refFirstPublished",       "date",         "Publication date").
-        fact("refPublishedInOAPeriod",  "boolean",      "Accepted in REF OA period").   // Since 2016-04-01
-        fact("refPublishedInREFPeriod", "boolean",      "Accepted in current REF period").   // Since 2014-04-01
-        fact("refIsOACompliant",        "boolean",      "OA compliant").
-        // NOTE: Published as Green OA !== Green OA compliant (for REF purposes). See hres_open_access plugin
-        fact("refIsGreenOACompliant",   "boolean",      "Green OA compliant").
         statistic({
             name:"refSubmissibleCount",
             description:"Items submissible to the REF",

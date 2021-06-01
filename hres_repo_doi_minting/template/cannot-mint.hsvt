@@ -1,4 +1,4 @@
 
-<p> "Cannot mint DOI for item, as it is missing the following fields required by the Datacite metadata schema." </p>
+<p> "Cannot mint DOI for item, as it is missing the following fields required by the DataCite metadata schema." </p>
 
 render(details)

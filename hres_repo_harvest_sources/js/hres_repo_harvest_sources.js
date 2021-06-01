@@ -27,6 +27,9 @@ P.implementService("haplo_alternative_versions:source_for_alternative_object", f
 });
 
 P.hook("hScheduleDailyEarly", function() {
+    if(O.application.hostname !== O.application.config["hres_repo_harvest_sources:safety_application_hostname"]) {
+        return;
+    }
     getUpdatesFromSources();
 });
 
@@ -193,16 +196,20 @@ var getUpdatesFromSources = function(harvestMaybe) {
 // TODO: Remove this temp edit freeze implementation when DENY permissions are possible in the platform
 
 P.hook("hPreObjectEdit", function(response, object, isTemplate, isNew) {
-    if(object.labels.includes(Label.Harvested)) {
-        response.redirectPath = "/do/hres-repo-harvest-sources/edit-notice";
+    // Super users should be able to edit harvested items (in case of issues)
+    if(object.labels.includes(Label.Harvested) && !O.currentUser.isSuperUser) {
+        response.redirectPath = "/do/hres-repo-harvest-sources/edit-notice/"+object.ref;
     }
 });
 
 P.respond("GET", "/do/hres-repo-harvest-sources/edit-notice", [
+    {pathElement:0, as:"object"}
 ], function(E, object) {
+    let existingWu = O.work.query("hres_repo_harvest_claim:claim_item").ref(object.ref)[0];
     E.render({
-        pageTitle: "Object not editable",
-        message: "This version of the object is not editable as it has been harvested from an "+
-            "external data source."
-    }, "std:ui:notice");
+        claimWorkUnit: existingWu,
+        currentUserIsActionable: existingWu && existingWu.isActionableBy(O.currentUser),
+        authoritativeVersion: object.first(A.AuthoritativeVersion),
+        currentAlternative: object
+    });
 });

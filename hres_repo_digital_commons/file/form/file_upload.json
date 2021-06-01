@@ -1,0 +1,26 @@
+{
+    "specificationVersion": 0,
+    "formId": "fileUpload",
+    "formTitle": "Upload JSON file for Digital Commons import",
+    "elements": [
+        {
+            "type": "choice",
+            "style": "select",
+            "path": "previousFile",
+            "label": "Choose a previously uploaded file, or upload one or more new file(s) below.",
+            "choices": "previousUploadedFiles"
+        },
+        {
+            "type": "file-repeating-section",
+            "path": "file",
+            "label": "Upload file",
+            "allowAdd": false,
+            "allowDelete": false,
+            "elements": [
+                {"type":"file", "path":"."}
+            ],
+            "minimumCount": 1,
+            "required": {"path": "previousFile", "operation": "not-defined"}
+        }
+    ]
+}

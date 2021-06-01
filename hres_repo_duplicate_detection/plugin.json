@@ -1,0 +1,21 @@
+{
+  "pluginName": "hres_repo_duplicate_detection",
+  "pluginAuthor": "Haplo Services",
+  "pluginVersion": 1,
+  "displayName": "Haplo Repository Output Duplicate Detection",
+  "displayDescription": "Detection and display of duplicate outputs in the repository.",
+  "installSecret": "388d07c4595e3b79e4159f94d09576ce60bb5daa",
+  "apiVersion": 4,
+  "depend": [
+    "hres_repository",
+    "std_reporting"
+  ],
+  "use": [
+    "std:reporting"
+  ],
+  "load": [
+      "js/hres_repo_duplicate_detection.js",
+      "js/hres_repo_duplicate_detection_reporting.js"
+    ],
+  "respond": ["/do/hres-repo-duplicate-detection"]
+}

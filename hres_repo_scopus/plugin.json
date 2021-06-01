@@ -1,0 +1,13 @@
+{
+  "pluginName": "hres_repo_scopus",
+  "pluginAuthor": "Haplo Services",
+  "pluginVersion": 1,
+  "displayName": "Haplo RM Repository Scopus",
+  "displayDescription": "Support for Scopus in Haplo Repositories",
+  "installSecret": "fb25e636217fdbdc1b1cd8b3af45a9955896b6fe",
+  "apiVersion": 4,
+  "loadPriority": 5305,
+  "load": [
+      "js/hres_repo_scopus.js"
+    ]
+}

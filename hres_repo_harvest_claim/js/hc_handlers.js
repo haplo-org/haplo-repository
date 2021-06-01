@@ -4,6 +4,8 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.         */
 
+P.REPOSITORY_EDITOR_DELEGATION = O.application.config["hres_repo_harvest_claim:allow_repository_editor_task_delegation"];
+
 // --------------------------------------------------------------------------
 // Confirm the item is theirs, or disclaim because it's an incorrect match
 
@@ -60,6 +62,46 @@ P.respond("GET,POST", "/do/hres-repo-harvest-claim/disclaim", [
         options: [{label:"Confirm"}]
     }, "std:ui:confirm");
 });
+
+if(P.REPOSITORY_EDITOR_DELEGATION) {
+    P.CanDelegateTaskToRepositoryEditors = O.action("hres_repo_harvest_claim:action:repository_editor_task_delegation").
+        title("Delegate the task to repository editors").
+        allow("group", Group.RepositoryEditors);
+
+    P.respond("GET,POST", "/do/hres-repo-harvest-claim/admin-takeover", [
+        {pathElement:0, as:"object"}
+    ], function(E, output) {
+        P.CanDelegateTaskToRepositoryEditors.enforce();
+        if(E.request.method === "POST") {
+            let relatedWus = O.work.query("hres_repo_harvest_claim:claim_item").ref(output.ref);
+            let source;
+            _.each(relatedWus, (wu) => {
+                // Prevent work units without a docstore entry showing in queries
+                wu.visible = false;
+                wu.close(O.currentUser);
+                wu.save();
+                if(!source) { source = wu.data.source; }
+            });
+            let wu = O.work.create({
+                workType: "hres_repo_harvest_claim:claim_item",
+                actionableBy: Group.RepositoryEditors,
+                ref: output.ref,
+                data: {source: source || "" }
+            }).save();
+            O.serviceMaybe("hres_repo_harvest_claim:notify:task_created", wu);
+            return E.response.redirect(output.url());
+        }
+        let i = P.locale().text("template");
+        E.render({
+            pageTitle: i["Take over claiming task"],
+            backLink: output.url(),
+            text: O.interpolateString(O.interpolateNAMEinString(i["Would you like to delegate the claiming task for "+
+                "this alternative version? This will remove the tasks from the authors and delegate it to the "+
+                NAME("Repository Editors")])),
+            options: [{label: i["Delegate"]}]
+        }, "std:ui:confirm");
+    });
+}
 
 // --------------------------------------------------------------------------
 // Docstore and forms for further claiming questions

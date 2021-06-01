@@ -1,0 +1,3 @@
+pageTitle(i("{} {label}") { if(checkPassed) { "Passed: "} else { "Failed: "} } label { check.label })
+backLink(std:object:url(output))
+render(detail)

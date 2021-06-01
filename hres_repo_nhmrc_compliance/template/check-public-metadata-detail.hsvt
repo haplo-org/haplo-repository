@@ -1,0 +1,9 @@
+
+if(deadline) { <h2> i("Public metadata deadline - {}") { std:date(deadline) } </h2> }
+
+<p><i> i("The metadata for the peer-reviewed publication must be made openly accessible via an institutional 
+    repository as soon as possible but no later than 3 months from the date of publication. The publication 
+    metadata requirement applies regardless of whether the publication is openly accessible upon publication, 
+    will be made openly accessible in the future, or will never be made openly accessible.") </i></p>
+
+std:object(displayObject)

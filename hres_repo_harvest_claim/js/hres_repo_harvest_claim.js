@@ -117,6 +117,10 @@ P.implementService("std:action_panel:alternative_versions", function(display, bu
             }
             claimPanel.
                 status(5, str);
+            if(!latestWu.closed && P.REPOSITORY_EDITOR_DELEGATION && O.currentUser.allowed(P.CanDelegateTaskToRepositoryEditors)) {
+                claimPanel.link(10, "/do/hres-repo-harvest-claim/admin-takeover/"+display.object.ref,
+                    "Delegate to "+NAME("Repository Editors"), "standard");
+            }
             if(latestWu.closed && O.currentUser.allowed(CanViewClaimForm)) {
                 claimPanel.
                     link(30, "/do/hres-repo-harvest-claim/admin-view-claim/"+latestWu.id, "View claim form");

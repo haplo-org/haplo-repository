@@ -22,9 +22,11 @@ var CanEditRepositoryActivityOverview = O.action("hres:action:repository:can_edi
 // --------------------------------------------------------------------------
 
 // Creates link on the homepage action panel to a reporting and guides area
-P.implementService("haplo_activity_navigation:discover", function(activity) {
-    activity(40, "repository", NAME("hres:repository-homepage-text", "Repository"), "E226,0,f", CanEditRepositoryActivityOverview);
-});
+if(!O.application.config["hres:repository:remove_default_activity_navigation"]) {
+    P.implementService("haplo_activity_navigation:discover", function(activity) {
+        activity(40, "repository", NAME("hres:repository-homepage-text", "Repository"), "E226,0,f", CanEditRepositoryActivityOverview);
+    });
+}
 
 // --------------------------------------------------------------------------
 
@@ -44,10 +46,11 @@ P.implementService("hres:repository:is_repository_item", function(object) {
     return isOutput;
 });
 
-P.implementService("hres:repository:is_author", function(person, object) {
+var personIsAuthorOfObject = P.personIsAuthorOfObject = function(person, object) {
     return (object.has(person.ref, A.Author) || 
         (object.has(person.ref, A.Editor) && object.isKindOf(T.Book)));
-});
+};
+P.implementService("hres:repository:is_author", personIsAuthorOfObject);
 
 P.implementService("hres:email:match-to-existing-record-in-list", function(object, list) {
     var emails = object.every(A.Email);
@@ -59,17 +62,6 @@ P.implementService("hres:email:match-to-existing-record-in-list", function(objec
         });
     }
 });
-
-/*HaploDoc
-node: /repository/hres_repository
-title: Earliest Publication Date
---
-h3(service). "hres:repository:earliest_publication_date"
-
-This service returns the earliest publication date for a text-based output if it has one, null if not.
-**However**
-If the output is practice-based then by definition it isn't published and returning a publication date would always be null, therefore the service should return the date associated with the output.
-*/
 
 P.implementService("hres:repository:earliest_publication_date", function(output) {
     var published;
@@ -247,3 +239,21 @@ P.respond("GET,POST", "/do/hres-repository/license", [
         options: [{label:"Confirm"}]
     }, "std:ui:confirm");
 });
+
+// --------------------------------------------------------------------------
+// Testing - impersonation
+// --------------------------------------------------------------------------
+
+P.onLoad = function() {
+    if(O.featureImplemented("hres:development_activity_impersonation")) {
+        P.use("hres:development_activity_impersonation");
+        P.activityImpersonation({
+            activityName: "repository",
+            activityPanel: 11111,
+            activityGroups: [
+                Group.RepositoryEditors
+            ],
+            activityRoles: []
+        });
+    }
+};

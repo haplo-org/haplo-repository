@@ -11,5 +11,6 @@
     ],
   "load": [
       "js/hres_repo_object_editor.js"
-    ]
+    ],
+  "respond": ["/api/hres-repo-object-editor"]
 }

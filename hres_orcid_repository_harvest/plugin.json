@@ -1,0 +1,24 @@
+{
+  "pluginName": "hres_orcid_repository_harvest",
+  "pluginAuthor": "Haplo Services",
+  "pluginVersion": 1,
+  "displayName": "Hres ORCID Repository Harvest",
+  "displayDescription": "Plugin to support harvesting of outputs from ORCID",
+  "installSecret": "fab171e13823614a41fd4f99d67708feee330aec",
+  "apiVersion": 4,
+  "privilegesRequired": ["pHTTPClient", "pKeychainRead"],
+  "depend": [
+    "hres_orcid",
+    "hres_repository",
+    "hres_author_citation_value",
+    "hres_repo_harvest_sources"
+  ],
+  "use": [
+    "hres:orcid"
+  ],
+  "load": [
+      "js/hres_orcid_repository_harvest.js",
+      "js/hres_orcid_repository_harvest_metadata.js"
+    ],
+  "respond": ["/do/hres-orcid-repository-harvest"]
+}
